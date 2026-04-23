@@ -1,223 +1,376 @@
 "use client";
 
 import Navbar from "../src/components/Navbar";
-import Hero from "../src/components/Hero";
 import Footer from "../src/components/Footer";
-import { ArrowRight, Download, BookOpen, Palette, Newspaper } from "lucide-react";
+import PortfolioSection from "../src/components/PortfolioSection";
+import Image from "next/image";
+import {
+  ArrowRight,
+  Download,
+  BookOpen,
+  Palette,
+  Newspaper,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  defaultSiteContent,
+  type SiteContent,
+  type Lang,
+  LANG_STORAGE_KEY,
+} from "../lib/siteContent";
+import { getSiteContent } from "../lib/getSiteContent";
+import { t } from "../lib/i18n";
+
+const cvFiles: Record<Lang, string> = {
+  fr: "/cv/CV French Sara Rodriguez.pdf",
+  en: "/cv/CV English Sara Rodriguez.pdf",
+  es: "/cv/CV Spanish Sara Rodriguez.pdf",
+};
+
+function getProfileWrapperSize(size: "small" | "medium" | "large") {
+  switch (size) {
+    case "small":
+      return "h-[280px] w-[280px] md:h-[340px] md:w-[340px] lg:h-[380px] lg:w-[380px]";
+    case "medium":
+      return "h-[320px] w-[320px] md:h-[400px] md:w-[400px] lg:h-[460px] lg:w-[460px]";
+    case "large":
+    default:
+      return "h-[360px] w-[360px] md:h-[460px] md:w-[460px] lg:h-[520px] lg:w-[520px]";
+  }
+}
+
+function getProfileShape(shape: "square" | "rounded" | "circle") {
+  switch (shape) {
+    case "square":
+      return "rounded-[26px]";
+    case "rounded":
+      return "rounded-[38px]";
+    case "circle":
+    default:
+      return "rounded-full";
+  }
+}
 
 export default function AboutPage() {
+  const [lang, setLang] = useState<Lang>("fr");
+  const [content, setContent] = useState<SiteContent>(defaultSiteContent);
+
+  useEffect(() => {
+    const syncLang = () => {
+      const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+      if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
+        setLang(savedLang);
+      } else {
+        setLang("fr");
+      }
+    };
+
+    const loadContent = () => {
+      setContent(getSiteContent());
+    };
+
+    syncLang();
+    loadContent();
+
+    window.addEventListener("focus", syncLang);
+    window.addEventListener("focus", loadContent);
+    window.addEventListener("storage", syncLang);
+    window.addEventListener("storage", loadContent);
+
+    return () => {
+      window.removeEventListener("focus", syncLang);
+      window.removeEventListener("focus", loadContent);
+      window.removeEventListener("storage", syncLang);
+      window.removeEventListener("storage", loadContent);
+    };
+  }, []);
+
+  const about = {
+    ...defaultSiteContent.about,
+    ...content.about,
+    profileImage: {
+      ...defaultSiteContent.about.profileImage,
+      ...(content.about?.profileImage ?? {}),
+    },
+    publications:
+      content.about?.publications ?? defaultSiteContent.about.publications,
+    collections:
+      content.about?.collections ?? defaultSiteContent.about.collections,
+    exhibitions:
+      content.about?.exhibitions ?? defaultSiteContent.about.exhibitions,
+    formations: content.about?.formations ?? defaultSiteContent.about.formations,
+    distinctions:
+      content.about?.distinctions ?? defaultSiteContent.about.distinctions,
+  };
+
+  const handleDownloadCV = () => {
+    const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+
+    const activeLang: Lang =
+      savedLang === "fr" || savedLang === "en" || savedLang === "es"
+        ? savedLang
+        : "fr";
+
+    setLang(activeLang);
+
+    const rawPath = cvFiles[activeLang];
+    const filePath = encodeURI(rawPath);
+
+    const link = document.createElement("a");
+    link.href = filePath;
+    link.download = rawPath.split("/").pop() || "cv.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const imageSrc = about.profileImage?.src || about.image || "/sara1.jpg";
+
   return (
     <main className="min-h-screen bg-[#f8f7f4]">
       <Navbar />
 
-      {/* HERO déjà créé */}
-      <Hero />
+      <section className="relative overflow-hidden bg-[#f6f2ed]">
+        <div className="absolute inset-0">
+          <Image
+            src={about.image || "/sara1.jpg"}
+            alt={t(about.title, lang)}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover opacity-20"
+          />
+        </div>
 
-      {/* ABOUT CONTENT */}
-      <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
-        {/* Intro */}
-        <div className="mb-20 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="animate-[fadeUp_.7s_ease]">
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(248,247,244,0.72),rgba(248,247,244,0.94))]" />
+
+        <div className="relative mx-auto max-w-7xl px-6 py-24 lg:px-10 lg:py-28">
+          <div className="max-w-4xl">
             <p className="mb-4 text-xs uppercase tracking-[0.38em] text-neutral-400">
-              À propos
+              {t(about.badge, lang)}
             </p>
 
-            <h2 className="mb-6 font-serif text-4xl leading-tight text-neutral-900 sm:text-5xl">
-              Une pratique guidée par
-              <br />
-              la mémoire, la couleur
-              <br />
-              et l’émotion
-            </h2>
+            <h1 className="font-serif text-4xl leading-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+              {t(about.title, lang)}
+            </h1>
 
-            <div className="mb-8 h-[1px] w-20 bg-neutral-300"></div>
+            <div className="mt-8 h-[1px] w-20 bg-neutral-300" />
 
-            <p className="max-w-2xl text-[17px] leading-8 text-neutral-600">
-              Mon travail explore la relation entre la mémoire, le paysage
-              intérieur et le silence. À travers des détails subtils, des
-              couches de couleur et des formes organiques, je cherche à révéler
-              les connexions invisibles entre les sens et les émotions.
-              Inspirées par des lieux chargés d’une énergie singulière, mes
-              peintures célèbrent l’intensité discrète des petites choses.
+            <p className="mt-8 max-w-2xl text-[17px] leading-8 text-neutral-600">
+              {t(about.introText, lang)}
             </p>
           </div>
+        </div>
+      </section>
 
-          <div className="animate-[fadeUp_.9s_ease] rounded-[28px] border border-neutral-200 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+      <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
+        <div className="mb-20 grid gap-10 lg:grid-cols-[1.08fr_0.92fr]">
+          <div className="flex items-center justify-center lg:justify-start">
+            <div className="relative">
+              <div className="absolute inset-0 scale-110 rounded-full bg-[#e9dfd7] opacity-70 blur-3xl" />
+
+              <div
+                className={`relative overflow-hidden border border-neutral-200 bg-white p-3 shadow-[0_20px_60px_rgba(0,0,0,0.08)] ${getProfileWrapperSize(
+                  about.profileImage.size
+                )} ${getProfileShape(about.profileImage.shape)}`}
+              >
+                <div
+                  className={`h-full w-full overflow-hidden ${getProfileShape(
+                    about.profileImage.shape
+                  )}`}
+                >
+                  <Image
+                    src={imageSrc}
+                    alt={t(about.title, lang)}
+                    width={900}
+                    height={900}
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out hover:scale-[1.05]"
+                  />
+                </div>
+              </div>
+
+              <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-full border border-white/70 bg-white/80 shadow-[0_8px_25px_rgba(0,0,0,0.08)] backdrop-blur-md" />
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-neutral-200 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
             <p className="mb-2 text-xs uppercase tracking-[0.28em] text-neutral-400">
-              Biographie
+              {t(about.bioTitle, lang)}
             </p>
 
-            <h3 className="mb-4 font-serif text-3xl text-neutral-900">
-              Sara Rodriguez Serrano
-            </h3>
-
             <p className="text-[15px] leading-7 text-neutral-600">
-              Artiste visuelle basée à Montréal, sa pratique se concentre
-              principalement sur la peinture contemporaine. Son travail explore
-              la relation entre la matière, la couleur et la perception,
-              créant des espaces où se rencontrent émotion et expérience
-              sensorielle.
+              {t(about.bioText1, lang)}
             </p>
 
             <p className="mt-4 text-[15px] leading-7 text-neutral-600">
-              Guidée par un esprit naturaliste et en grande partie autodidacte,
-              elle aborde la peinture comme une manière d’observer et de se
-              connecter au monde qui l’entoure. La nature constitue sa
-              principale source d’inspiration.
+              {t(about.bioText2, lang)}
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
               <a
                 href="#parcours"
-                className="inline-flex items-center gap-2 rounded-full border border-neutral-900 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-900 transition hover:bg-neutral-900 hover:text-white"
+                className="inline-flex items-center gap-2 rounded-full border border-neutral-900 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-900 transition duration-300 hover:bg-neutral-900 hover:text-white"
               >
-                Parcours artistique
+                {t(about.parcoursButtonLabel, lang)}
                 <ArrowRight size={16} />
               </a>
 
-              <a
-                href="#"
-                className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-700 transition hover:border-neutral-900 hover:text-neutral-900"
+              <button
+                type="button"
+                onClick={handleDownloadCV}
+                className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-700 transition duration-300 hover:border-neutral-900 hover:text-neutral-900"
               >
-                Télécharger CV
+                {t(about.cvButtonLabel, lang)}
                 <Download size={16} />
-              </a>
+              </button>
             </div>
+
+            <p className="mt-4 text-xs tracking-[0.16em] text-neutral-400">
+              Langue active : {lang.toUpperCase()}
+            </p>
           </div>
         </div>
 
-        {/* Démarche + Publications */}
         <div className="mb-20 grid gap-8 lg:grid-cols-2">
-          <div className="animate-[fadeUp_1s_ease] rounded-[28px] border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+          <div className="rounded-[28px] border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
             <div className="mb-5 flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-800">
                 <Palette size={18} />
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.26em] text-neutral-400">
-                  Démarche artistique
+                  {t(about.visionBadge, lang)}
                 </p>
                 <h3 className="font-serif text-2xl text-neutral-900">
-                  Vision et pratique
+                  {t(about.visionTitle, lang)}
                 </h3>
               </div>
             </div>
 
             <p className="text-[15px] leading-8 text-neutral-600">
-              Je travaille principalement à la peinture à l’huile, attirée par
-              sa texture et la profondeur expressive qu’elle permet. Je crée
-              ainsi des espaces oniriques qui invitent à la contemplation et à
-              l’évasion. Ma pratique cherche à instaurer un dialogue sensible
-              entre paysage intérieur et monde naturel.
+              {t(about.visionText, lang)}
             </p>
           </div>
 
-          <div className="animate-[fadeUp_1.1s_ease] rounded-[28px] border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+          <div className="rounded-[28px] border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
             <div className="mb-5 flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-800">
                 <Newspaper size={18} />
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.26em] text-neutral-400">
-                  Publications
+                  {t(about.publicationsBadge, lang)}
                 </p>
                 <h3 className="font-serif text-2xl text-neutral-900">
-                  Sélection récente
+                  {t(about.publicationsTitle, lang)}
                 </h3>
               </div>
             </div>
 
             <div className="space-y-4 text-[15px] leading-7 text-neutral-600">
-              <p>
-                <span className="font-medium text-neutral-900">2025</span> — Livres et projets
-                éditoriaux - Art et Femme, édition 2.
-              </p>
-              <p>
-                <span className="font-medium text-neutral-900">2025</span> — Articles de Magazine
-                - Artist Close up magazine #36.
-              </p>
-              <p>
-                <span className="font-medium text-neutral-900">2025</span> — Interviews, Arts to
-                Hearts Project.
-              </p>
+              {about.publications.map((item, index) => (
+                <p key={index}>
+                  <span className="font-medium text-neutral-900">
+                    {item.year}
+                  </span>{" "}
+                  — {t(item.text, lang)}
+                </p>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Collections */}
-        <div className="mb-20 animate-[fadeUp_1.2s_ease] rounded-[28px] border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+        <div className="mb-20 rounded-[28px] border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-800">
               <BookOpen size={18} />
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.26em] text-neutral-400">
-                Collections
+                {t(about.collectionsBadge, lang)}
               </p>
               <h3 className="font-serif text-2xl text-neutral-900">
-                Présence dans des collections privées
+                {t(about.collectionsTitle, lang)}
               </h3>
             </div>
           </div>
 
           <ul className="grid gap-4 text-[15px] leading-7 text-neutral-600 sm:grid-cols-2">
-            <li className="rounded-2xl bg-neutral-50 px-5 py-4">
-              Certaines peintures font partie de collections privées en Espagne.
-            </li>
-            <li className="rounded-2xl bg-neutral-50 px-5 py-4">
-              Certaines œuvres sont présentes dans des collections privées à Montréal, Canada.
-            </li>
-            <li className="rounded-2xl bg-neutral-50 px-5 py-4 sm:col-span-2">
-              Les œuvres de l’artiste sont également représentées dans des collections privées en Europe et au Canada.
-            </li>
+            {about.collections.map((item, index) => (
+              <li
+                key={index}
+                className={`rounded-2xl bg-neutral-50 px-5 py-4 ${
+                  index === 2 ? "sm:col-span-2" : ""
+                }`}
+              >
+                {t(item.text, lang)}
+              </li>
+            ))}
           </ul>
         </div>
 
-        {/* Parcours artistique */}
+        <div className="mb-20">
+          <PortfolioSection />
+        </div>
+
         <div
           id="parcours"
-          className="animate-[fadeUp_1.3s_ease] rounded-[32px] border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]"
+          className="rounded-[32px] border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]"
         >
           <p className="mb-2 text-xs uppercase tracking-[0.28em] text-neutral-400">
-            Parcours artistique
+            {t(about.parcoursBadge, lang)}
           </p>
 
-          <h3 className="mb-8 font-serif text-4xl text-neutral-900">
-            Expositions, formation et distinctions
+          <h3 className="mb-8 font-serif text-4xl text-neutral-900 sm:text-5xl">
+            {t(about.parcoursTitle, lang)}
           </h3>
 
           <div className="grid gap-10 lg:grid-cols-3">
             <div>
               <h4 className="mb-4 text-sm font-medium uppercase tracking-[0.22em] text-neutral-500">
-                Expositions
+                {t(about.exhibitionsTitle, lang)}
               </h4>
               <div className="space-y-3 text-[15px] leading-7 text-neutral-600">
-                <p><span className="font-medium text-neutral-900">2026</span> — The Inner Forest, Montréal, Canada</p>
-                <p><span className="font-medium text-neutral-900">2014</span> — Portraits d’animaux, Madrid, Espagne</p>
-                <p><span className="font-medium text-neutral-900">2013</span> — Portraits de femmes, Madrid, Espagne</p>
+                {about.exhibitions.map((item, index) => (
+                  <p key={index}>
+                    <span className="font-medium text-neutral-900">
+                      {item.year}
+                    </span>{" "}
+                    — {t(item.text, lang)}
+                  </p>
+                ))}
               </div>
             </div>
 
             <div>
               <h4 className="mb-4 text-sm font-medium uppercase tracking-[0.22em] text-neutral-500">
-                Formation
+                {t(about.formationTitle, lang)}
               </h4>
               <div className="space-y-3 text-[15px] leading-7 text-neutral-600">
-                <p><span className="font-medium text-neutral-900">2024</span> — Programme de peinture numérique, Procreate</p>
-                <p><span className="font-medium text-neutral-900">2023</span> — Peinture murale intérieure</p>
-                <p><span className="font-medium text-neutral-900">2022</span> — Formation en broderie, transfert et aquarelle</p>
-                <p><span className="font-medium text-neutral-900">2015</span> — Carnet de croquis</p>
+                {about.formations.map((item, index) => (
+                  <p key={index}>
+                    <span className="font-medium text-neutral-900">
+                      {item.year}
+                    </span>{" "}
+                    — {t(item.text, lang)}
+                  </p>
+                ))}
               </div>
             </div>
 
             <div>
               <h4 className="mb-4 text-sm font-medium uppercase tracking-[0.22em] text-neutral-500">
-                Distinctions
+                {t(about.distinctionsTitle, lang)}
               </h4>
               <div className="space-y-3 text-[15px] leading-7 text-neutral-600">
-                <p><span className="font-medium text-neutral-900">2012</span> — Concours peinture rapide, Madrid</p>
-                <p><span className="font-medium text-neutral-900">2011</span> — Concours peinture rapide, Alameda de Osuna</p>
-                <p><span className="font-medium text-neutral-900">2002–2005</span> — Architecture technique, Université San Pablo Ceu, Madrid</p>
+                {about.distinctions.map((item, index) => (
+                  <p key={index}>
+                    <span className="font-medium text-neutral-900">
+                      {item.year}
+                    </span>{" "}
+                    — {t(item.text, lang)}
+                  </p>
+                ))}
               </div>
             </div>
           </div>
@@ -225,19 +378,6 @@ export default function AboutPage() {
       </section>
 
       <Footer />
-
-      <style jsx>{`
-        @keyframes fadeUp {
-          from {
-            opacity: 0;
-            transform: translateY(18px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </main>
   );
 }

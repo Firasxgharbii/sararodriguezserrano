@@ -1,186 +1,395 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Navbar from "../src/components/Navbar";
 import Footer from "../src/components/Footer";
 import { Mail, Instagram, MapPin, ArrowRight } from "lucide-react";
 import Image from "next/image";
+import {
+  defaultSiteContent,
+  type SiteContent,
+  type Lang,
+  LANG_STORAGE_KEY,
+} from "../lib/siteContent";
+import { getSiteContent } from "../lib/getSiteContent";
+import { t } from "../lib/i18n";
 
 export default function ContactPage() {
+  const [content, setContent] = useState<SiteContent>(defaultSiteContent);
+  const [lang, setLang] = useState<Lang>("fr");
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadContent = () => {
+      const stored = getSiteContent();
+
+      setContent({
+        ...defaultSiteContent,
+        ...stored,
+        contact: {
+          ...defaultSiteContent.contact,
+          ...(stored.contact ?? {}),
+          contactImage: {
+            ...defaultSiteContent.contact.contactImage,
+            ...(stored.contact?.contactImage ?? {}),
+          },
+        },
+      });
+
+      const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+      if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
+        setLang(savedLang);
+      } else {
+        setLang("fr");
+      }
+    };
+
+    loadContent();
+
+    window.addEventListener("focus", loadContent);
+    window.addEventListener("storage", loadContent);
+
+    return () => {
+      window.removeEventListener("focus", loadContent);
+      window.removeEventListener("storage", loadContent);
+    };
+  }, []);
+
+  const contact = content.contact;
+  const contactImageSrc =
+    contact.contactImage?.src || defaultSiteContent.contact.contactImage.src;
+
+  const uiText = {
+    emailLabel: {
+      fr: "Email",
+      en: "Email",
+      es: "Correo electrónico",
+    },
+    instagramLabel: {
+      fr: "Instagram",
+      en: "Instagram",
+      es: "Instagram",
+    },
+    locationLabel: {
+      fr: "Localisation",
+      en: "Location",
+      es: "Ubicación",
+    },
+    locationValue: {
+      fr: "Montréal, Canada",
+      en: "Montreal, Canada",
+      es: "Montreal, Canadá",
+    },
+    formBadge: {
+      fr: "Formulaire",
+      en: "Form",
+      es: "Formulario",
+    },
+    formTitle: {
+      fr: "Envoyer un message",
+      en: "Send a message",
+      es: "Enviar un mensaje",
+    },
+    namePlaceholder: {
+      fr: "Nom",
+      en: "Name",
+      es: "Nombre",
+    },
+    emailPlaceholder: {
+      fr: "Email",
+      en: "Email",
+      es: "Correo electrónico",
+    },
+    subjectPlaceholder: {
+      fr: "Sujet",
+      en: "Subject",
+      es: "Asunto",
+    },
+    messagePlaceholder: {
+      fr: "Message",
+      en: "Message",
+      es: "Mensaje",
+    },
+    fillAllFields: {
+      fr: "Veuillez remplir tous les champs.",
+      en: "Please fill in all fields.",
+      es: "Por favor complete todos los campos.",
+    },
+    sendError: {
+      fr: "Impossible d’envoyer le message.",
+      en: "Unable to send the message.",
+      es: "No se pudo enviar el mensaje.",
+    },
+    genericError: {
+      fr: "Une erreur est survenue.",
+      en: "An error occurred.",
+      es: "Ocurrió un error.",
+    },
+    success: {
+      fr: "Votre message a bien été enregistré.",
+      en: "Your message has been successfully sent.",
+      es: "Su mensaje ha sido enviado correctamente.",
+    },
+    sending: {
+      fr: "Envoi...",
+      en: "Sending...",
+      es: "Enviando...",
+    },
+    send: {
+      fr: "Envoyer",
+      en: "Send",
+      es: "Enviar",
+    },
+    contactNote: {
+      fr: "Vous pouvez aussi nous contacter directement via email ou Instagram.",
+      en: "You can also contact us directly via email or Instagram.",
+      es: "También puede contactarnos directamente por correo electrónico o Instagram.",
+    },
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSuccess("");
+    setError("");
+
+    if (!form.name || !form.email || !form.subject || !form.message) {
+      setError(t(uiText.fillAllFields, lang));
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setError(data.message || t(uiText.sendError, lang));
+        return;
+      }
+
+      setSuccess(t(uiText.success, lang));
+      setForm({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+    } catch {
+      setError(t(uiText.genericError, lang));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <main className="bg-[#faf8f4] min-h-screen">
+    <main className="min-h-screen bg-[#faf8f4]">
       <Navbar />
 
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-[-100px] top-[-80px] h-72 w-72 rounded-full bg-[#eee6dc] opacity-70 blur-3xl" />
+          <div className="absolute bottom-[-120px] right-[-100px] h-80 w-80 rounded-full bg-[#efe8de] opacity-80 blur-3xl" />
+        </div>
 
-          {/* LEFT SIDE */}
-          <div className="animate-[fadeUp_.7s_ease]">
+        <div className="relative mx-auto max-w-6xl px-6 py-16 sm:py-20 lg:px-10 lg:py-24">
+          <div className="grid items-start gap-12 lg:grid-cols-[0.95fr_1.05fr]">
+            <div>
+              <p className="mb-4 text-xs uppercase tracking-[0.4em] text-neutral-400">
+                {t(contact.badge, lang)}
+              </p>
 
-            <p className="text-xs tracking-[0.4em] uppercase text-neutral-400 mb-4">
-              Contact
-            </p>
+              <h1 className="mb-6 font-serif text-4xl leading-[1.05] text-neutral-900 sm:text-5xl lg:text-6xl">
+                {t(contact.title, lang)}
+              </h1>
 
-            <h1 className="font-serif text-5xl lg:text-6xl text-neutral-900 mb-6 leading-[1.05]">
-              Entrer en
-              <br />
-              contact
-            </h1>
+              <div className="mb-8 h-[1px] w-16 bg-neutral-300" />
 
-            <div className="w-16 h-[1px] bg-neutral-300 mb-8"></div>
+              <p className="max-w-md text-[17px] leading-8 text-neutral-600">
+                {t(contact.text, lang)}
+              </p>
 
-            <p className="text-neutral-600 text-lg leading-7 max-w-md">
-              Pour toute question concernant mes œuvres, expositions ou collaborations,
-              vous pouvez me contacter directement ou remplir le formulaire.
-            </p>
+              <div className="mt-10 space-y-4">
+                <a
+                  href={`mailto:${contact.email}`}
+                  className="group flex items-center justify-between rounded-2xl border border-neutral-200 bg-white px-5 py-4 transition hover:-translate-y-[2px] hover:shadow-sm"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100">
+                      <Mail size={18} />
+                    </div>
 
-            <div className="mt-10 space-y-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.25em] text-neutral-400">
+                        {t(uiText.emailLabel, lang)}
+                      </p>
+                      <p className="break-all text-sm text-neutral-800">
+                        {contact.email}
+                      </p>
+                    </div>
+                  </div>
 
-              {/* EMAIL */}
-              <a
-                href="mailto:sararodriguezserrano.art@gmail.com"
-                className="group flex items-center justify-between bg-white border border-neutral-200 rounded-2xl px-5 py-4 hover:shadow-sm hover:-translate-y-[2px] transition"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
-                    <Mail size={18} />
+                  <ArrowRight className="text-neutral-400 transition group-hover:translate-x-1" />
+                </a>
+
+                <a
+                  href={
+                    contact.instagram.startsWith("http")
+                      ? contact.instagram
+                      : `https://instagram.com/${contact.instagram.replace("@", "")}`
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex items-center justify-between rounded-2xl border border-neutral-200 bg-white px-5 py-4 transition hover:-translate-y-[2px] hover:shadow-sm"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100">
+                      <Instagram size={18} />
+                    </div>
+
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.25em] text-neutral-400">
+                        {t(uiText.instagramLabel, lang)}
+                      </p>
+                      <p className="text-sm text-neutral-800">
+                        {contact.instagram}
+                      </p>
+                    </div>
+                  </div>
+
+                  <ArrowRight className="text-neutral-400 transition group-hover:translate-x-1" />
+                </a>
+
+                <div className="flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white px-5 py-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100">
+                    <MapPin size={18} />
                   </div>
 
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-neutral-400">
-                      Email
+                      {t(uiText.locationLabel, lang)}
                     </p>
                     <p className="text-sm text-neutral-800">
-                      sararodriguezserrano.art@gmail.com
+                      {t(uiText.locationValue, lang)}
                     </p>
                   </div>
-                </div>
-
-                <ArrowRight className="text-neutral-400 group-hover:translate-x-1 transition" />
-              </a>
-
-              {/* INSTAGRAM */}
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                className="group flex items-center justify-between bg-white border border-neutral-200 rounded-2xl px-5 py-4 hover:shadow-sm hover:-translate-y-[2px] transition"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
-                    <Instagram size={18} />
-                  </div>
-
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-neutral-400">
-                      Instagram
-                    </p>
-                    <p className="text-sm text-neutral-800">
-                      @sarose_art
-                    </p>
-                  </div>
-                </div>
-
-                <ArrowRight className="text-neutral-400 group-hover:translate-x-1 transition" />
-              </a>
-
-              {/* LOCATION */}
-              <div className="flex items-center gap-4 bg-white border border-neutral-200 rounded-2xl px-5 py-4">
-                <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
-                  <MapPin size={18} />
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase tracking-[0.25em] text-neutral-400">
-                    Localisation
-                  </p>
-                  <p className="text-sm text-neutral-800">
-                    Montréal, Canada
-                  </p>
                 </div>
               </div>
-
             </div>
-          </div>
 
-          {/* RIGHT SIDE FORM */}
-          <div className="animate-[fadeUp_.9s_ease] bg-white border border-neutral-200 rounded-3xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+            <div className="rounded-[28px] border border-neutral-200 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)] sm:p-7">
+              <p className="mb-2 text-xs uppercase tracking-[0.3em] text-neutral-400">
+                {t(uiText.formBadge, lang)}
+              </p>
 
-            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-2">
-              Formulaire
-            </p>
+              <h2 className="mb-6 font-serif text-3xl text-neutral-900">
+                {t(uiText.formTitle, lang)}
+              </h2>
 
-            <h2 className="font-serif text-3xl text-neutral-900 mb-6">
-              Envoyer un message
-            </h2>
+              <form onSubmit={handleSubmit} className="grid gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <input
+                    type="text"
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    placeholder={t(uiText.namePlaceholder, lang)}
+                    className="h-12 rounded-xl border border-neutral-200 px-4 outline-none transition focus:border-black"
+                  />
 
-            <form className="grid gap-4">
+                  <input
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder={t(uiText.emailPlaceholder, lang)}
+                    className="h-12 rounded-xl border border-neutral-200 px-4 outline-none transition focus:border-black"
+                  />
+                </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
                 <input
                   type="text"
-                  placeholder="Nom"
-                  className="h-12 px-4 border border-neutral-200 rounded-xl outline-none focus:border-black"
+                  name="subject"
+                  value={form.subject}
+                  onChange={handleChange}
+                  placeholder={t(uiText.subjectPlaceholder, lang)}
+                  className="h-12 rounded-xl border border-neutral-200 px-4 outline-none transition focus:border-black"
                 />
 
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="h-12 px-4 border border-neutral-200 rounded-xl outline-none focus:border-black"
+                <textarea
+                  name="message"
+                  value={form.message}
+                  onChange={handleChange}
+                  placeholder={t(uiText.messagePlaceholder, lang)}
+                  className="h-40 rounded-xl border border-neutral-200 px-4 py-3 outline-none transition focus:border-black"
                 />
-              </div>
 
-              <input
-                type="text"
-                placeholder="Sujet"
-                className="h-12 px-4 border border-neutral-200 rounded-xl outline-none focus:border-black"
-              />
+                <div className="mt-2 overflow-hidden rounded-2xl">
+                  <Image
+                    src={contactImageSrc}
+                    alt="Contact illustration"
+                    width={800}
+                    height={400}
+                    className="h-48 w-full object-cover"
+                  />
+                </div>
 
-              <textarea
-                placeholder="Message"
-                className="h-40 px-4 py-3 border border-neutral-200 rounded-xl outline-none focus:border-black"
-              />
+                {error && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {error}
+                  </div>
+                )}
 
-              {/* IMAGE AJOUTÉE */}
-              <div className="mt-2 overflow-hidden rounded-xl">
-                <Image
-                  src="/sara.jpg" // 👉 mets ton image ici dans public/
-                  alt="Contact illustration"
-                  width={600}
-                  height={300}
-                  className="w-full h-48 object-cover"
-                />
-              </div>
+                {success && (
+                  <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                    {success}
+                  </div>
+                )}
 
-              {/* BUTTON */}
-              <button className="mt-2 h-12 bg-black text-white text-sm uppercase tracking-[0.25em] rounded-xl hover:bg-neutral-800 transition">
-                Envoyer
-              </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="mt-2 h-12 rounded-xl bg-black text-sm uppercase tracking-[0.25em] text-white transition hover:bg-neutral-800 disabled:opacity-70"
+                >
+                  {loading ? t(uiText.sending, lang) : t(uiText.send, lang)}
+                </button>
+              </form>
 
-            </form>
-
-            <p className="text-xs text-neutral-400 mt-4">
-              Vous pouvez aussi nous contacter directement via email ou Instagram.
-            </p>
-
+              <p className="mt-4 text-xs text-neutral-400">
+                {t(uiText.contactNote, lang)}
+              </p>
+            </div>
           </div>
-
         </div>
       </section>
 
       <Footer />
-
-      {/* ANIMATION */}
-      <style jsx>{`
-        @keyframes fadeUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </main>
   );
 }

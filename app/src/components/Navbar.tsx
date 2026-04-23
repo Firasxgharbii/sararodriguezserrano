@@ -42,6 +42,8 @@ const translations = {
   },
 };
 
+const LANG_STORAGE_KEY = "site_lang";
+
 export default function Navbar() {
   const [lang, setLang] = useState<Lang>("fr");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -52,15 +54,41 @@ export default function Navbar() {
 
   const navItems = [
     { href: "/", label: t.home },
-    { href: "/#works", label: t.works },
+    { href: "/oeuvres", label: t.works },
     { href: "/about", label: t.about },
     { href: "/contact", label: t.contact },
   ];
 
   const handleChangeLang = (newLang: Lang) => {
     setLang(newLang);
+    localStorage.setItem(LANG_STORAGE_KEY, newLang);
     setLangOpen(false);
+    setMobileOpen(false);
+
+    window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new Event("focus"));
   };
+
+  useEffect(() => {
+    const syncLang = () => {
+      const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+      if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
+        setLang(savedLang);
+      } else {
+        setLang("fr");
+      }
+    };
+
+    syncLang();
+
+    window.addEventListener("storage", syncLang);
+    window.addEventListener("focus", syncLang);
+
+    return () => {
+      window.removeEventListener("storage", syncLang);
+      window.removeEventListener("focus", syncLang);
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -89,9 +117,9 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-50 w-full border-b border-neutral-200/80 bg-white/95 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
-          {/* MOBILE HEADER */}
           <div className="flex items-center justify-between py-4 md:hidden">
             <button
+              type="button"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
               className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-900 transition duration-300 hover:bg-neutral-50 active:scale-95"
@@ -100,13 +128,22 @@ export default function Navbar() {
             </button>
 
             <div className="px-3 text-center">
-              <h1 className="font-serif text-[1.9rem] leading-[1.05] tracking-[0.02em] text-neutral-900">
+              <h1
+                className="text-[1.9rem] leading-[1.05] text-[#808080]"
+                style={{
+                  fontFamily:
+                    '"Futura PT", "Futura", "Avenir Next", "Helvetica Neue", sans-serif',
+                  fontWeight: 300,
+                  letterSpacing: "0.08em",
+                }}
+              >
                 Sara Rodriguez Serrano
               </h1>
             </div>
 
             <div className="relative" ref={langRef}>
               <button
+                type="button"
                 onClick={() => setLangOpen((prev) => !prev)}
                 className="flex h-11 items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 text-sm text-neutral-900 transition duration-300 hover:bg-neutral-50 active:scale-95"
               >
@@ -127,18 +164,21 @@ export default function Navbar() {
                 }`}
               >
                 <button
+                  type="button"
                   onClick={() => handleChangeLang("fr")}
                   className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
                 >
                   {t.french}
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleChangeLang("en")}
                   className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
                 >
                   {t.english}
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleChangeLang("es")}
                   className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
                 >
@@ -148,7 +188,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* DESKTOP */}
           <div className="hidden md:block">
             <div className="relative py-6">
               <div className="absolute right-0 top-6 flex items-center gap-3">
@@ -161,6 +200,7 @@ export default function Navbar() {
                 >
                   <Instagram size={18} />
                 </a>
+
                 <a
                   href="mailto:sararodriguezserrano.art@gmail.com"
                   className="text-neutral-600 transition duration-300 hover:-translate-y-[2px] hover:text-neutral-900"
@@ -168,16 +208,18 @@ export default function Navbar() {
                 >
                   <Mail size={18} />
                 </a>
-                <a
-                  href="/contact"
+
+                <Link
+                  href="/login"
                   className="text-neutral-600 transition duration-300 hover:-translate-y-[2px] hover:text-neutral-900"
-                  aria-label="Contact"
+                  aria-label="Login"
                 >
                   <Globe size={18} />
-                </a>
+                </Link>
 
                 <div className="relative ml-2" ref={langRef}>
                   <button
+                    type="button"
                     onClick={() => setLangOpen((prev) => !prev)}
                     className="flex items-center gap-1 rounded-full border border-neutral-200 px-4 py-2 text-sm tracking-[0.12em] text-neutral-900 transition duration-300 hover:bg-neutral-50"
                   >
@@ -194,22 +236,25 @@ export default function Navbar() {
                     className={`absolute right-0 top-12 z-50 w-44 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl transition-all duration-300 ${
                       langOpen
                         ? "pointer-events-auto translate-y-0 opacity-100"
-                        : "pointer-events-none -translate-y2 opacity-0"
+                        : "pointer-events-none -translate-y-2 opacity-0"
                     }`}
                   >
                     <button
+                      type="button"
                       onClick={() => handleChangeLang("fr")}
                       className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
                     >
                       {t.french}
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleChangeLang("en")}
                       className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
                     >
                       {t.english}
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleChangeLang("es")}
                       className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
                     >
@@ -219,7 +264,15 @@ export default function Navbar() {
                 </div>
               </div>
 
-              <h1 className="text-center font-serif text-5xl tracking-[0.03em] text-neutral-900">
+              <h1
+                className="text-center text-5xl text-[#808080]"
+                style={{
+                  fontFamily:
+                    '"Futura PT", "Futura", "Avenir Next", "Helvetica Neue", sans-serif',
+                  fontWeight: 300,
+                  letterSpacing: "0.2em",
+                }}
+              >
                 Sara Rodriguez Serrano
               </h1>
             </div>
@@ -240,7 +293,6 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* MOBILE FULLSCREEN MENU */}
       <div
         className={`fixed inset-0 z-[60] md:hidden transition-all duration-300 ${
           mobileOpen
@@ -263,12 +315,21 @@ export default function Navbar() {
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-5">
               <div className="pr-4">
-                <h2 className="font-serif text-[1.8rem] leading-[1.05] text-neutral-900">
+                <h2
+                  className="text-[1.8rem] leading-[1.05] text-[#808080]"
+                  style={{
+                    fontFamily:
+                      '"Futura PT", "Futura", "Avenir Next", "Helvetica Neue", sans-serif',
+                    fontWeight: 300,
+                    letterSpacing: "0.08em",
+                  }}
+                >
                   Sara Rodriguez Serrano
                 </h2>
               </div>
 
               <button
+                type="button"
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close menu"
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-900 transition hover:bg-neutral-50 active:scale-95"
@@ -307,6 +368,7 @@ export default function Navbar() {
 
                 <div className="flex flex-wrap gap-2">
                   <button
+                    type="button"
                     onClick={() => handleChangeLang("fr")}
                     className={`rounded-full border px-4 py-2.5 text-sm transition duration-300 ${
                       lang === "fr"
@@ -317,6 +379,7 @@ export default function Navbar() {
                     FR
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleChangeLang("en")}
                     className={`rounded-full border px-4 py-2.5 text-sm transition duration-300 ${
                       lang === "en"
@@ -327,6 +390,7 @@ export default function Navbar() {
                     EN
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleChangeLang("es")}
                     className={`rounded-full border px-4 py-2.5 text-sm transition duration-300 ${
                       lang === "es"
@@ -348,6 +412,7 @@ export default function Navbar() {
                   >
                     <Instagram size={18} />
                   </a>
+
                   <a
                     href="mailto:sararodriguezserrano.art@gmail.com"
                     className="transition duration-300 hover:-translate-y-[2px] hover:text-neutral-900"
@@ -355,11 +420,12 @@ export default function Navbar() {
                   >
                     <Mail size={18} />
                   </a>
+
                   <Link
-                    href="/contact"
+                    href="/login"
                     onClick={() => setMobileOpen(false)}
                     className="transition duration-300 hover:-translate-y-[2px] hover:text-neutral-900"
-                    aria-label="Contact"
+                    aria-label="Login"
                   >
                     <Globe size={18} />
                   </Link>
@@ -368,7 +434,15 @@ export default function Navbar() {
             </div>
 
             <div className="border-t border-neutral-200 px-5 py-4">
-              <p className="text-xs tracking-[0.2em] text-neutral-400">
+              <p
+                className="text-xs text-[#808080]"
+                style={{
+                  fontFamily:
+                    '"Futura PT", "Futura", "Avenir Next", "Helvetica Neue", sans-serif',
+                  fontWeight: 300,
+                  letterSpacing: "0.2em",
+                }}
+              >
                 Sara Rodriguez Serrano
               </p>
             </div>
