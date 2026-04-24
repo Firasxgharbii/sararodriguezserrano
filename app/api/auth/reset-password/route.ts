@@ -47,11 +47,10 @@ export async function POST(req: Request) {
     );
 
     // 🔹 delete reset codes
-    await db.execute(
-      `DELETE FROM password_resets WHERE LOWER(email) = ?`,
-      [email]
-    );
-
+await db.execute(
+  `UPDATE users SET password_hash = ? WHERE LOWER(email) = ?`,
+  [hashedPassword, email]
+);
     await db.end();
 
     return NextResponse.json({ success: true });
