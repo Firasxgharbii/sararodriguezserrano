@@ -6,7 +6,8 @@ import { useState } from "react";
 export default function VerifyCodeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get("email") || "";
+
+  const email = (searchParams.get("email") || "").trim().toLowerCase();
 
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,12 +17,15 @@ export default function VerifyCodeContent() {
     e.preventDefault();
     setError("");
 
-    if (!email) {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanCode = code.trim();
+
+    if (!cleanEmail) {
       setError("Adresse e-mail introuvable.");
       return;
     }
 
-    if (code.length !== 6) {
+    if (cleanCode.length !== 6) {
       setError("Le code doit contenir 6 chiffres.");
       return;
     }
@@ -34,7 +38,10 @@ export default function VerifyCodeContent() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, code }),
+        body: JSON.stringify({
+          email: cleanEmail,
+          code: cleanCode,
+        }),
       });
 
       const data = await res.json();
@@ -44,7 +51,7 @@ export default function VerifyCodeContent() {
         return;
       }
 
-      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+      router.push(`/reset-password?email=${encodeURIComponent(cleanEmail)}`);
     } catch {
       setError("Une erreur est survenue.");
     } finally {
