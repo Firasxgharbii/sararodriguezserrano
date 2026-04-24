@@ -1,57 +1,66 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import mysql from "mysql2/promise";
+import bcrypt from "bcryptjs";
+
+function getDbConfig() {
+  return {
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT || 3306),
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  };
+}
 
 export async function POST(req: Request) {
-  let connection;
-
   try {
-    const { email, password } = await req.json();
+    const body = await req.json();
+
+    const email = String(body.email || "").trim().toLowerCase();
+    const password = String(body.password || "").trim();
 
     if (!email || !password) {
       return NextResponse.json(
-        { success: false, message: "Email et mot de passe requis." },
+        { success: false, message: "Données manquantes." },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 6) {
+      return NextResponse.json(
+        { success: false, message: "Mot de passe trop court." },
         { status: 400 }
       );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-    });
+    const db = await mysql.createConnection(getDbConfig());
 
-    const [result] = await connection.execute(
-      "UPDATE users SET password_hash = ?, updated_at = NOW() WHERE email = ?",
+    // 🔹 update user password
+    await db.execute(
+      `UPDATE users SET password = ? WHERE LOWER(email) = ?`,
       [hashedPassword, email]
     );
 
-    const updateResult = result as mysql.ResultSetHeader;
+    // 🔹 delete reset codes
+    await db.execute(
+      `DELETE FROM password_resets WHERE LOWER(email) = ?`,
+      [email]
+    );
 
-    if (updateResult.affectedRows === 0) {
-      return NextResponse.json(
-        { success: false, message: "Utilisateur introuvable." },
-        { status: 404 }
-      );
-    }
+    await db.end();
 
-    return NextResponse.json({
-      success: true,
-      message: "Mot de passe mis à jour avec succès.",
-    });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Erreur reset-password:", error);
+    console.error("RESET_PASSWORD_ERROR:", error);
 
     return NextResponse.json(
       { success: false, message: "Erreur serveur." },
       { status: 500 }
     );
-  } finally {
-    if (connection) {
-      await connection.end();
-    }
   }
 }
