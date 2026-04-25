@@ -11,7 +11,7 @@ import {
 } from "../lib/siteContent";
 import DatabaseSection from "./DatabaseSection";
 
-type Tab = "home" | "about" | "contact" | "oeuvres" | "portfolio";
+type Tab = "home" | "about" | "contact" | "oeuvres" | "portfolio" | "database";
 
 export default function DashboardPage() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
@@ -179,6 +179,12 @@ export default function DashboardPage() {
               onClick={() => setActiveTab("portfolio")}
               label="Portfolio"
             />
+
+            <TabButton
+  active={activeTab === "database"}
+  onClick={() => setActiveTab("database")}
+  label="Base de données"
+/>
           </aside>
 
           <section className="rounded-[30px] border border-[#e7ddd6] bg-white/80 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.04)] backdrop-blur-xl sm:p-8">
@@ -1158,7 +1164,12 @@ export default function DashboardPage() {
                 </div>
               </EditorBlock>
             )}
+
+            {activeTab === "database" && <DatabaseSection />}
           </section>
+
+          
+
         </div>
       </div>
     </main>
@@ -1351,7 +1362,7 @@ function TimelineLocalizedEditor({
     </div>
   );
 }
-<DatabaseSection />
+
 
 function SelectField({
   label,
