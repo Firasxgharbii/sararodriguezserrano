@@ -13,8 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Sara Rodriguez Serrano",
-  description: "Portfolio artistique de Sara Rodriguez Serrano",
+  title: "Sara Rodríguez Serrano",
+  description: "Portfolio artistique de Sara Rodríguez Serrano",
+  icons: {
+    icon: "/logosara.png",
+    shortcut: "/logosara.png",
+    apple: "/logosara.png",
+  },
 };
 
 export default function RootLayout({
