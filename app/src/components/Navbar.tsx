@@ -8,6 +8,7 @@ type Lang = "fr" | "en" | "es";
 
 const INSTAGRAM_URL = "https://www.instagram.com/sara_rodriguez_serrano/";
 const EMAIL_URL = "mailto:sararodriguezserrano.art@gmail.com";
+const LANG_STORAGE_KEY = "site_lang";
 
 const translations = {
   fr: {
@@ -45,13 +46,13 @@ const translations = {
   },
 };
 
-const LANG_STORAGE_KEY = "site_lang";
-
 export default function Navbar() {
   const [lang, setLang] = useState<Lang>("fr");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
-  const langRef = useRef<HTMLDivElement | null>(null);
+
+  const mobileLangRef = useRef<HTMLDivElement | null>(null);
+  const desktopLangRef = useRef<HTMLDivElement | null>(null);
 
   const t = translations[lang];
 
@@ -75,6 +76,7 @@ export default function Navbar() {
   useEffect(() => {
     const syncLang = () => {
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+
       if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
         setLang(savedLang);
       } else {
@@ -95,7 +97,15 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (langRef.current && !langRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+
+      const clickedMobile =
+        mobileLangRef.current && mobileLangRef.current.contains(target);
+
+      const clickedDesktop =
+        desktopLangRef.current && desktopLangRef.current.contains(target);
+
+      if (!clickedMobile && !clickedDesktop) {
         setLangOpen(false);
       }
     };
@@ -140,7 +150,7 @@ export default function Navbar() {
               </h1>
             </div>
 
-            <div className="relative" ref={langRef}>
+            <div className="relative" ref={mobileLangRef}>
               <button
                 type="button"
                 onClick={() => setLangOpen((prev) => !prev)}
@@ -156,7 +166,7 @@ export default function Navbar() {
               </button>
 
               <div
-                className={`absolute right-0 top-12 z-50 w-40 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl transition-all duration-300 ${
+                className={`absolute right-0 top-12 z-[999] w-40 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl transition-all duration-300 ${
                   langOpen
                     ? "pointer-events-auto translate-y-0 opacity-100"
                     : "pointer-events-none -translate-y-2 opacity-0"
@@ -167,7 +177,7 @@ export default function Navbar() {
                   onClick={() => handleChangeLang("fr")}
                   className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
                 >
-                  {t.french}
+                  Français
                 </button>
 
                 <button
@@ -175,7 +185,7 @@ export default function Navbar() {
                   onClick={() => handleChangeLang("en")}
                   className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
                 >
-                  {t.english}
+                  English
                 </button>
 
                 <button
@@ -183,7 +193,7 @@ export default function Navbar() {
                   onClick={() => handleChangeLang("es")}
                   className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
                 >
-                  {t.spanish}
+                  Español
                 </button>
               </div>
             </div>
@@ -218,7 +228,7 @@ export default function Navbar() {
                   <Globe size={18} />
                 </Link>
 
-                <div className="relative ml-2" ref={langRef}>
+                <div className="relative ml-2" ref={desktopLangRef}>
                   <button
                     type="button"
                     onClick={() => setLangOpen((prev) => !prev)}
@@ -234,7 +244,7 @@ export default function Navbar() {
                   </button>
 
                   <div
-                    className={`absolute right-0 top-12 z-50 w-44 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl transition-all duration-300 ${
+                    className={`absolute right-0 top-12 z-[999] w-44 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl transition-all duration-300 ${
                       langOpen
                         ? "pointer-events-auto translate-y-0 opacity-100"
                         : "pointer-events-none -translate-y-2 opacity-0"
@@ -245,7 +255,7 @@ export default function Navbar() {
                       onClick={() => handleChangeLang("fr")}
                       className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
                     >
-                      {t.french}
+                      Français
                     </button>
 
                     <button
@@ -253,7 +263,7 @@ export default function Navbar() {
                       onClick={() => handleChangeLang("en")}
                       className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
                     >
-                      {t.english}
+                      English
                     </button>
 
                     <button
@@ -261,7 +271,7 @@ export default function Navbar() {
                       onClick={() => handleChangeLang("es")}
                       className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
                     >
-                      {t.spanish}
+                      Español
                     </button>
                   </div>
                 </div>

@@ -12,11 +12,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Sara Rodríguez Serrano",
   description: "Portfolio artistique de Sara Rodríguez Serrano",
   icons: {
-    icon: "/logosara.png",
+    icon: [
+      { url: "/logosara.png", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
     shortcut: "/logosara.png",
     apple: "/logosara.png",
   },
