@@ -1,11 +1,27 @@
 import { NextResponse } from "next/server";
 import mysql from "mysql2/promise";
 
+function getDbConfig() {
+  return {
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT || 3306),
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    ssl: { rejectUnauthorized: false },
+  };
+}
+
 export async function POST(req: Request) {
   let connection: mysql.Connection | null = null;
 
   try {
-    const { name, email, subject, message } = await req.json();
+    const body = await req.json();
+
+    const name = String(body.name || "").trim();
+    const email = String(body.email || "").trim().toLowerCase();
+    const subject = String(body.subject || "").trim();
+    const message = String(body.message || "").trim();
 
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
@@ -14,12 +30,7 @@ export async function POST(req: Request) {
       );
     }
 
-    connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-    });
+    connection = await mysql.createConnection(getDbConfig());
 
     await connection.execute(
       `
@@ -33,16 +44,14 @@ export async function POST(req: Request) {
       success: true,
       message: "Message enregistré avec succès.",
     });
-  } catch (error) {
-    console.error("Erreur contact:", error);
+  } catch (error: any) {
+    console.error("CONTACT_ERROR:", error?.message || error);
 
     return NextResponse.json(
-      { success: false, message: "Erreur serveur." },
+      { success: false, message: error?.message || "Erreur serveur." },
       { status: 500 }
     );
   } finally {
-    if (connection) {
-      await connection.end();
-    }
+    if (connection) await connection.end();
   }
 }
