@@ -19,24 +19,53 @@ export async function GET() {
     db = await mysql.createConnection(getDbConfig());
 
     const [messages] = await db.execute(`
-      SELECT id, name, email, subject, message, created_at
+      SELECT *
       FROM contact_messages
       ORDER BY created_at DESC
-      LIMIT 50
+      LIMIT 100
     `);
 
     const [oeuvres] = await db.execute(`
-      SELECT id, title, year, category, availability, image, created_at
+      SELECT *
       FROM oeuvres
       ORDER BY id DESC
-      LIMIT 50
+      LIMIT 100
     `);
 
     const [users] = await db.execute(`
-      SELECT id, full_name, email, role, is_active, created_at
+      SELECT id, full_name, email, role, is_active, created_at, updated_at
       FROM users
       ORDER BY id DESC
-      LIMIT 50
+      LIMIT 100
+    `);
+
+    const [siteContent] = await db.execute(`
+      SELECT *
+      FROM site_content
+      ORDER BY id DESC
+      LIMIT 100
+    `);
+
+    const [passwordResets] = await db.execute(`
+      SELECT 
+        pr.id,
+        pr.user_id,
+        u.email,
+        pr.reset_token,
+        pr.expires_at,
+        pr.used_at,
+        pr.created_at
+      FROM password_resets pr
+      LEFT JOIN users u ON u.id = pr.user_id
+      ORDER BY pr.created_at DESC
+      LIMIT 100
+    `);
+
+    const [userSessions] = await db.execute(`
+      SELECT *
+      FROM user_sessions
+      ORDER BY id DESC
+      LIMIT 100
     `);
 
     return NextResponse.json({
@@ -45,6 +74,9 @@ export async function GET() {
         messages,
         oeuvres,
         users,
+        siteContent,
+        passwordResets,
+        userSessions,
       },
     });
   } catch (error: any) {
