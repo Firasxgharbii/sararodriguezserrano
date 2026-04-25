@@ -8,16 +8,15 @@ function getDbConfig() {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    ssl: {
-      rejectUnauthorized: false,
-    },
+    ssl: { rejectUnauthorized: false },
   };
 }
 
 export async function POST(req: Request) {
+  let db: mysql.Connection | null = null;
+
   try {
     const body = await req.json();
-
     const email = String(body.email || "").trim().toLowerCase();
     const code = String(body.code || "").trim();
 
@@ -28,24 +27,23 @@ export async function POST(req: Request) {
       );
     }
 
-    const db = await mysql.createConnection(getDbConfig());
+    db = await mysql.createConnection(getDbConfig());
 
     const [rows] = await db.execute(
       `
-      SELECT id, code, expires_at
-      FROM password_resets
-      WHERE LOWER(email) = ?
-      ORDER BY created_at DESC
+      SELECT pr.id, pr.reset_token, pr.expires_at
+      FROM password_resets pr
+      INNER JOIN users u ON u.id = pr.user_id
+      WHERE LOWER(u.email) = ?
+      ORDER BY pr.created_at DESC
       LIMIT 1
       `,
       [email]
     );
 
-    await db.end();
-
     const results = rows as {
       id: number;
-      code: string;
+      reset_token: string;
       expires_at: Date | string;
     }[];
 
@@ -57,16 +55,15 @@ export async function POST(req: Request) {
     }
 
     const saved = results[0];
-    const expiresAt = new Date(saved.expires_at).getTime();
 
-    if (Date.now() > expiresAt) {
+    if (Date.now() > new Date(saved.expires_at).getTime()) {
       return NextResponse.json(
         { success: false, message: "Le code a expiré." },
         { status: 400 }
       );
     }
 
-    if (String(saved.code).trim() !== code) {
+    if (String(saved.reset_token).trim() !== code) {
       return NextResponse.json(
         { success: false, message: "Code incorrect." },
         { status: 400 }
@@ -74,12 +71,14 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("VERIFY_CODE_ERROR:", error);
+  } catch (error: any) {
+    console.error("VERIFY_CODE_ERROR:", error?.message || error);
 
     return NextResponse.json(
-      { success: false, message: "Erreur serveur." },
+      { success: false, message: error?.message || "Erreur serveur." },
       { status: 500 }
     );
+  } finally {
+    if (db) await db.end();
   }
 }

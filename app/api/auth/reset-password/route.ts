@@ -16,8 +16,6 @@ function getDbConfig() {
 }
 
 export async function POST(req: Request) {
-  let db: mysql.Connection | null = null;
-
   try {
     const body = await req.json();
 
@@ -40,43 +38,28 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    db = await mysql.createConnection(getDbConfig());
+    const db = await mysql.createConnection(getDbConfig());
 
-    const [result] = await db.execute(
-      `UPDATE users SET password_hash = ? WHERE LOWER(email) = ?`,
+    // 🔹 update user password
+    await db.execute(
+      `UPDATE users SET password = ? WHERE LOWER(email) = ?`,
       [hashedPassword, email]
     );
 
-    const updateResult = result as mysql.ResultSetHeader;
+    // 🔹 delete reset codes
+await db.execute(
+  `UPDATE users SET password_hash = ? WHERE LOWER(email) = ?`,
+  [hashedPassword, email]
+);
+    await db.end();
 
-    if (updateResult.affectedRows === 0) {
-      return NextResponse.json(
-        { success: false, message: "Aucun utilisateur trouvé avec cet email." },
-        { status: 404 }
-      );
-    }
-
-    await db.execute(`DELETE FROM password_resets WHERE LOWER(email) = ?`, [
-      email,
-    ]);
-
-    return NextResponse.json({
-      success: true,
-      message: "Mot de passe mis à jour avec succès.",
-    });
-  } catch (error: any) {
-    console.error("RESET_PASSWORD_ERROR:", error?.message || error);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("RESET_PASSWORD_ERROR:", error);
 
     return NextResponse.json(
-      {
-        success: false,
-        message: error?.message || "Erreur serveur.",
-      },
+      { success: false, message: "Erreur serveur." },
       { status: 500 }
     );
-  } finally {
-    if (db) {
-      await db.end();
-    }
   }
 }
