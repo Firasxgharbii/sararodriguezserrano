@@ -6,6 +6,9 @@ import { ChevronDown, Globe, Instagram, Mail, Menu, X } from "lucide-react";
 
 type Lang = "fr" | "en" | "es";
 
+const INSTAGRAM_URL = "https://www.instagram.com/sara_rodriguez_serrano/";
+const EMAIL_URL = "mailto:sararodriguezserrano.art@gmail.com";
+
 const translations = {
   fr: {
     current: "FR",
@@ -102,11 +105,7 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
@@ -170,6 +169,7 @@ export default function Navbar() {
                 >
                   {t.french}
                 </button>
+
                 <button
                   type="button"
                   onClick={() => handleChangeLang("en")}
@@ -177,6 +177,7 @@ export default function Navbar() {
                 >
                   {t.english}
                 </button>
+
                 <button
                   type="button"
                   onClick={() => handleChangeLang("es")}
@@ -192,9 +193,9 @@ export default function Navbar() {
             <div className="relative py-6">
               <div className="absolute right-0 top-6 flex items-center gap-3">
                 <a
-                  href="https://instagram.com"
+                  href={INSTAGRAM_URL}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="text-neutral-600 transition duration-300 hover:-translate-y-[2px] hover:text-neutral-900"
                   aria-label="Instagram"
                 >
@@ -202,7 +203,7 @@ export default function Navbar() {
                 </a>
 
                 <a
-                  href="mailto:sararodriguezserrano.art@gmail.com"
+                  href={EMAIL_URL}
                   className="text-neutral-600 transition duration-300 hover:-translate-y-[2px] hover:text-neutral-900"
                   aria-label="Email"
                 >
@@ -246,6 +247,7 @@ export default function Navbar() {
                     >
                       {t.french}
                     </button>
+
                     <button
                       type="button"
                       onClick={() => handleChangeLang("en")}
@@ -253,6 +255,7 @@ export default function Navbar() {
                     >
                       {t.english}
                     </button>
+
                     <button
                       type="button"
                       onClick={() => handleChangeLang("es")}
@@ -367,46 +370,27 @@ export default function Navbar() {
                 </p>
 
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleChangeLang("fr")}
-                    className={`rounded-full border px-4 py-2.5 text-sm transition duration-300 ${
-                      lang === "fr"
-                        ? "border-neutral-900 bg-neutral-900 text-white"
-                        : "border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50"
-                    }`}
-                  >
-                    FR
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleChangeLang("en")}
-                    className={`rounded-full border px-4 py-2.5 text-sm transition duration-300 ${
-                      lang === "en"
-                        ? "border-neutral-900 bg-neutral-900 text-white"
-                        : "border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50"
-                    }`}
-                  >
-                    EN
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleChangeLang("es")}
-                    className={`rounded-full border px-4 py-2.5 text-sm transition duration-300 ${
-                      lang === "es"
-                        ? "border-neutral-900 bg-neutral-900 text-white"
-                        : "border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50"
-                    }`}
-                  >
-                    ES
-                  </button>
+                  {(["fr", "en", "es"] as Lang[]).map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => handleChangeLang(item)}
+                      className={`rounded-full border px-4 py-2.5 text-sm transition duration-300 ${
+                        lang === item
+                          ? "border-neutral-900 bg-neutral-900 text-white"
+                          : "border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50"
+                      }`}
+                    >
+                      {item.toUpperCase()}
+                    </button>
+                  ))}
                 </div>
 
                 <div className="mt-7 flex items-center gap-5 text-neutral-600">
                   <a
-                    href="https://instagram.com"
+                    href={INSTAGRAM_URL}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="transition duration-300 hover:-translate-y-[2px] hover:text-neutral-900"
                     aria-label="Instagram"
                   >
@@ -414,7 +398,7 @@ export default function Navbar() {
                   </a>
 
                   <a
-                    href="mailto:sararodriguezserrano.art@gmail.com"
+                    href={EMAIL_URL}
                     className="transition duration-300 hover:-translate-y-[2px] hover:text-neutral-900"
                     aria-label="Email"
                   >
