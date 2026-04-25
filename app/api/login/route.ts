@@ -1,22 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import db from "../../lib/db";
+import mysql from "mysql2/promise";
 
 type UserRow = {
   id: number;
-  full_name: string;
+  full_name: string | null;
   email: string;
   password_hash: string;
   role: string;
+  is_active: number;
 };
 
+function getDbConfig() {
+  return {
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT || 3306),
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    ssl: { rejectUnauthorized: false },
+  };
+}
+
 export async function POST(req: NextRequest) {
+  let db: mysql.Connection | null = null;
+
   try {
     const body = await req.json();
-    const { email, password } = body as {
-      email?: string;
-      password?: string;
-    };
+
+    const email = String(body.email || "").trim().toLowerCase();
+    const password = String(body.password || "").trim();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -25,8 +38,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const [rows] = await db.query(
-      "SELECT id, full_name, email, password_hash, role FROM users WHERE email = ? LIMIT 1",
+    db = await mysql.createConnection(getDbConfig());
+
+    const [rows] = await db.execute(
+      `
+      SELECT id, full_name, email, password_hash, role, is_active
+      FROM users
+      WHERE LOWER(email) = ?
+      LIMIT 1
+      `,
       [email]
     );
 
@@ -40,6 +60,14 @@ export async function POST(req: NextRequest) {
     }
 
     const user = users[0];
+
+    if (Number(user.is_active) !== 1) {
+      return NextResponse.json(
+        { success: false, message: "Compte désactivé." },
+        { status: 403 }
+      );
+    }
+
     const isValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isValid) {
@@ -59,11 +87,14 @@ export async function POST(req: NextRequest) {
         role: user.role,
       },
     });
-  } catch (error) {
-    console.error("Erreur login:", error);
+  } catch (error: any) {
+    console.error("LOGIN_ERROR:", error?.message || error);
+
     return NextResponse.json(
-      { success: false, message: "Erreur serveur." },
+      { success: false, message: error?.message || "Erreur serveur." },
       { status: 500 }
     );
+  } finally {
+    if (db) await db.end();
   }
 }
