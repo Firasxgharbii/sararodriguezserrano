@@ -16,12 +16,9 @@ export const metadata: Metadata = {
   title: "Sara Rodríguez Serrano",
   description: "Portfolio artistique de Sara Rodríguez Serrano",
   icons: {
-    icon: [
-      { url: "/logosara.png", type: "image/png" },
-      { url: "/favicon.ico" },
-    ],
-    shortcut: "/logosara.png",
-    apple: "/logosara.png",
+    icon: "/logosara.png?v=10",
+    shortcut: "/logosara.png?v=10",
+    apple: "/logosara.png?v=10",
   },
 };
 
@@ -31,7 +28,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr">
+      <head>
+        <link rel="icon" href="/logosara.png?v=10" type="image/png" />
+        <link rel="shortcut icon" href="/logosara.png?v=10" type="image/png" />
+        <link rel="apple-touch-icon" href="/logosara.png?v=10" />
+      </head>
+
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
