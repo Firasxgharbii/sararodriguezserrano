@@ -220,15 +220,7 @@ export default function LoginPage() {
                 </button>
               </form>
 
-              <p className="mt-9 text-center text-[15px] leading-8 text-[#9a8780] animate-[fadeUp_1.15s_ease_forwards] opacity-0">
-                Vous découvrez l’espace pour la première fois ?{" "}
-                <Link
-                  href="/inscription"
-                  className="font-medium text-[#a77d67] transition hover:text-[#5f473d]"
-                >
-                  Créer un compte
-                </Link>
-              </p>
+            
             </div>
           </div>
         </div>
