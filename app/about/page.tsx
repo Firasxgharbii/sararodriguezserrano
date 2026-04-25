@@ -39,18 +39,6 @@ function getProfileWrapperSize(size: "small" | "medium" | "large") {
   }
 }
 
-function getProfileShape(shape: "square" | "rounded" | "circle") {
-  switch (shape) {
-    case "square":
-      return "rounded-[26px]";
-    case "rounded":
-      return "rounded-[38px]";
-    case "circle":
-    default:
-      return "rounded-full";
-  }
-}
-
 export default function AboutPage() {
   const [lang, setLang] = useState<Lang>("fr");
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
@@ -58,11 +46,7 @@ export default function AboutPage() {
   useEffect(() => {
     const syncLang = () => {
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
-      if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
-        setLang(savedLang);
-      } else {
-        setLang("fr");
-      }
+      setLang(savedLang === "fr" || savedLang === "en" || savedLang === "es" ? savedLang : "fr");
     };
 
     const loadContent = () => {
@@ -92,32 +76,21 @@ export default function AboutPage() {
       ...defaultSiteContent.about.profileImage,
       ...(content.about?.profileImage ?? {}),
     },
-    publications:
-      content.about?.publications ?? defaultSiteContent.about.publications,
-    collections:
-      content.about?.collections ?? defaultSiteContent.about.collections,
-    exhibitions:
-      content.about?.exhibitions ?? defaultSiteContent.about.exhibitions,
+    publications: content.about?.publications ?? defaultSiteContent.about.publications,
+    collections: content.about?.collections ?? defaultSiteContent.about.collections,
+    exhibitions: content.about?.exhibitions ?? defaultSiteContent.about.exhibitions,
     formations: content.about?.formations ?? defaultSiteContent.about.formations,
-    distinctions:
-      content.about?.distinctions ?? defaultSiteContent.about.distinctions,
+    distinctions: content.about?.distinctions ?? defaultSiteContent.about.distinctions,
   };
 
   const handleDownloadCV = () => {
     const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
-
     const activeLang: Lang =
-      savedLang === "fr" || savedLang === "en" || savedLang === "es"
-        ? savedLang
-        : "fr";
-
-    setLang(activeLang);
+      savedLang === "fr" || savedLang === "en" || savedLang === "es" ? savedLang : "fr";
 
     const rawPath = cvFiles[activeLang];
-    const filePath = encodeURI(rawPath);
-
     const link = document.createElement("a");
-    link.href = filePath;
+    link.href = encodeURI(rawPath);
     link.download = rawPath.split("/").pop() || "cv.pdf";
     document.body.appendChild(link);
     link.click();
@@ -150,7 +123,7 @@ export default function AboutPage() {
               {t(about.badge, lang)}
             </p>
 
-            <h1 className="font-serif text-4xl leading-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+            <h1 className="text-4xl font-light leading-tight tracking-[0.04em] text-neutral-800 sm:text-5xl lg:text-6xl">
               {t(about.title, lang)}
             </h1>
 
@@ -167,18 +140,14 @@ export default function AboutPage() {
         <div className="mb-20 grid gap-10 lg:grid-cols-[1.08fr_0.92fr]">
           <div className="flex items-center justify-center lg:justify-start">
             <div className="relative">
-              <div className="absolute inset-0 scale-110 rounded-full bg-[#e9dfd7] opacity-70 blur-3xl" />
+              <div className="absolute inset-0 scale-110 bg-[#e9dfd7] opacity-70 blur-3xl" />
 
               <div
                 className={`relative overflow-hidden border border-neutral-200 bg-white p-3 shadow-[0_20px_60px_rgba(0,0,0,0.08)] ${getProfileWrapperSize(
                   about.profileImage.size
-                )} ${getProfileShape(about.profileImage.shape)}`}
+                )}`}
               >
-                <div
-                  className={`h-full w-full overflow-hidden ${getProfileShape(
-                    about.profileImage.shape
-                  )}`}
-                >
+                <div className="h-full w-full overflow-hidden">
                   <Image
                     src={imageSrc}
                     alt={t(about.title, lang)}
@@ -188,12 +157,10 @@ export default function AboutPage() {
                   />
                 </div>
               </div>
-
-              <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-full border border-white/70 bg-white/80 shadow-[0_8px_25px_rgba(0,0,0,0.08)] backdrop-blur-md" />
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-neutral-200 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+          <div className="border border-neutral-200 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
             <p className="mb-2 text-xs uppercase tracking-[0.28em] text-neutral-400">
               {t(about.bioTitle, lang)}
             </p>
@@ -209,7 +176,7 @@ export default function AboutPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <a
                 href="#parcours"
-                className="inline-flex items-center gap-2 rounded-full border border-neutral-900 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-900 transition duration-300 hover:bg-neutral-900 hover:text-white"
+                className="inline-flex items-center gap-2 border border-neutral-900 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-900 transition duration-300 hover:bg-neutral-900 hover:text-white"
               >
                 {t(about.parcoursButtonLabel, lang)}
                 <ArrowRight size={16} />
@@ -218,30 +185,26 @@ export default function AboutPage() {
               <button
                 type="button"
                 onClick={handleDownloadCV}
-                className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-700 transition duration-300 hover:border-neutral-900 hover:text-neutral-900"
+                className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-700 transition duration-300 hover:border-neutral-900 hover:text-neutral-900"
               >
                 {t(about.cvButtonLabel, lang)}
                 <Download size={16} />
               </button>
             </div>
-
-            <p className="mt-4 text-xs tracking-[0.16em] text-neutral-400">
-              Langue active : {lang.toUpperCase()}
-            </p>
           </div>
         </div>
 
         <div className="mb-20 grid gap-8 lg:grid-cols-2">
-          <div className="rounded-[28px] border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+          <div className="border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
             <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-800">
+              <div className="flex h-11 w-11 items-center justify-center bg-neutral-100 text-neutral-800">
                 <Palette size={18} />
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.26em] text-neutral-400">
                   {t(about.visionBadge, lang)}
                 </p>
-                <h3 className="font-serif text-2xl text-neutral-900">
+                <h3 className="text-2xl font-light text-neutral-900">
                   {t(about.visionTitle, lang)}
                 </h3>
               </div>
@@ -252,16 +215,16 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="rounded-[28px] border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+          <div className="border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
             <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-800">
+              <div className="flex h-11 w-11 items-center justify-center bg-neutral-100 text-neutral-800">
                 <Newspaper size={18} />
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.26em] text-neutral-400">
                   {t(about.publicationsBadge, lang)}
                 </p>
-                <h3 className="font-serif text-2xl text-neutral-900">
+                <h3 className="text-2xl font-light text-neutral-900">
                   {t(about.publicationsTitle, lang)}
                 </h3>
               </div>
@@ -280,16 +243,16 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="mb-20 rounded-[28px] border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+        <div className="mb-20 border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
           <div className="mb-5 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-800">
+            <div className="flex h-11 w-11 items-center justify-center bg-neutral-100 text-neutral-800">
               <BookOpen size={18} />
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.26em] text-neutral-400">
                 {t(about.collectionsBadge, lang)}
               </p>
-              <h3 className="font-serif text-2xl text-neutral-900">
+              <h3 className="text-2xl font-light text-neutral-900">
                 {t(about.collectionsTitle, lang)}
               </h3>
             </div>
@@ -299,7 +262,7 @@ export default function AboutPage() {
             {about.collections.map((item, index) => (
               <li
                 key={index}
-                className={`rounded-2xl bg-neutral-50 px-5 py-4 ${
+                className={`bg-neutral-50 px-5 py-4 ${
                   index === 2 ? "sm:col-span-2" : ""
                 }`}
               >
@@ -315,13 +278,13 @@ export default function AboutPage() {
 
         <div
           id="parcours"
-          className="rounded-[32px] border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]"
+          className="border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]"
         >
           <p className="mb-2 text-xs uppercase tracking-[0.28em] text-neutral-400">
             {t(about.parcoursBadge, lang)}
           </p>
 
-          <h3 className="mb-8 font-serif text-4xl text-neutral-900 sm:text-5xl">
+          <h3 className="mb-8 text-4xl font-light text-neutral-900 sm:text-5xl">
             {t(about.parcoursTitle, lang)}
           </h3>
 

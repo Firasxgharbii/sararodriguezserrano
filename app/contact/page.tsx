@@ -14,6 +14,12 @@ import {
 import { getSiteContent } from "../lib/getSiteContent";
 import { t } from "../lib/i18n";
 
+const futuraLight = {
+  fontFamily:
+    '"Futura PT", Futura, "Avenir Next", "Helvetica Neue", Arial, sans-serif',
+  fontWeight: 300,
+};
+
 export default function ContactPage() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [lang, setLang] = useState<Lang>("fr");
@@ -47,11 +53,11 @@ export default function ContactPage() {
       });
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
-      if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
-        setLang(savedLang);
-      } else {
-        setLang("fr");
-      }
+      setLang(
+        savedLang === "fr" || savedLang === "en" || savedLang === "es"
+          ? savedLang
+          : "fr"
+      );
     };
 
     loadContent();
@@ -70,56 +76,24 @@ export default function ContactPage() {
     contact.contactImage?.src || defaultSiteContent.contact.contactImage.src;
 
   const uiText = {
-    emailLabel: {
-      fr: "Email",
-      en: "Email",
-      es: "Correo electrónico",
-    },
-    instagramLabel: {
-      fr: "Instagram",
-      en: "Instagram",
-      es: "Instagram",
-    },
-    locationLabel: {
-      fr: "Localisation",
-      en: "Location",
-      es: "Ubicación",
-    },
+    emailLabel: { fr: "Email", en: "Email", es: "Correo electrónico" },
+    instagramLabel: { fr: "Instagram", en: "Instagram", es: "Instagram" },
+    locationLabel: { fr: "Localisation", en: "Location", es: "Ubicación" },
     locationValue: {
       fr: "Montréal, Canada",
       en: "Montreal, Canada",
       es: "Montreal, Canadá",
     },
-    formBadge: {
-      fr: "Formulaire",
-      en: "Form",
-      es: "Formulario",
-    },
+    formBadge: { fr: "Formulaire", en: "Form", es: "Formulario" },
     formTitle: {
       fr: "Envoyer un message",
       en: "Send a message",
       es: "Enviar un mensaje",
     },
-    namePlaceholder: {
-      fr: "Nom",
-      en: "Name",
-      es: "Nombre",
-    },
-    emailPlaceholder: {
-      fr: "Email",
-      en: "Email",
-      es: "Correo electrónico",
-    },
-    subjectPlaceholder: {
-      fr: "Sujet",
-      en: "Subject",
-      es: "Asunto",
-    },
-    messagePlaceholder: {
-      fr: "Message",
-      en: "Message",
-      es: "Mensaje",
-    },
+    namePlaceholder: { fr: "Nom", en: "Name", es: "Nombre" },
+    emailPlaceholder: { fr: "Email", en: "Email", es: "Correo electrónico" },
+    subjectPlaceholder: { fr: "Sujet", en: "Subject", es: "Asunto" },
+    messagePlaceholder: { fr: "Message", en: "Message", es: "Mensaje" },
     fillAllFields: {
       fr: "Veuillez remplir tous les champs.",
       en: "Please fill in all fields.",
@@ -140,16 +114,8 @@ export default function ContactPage() {
       en: "Your message has been successfully sent.",
       es: "Su mensaje ha sido enviado correctamente.",
     },
-    sending: {
-      fr: "Envoi...",
-      en: "Sending...",
-      es: "Enviando...",
-    },
-    send: {
-      fr: "Envoyer",
-      en: "Send",
-      es: "Enviar",
-    },
+    sending: { fr: "Envoi...", en: "Sending...", es: "Enviando..." },
+    send: { fr: "Envoyer", en: "Send", es: "Enviar" },
     contactNote: {
       fr: "Vous pouvez aussi nous contacter directement via email ou Instagram.",
       en: "You can also contact us directly via email or Instagram.",
@@ -160,10 +126,7 @@ export default function ContactPage() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setForm((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -181,9 +144,7 @@ export default function ContactPage() {
 
       const res = await fetch("/api/contact", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
@@ -195,12 +156,7 @@ export default function ContactPage() {
       }
 
       setSuccess(t(uiText.success, lang));
-      setForm({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
+      setForm({ name: "", email: "", subject: "", message: "" });
     } catch {
       setError(t(uiText.genericError, lang));
     } finally {
@@ -213,40 +169,47 @@ export default function ContactPage() {
       <Navbar />
 
       <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-[-100px] top-[-80px] h-72 w-72 rounded-full bg-[#eee6dc] opacity-70 blur-3xl" />
-          <div className="absolute bottom-[-120px] right-[-100px] h-80 w-80 rounded-full bg-[#efe8de] opacity-80 blur-3xl" />
-        </div>
-
         <div className="relative mx-auto max-w-6xl px-6 py-16 sm:py-20 lg:px-10 lg:py-24">
           <div className="grid items-start gap-12 lg:grid-cols-[0.95fr_1.05fr]">
             <div>
-              <p className="mb-4 text-xs uppercase tracking-[0.4em] text-neutral-400">
+              <p
+                className="mb-4 text-xs uppercase tracking-[0.4em] text-neutral-400"
+                style={futuraLight}
+              >
                 {t(contact.badge, lang)}
               </p>
 
-              <h1 className="mb-6 font-serif text-4xl leading-[1.05] text-neutral-900 sm:text-5xl lg:text-6xl">
+              <h1
+                className="mb-6 text-[44px] leading-[1.05] text-[#8a8a8a] sm:text-[58px] lg:text-[68px]"
+                style={{
+                  ...futuraLight,
+                  letterSpacing: "0.01em",
+                }}
+              >
                 {t(contact.title, lang)}
               </h1>
 
               <div className="mb-8 h-[1px] w-16 bg-neutral-300" />
 
-              <p className="max-w-md text-[17px] leading-8 text-neutral-600">
+              <p className="max-w-md text-[16px] leading-8 text-neutral-600">
                 {t(contact.text, lang)}
               </p>
 
               <div className="mt-10 space-y-4">
                 <a
                   href={`mailto:${contact.email}`}
-                  className="group flex items-center justify-between rounded-2xl border border-neutral-200 bg-white px-5 py-4 transition hover:-translate-y-[2px] hover:shadow-sm"
+                  className="group flex items-center justify-between border border-neutral-200 bg-white px-5 py-4 transition hover:-translate-y-[2px] hover:shadow-sm"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100">
+                    <div className="flex h-10 w-10 items-center justify-center bg-neutral-100">
                       <Mail size={18} />
                     </div>
 
                     <div>
-                      <p className="text-xs uppercase tracking-[0.25em] text-neutral-400">
+                      <p
+                        className="text-xs uppercase tracking-[0.25em] text-neutral-400"
+                        style={futuraLight}
+                      >
                         {t(uiText.emailLabel, lang)}
                       </p>
                       <p className="break-all text-sm text-neutral-800">
@@ -259,22 +222,21 @@ export default function ContactPage() {
                 </a>
 
                 <a
-                  href={
-                    contact.instagram.startsWith("http")
-                      ? contact.instagram
-                      : `https://www.instagram.com/sara_rodriguez_serrano/${contact.instagram.replace("@", "")}`
-                  }
+                  href="https://www.instagram.com/sara_rodriguez_serrano/"
                   target="_blank"
                   rel="noreferrer"
-                  className="group flex items-center justify-between rounded-2xl border border-neutral-200 bg-white px-5 py-4 transition hover:-translate-y-[2px] hover:shadow-sm"
+                  className="group flex items-center justify-between border border-neutral-200 bg-white px-5 py-4 transition hover:-translate-y-[2px] hover:shadow-sm"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100">
+                    <div className="flex h-10 w-10 items-center justify-center bg-neutral-100">
                       <Instagram size={18} />
                     </div>
 
                     <div>
-                      <p className="text-xs uppercase tracking-[0.25em] text-neutral-400">
+                      <p
+                        className="text-xs uppercase tracking-[0.25em] text-neutral-400"
+                        style={futuraLight}
+                      >
                         {t(uiText.instagramLabel, lang)}
                       </p>
                       <p className="text-sm text-neutral-800">
@@ -286,13 +248,16 @@ export default function ContactPage() {
                   <ArrowRight className="text-neutral-400 transition group-hover:translate-x-1" />
                 </a>
 
-                <div className="flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white px-5 py-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100">
+                <div className="flex items-center gap-4 border border-neutral-200 bg-white px-5 py-4">
+                  <div className="flex h-10 w-10 items-center justify-center bg-neutral-100">
                     <MapPin size={18} />
                   </div>
 
                   <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-neutral-400">
+                    <p
+                      className="text-xs uppercase tracking-[0.25em] text-neutral-400"
+                      style={futuraLight}
+                    >
                       {t(uiText.locationLabel, lang)}
                     </p>
                     <p className="text-sm text-neutral-800">
@@ -303,12 +268,18 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-neutral-200 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)] sm:p-7">
-              <p className="mb-2 text-xs uppercase tracking-[0.3em] text-neutral-400">
+            <div className="border border-neutral-200 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)] sm:p-7">
+              <p
+                className="mb-2 text-xs uppercase tracking-[0.3em] text-neutral-400"
+                style={futuraLight}
+              >
                 {t(uiText.formBadge, lang)}
               </p>
 
-              <h2 className="mb-6 font-serif text-3xl text-neutral-900">
+              <h2
+                className="mb-6 text-[34px] leading-tight text-[#8a8a8a]"
+                style={futuraLight}
+              >
                 {t(uiText.formTitle, lang)}
               </h2>
 
@@ -320,7 +291,7 @@ export default function ContactPage() {
                     value={form.name}
                     onChange={handleChange}
                     placeholder={t(uiText.namePlaceholder, lang)}
-                    className="h-12 rounded-xl border border-neutral-200 px-4 outline-none transition focus:border-black"
+                    className="h-12 border border-neutral-200 px-4 outline-none transition focus:border-black"
                   />
 
                   <input
@@ -329,7 +300,7 @@ export default function ContactPage() {
                     value={form.email}
                     onChange={handleChange}
                     placeholder={t(uiText.emailPlaceholder, lang)}
-                    className="h-12 rounded-xl border border-neutral-200 px-4 outline-none transition focus:border-black"
+                    className="h-12 border border-neutral-200 px-4 outline-none transition focus:border-black"
                   />
                 </div>
 
@@ -339,7 +310,7 @@ export default function ContactPage() {
                   value={form.subject}
                   onChange={handleChange}
                   placeholder={t(uiText.subjectPlaceholder, lang)}
-                  className="h-12 rounded-xl border border-neutral-200 px-4 outline-none transition focus:border-black"
+                  className="h-12 border border-neutral-200 px-4 outline-none transition focus:border-black"
                 />
 
                 <textarea
@@ -347,10 +318,10 @@ export default function ContactPage() {
                   value={form.message}
                   onChange={handleChange}
                   placeholder={t(uiText.messagePlaceholder, lang)}
-                  className="h-40 rounded-xl border border-neutral-200 px-4 py-3 outline-none transition focus:border-black"
+                  className="h-40 border border-neutral-200 px-4 py-3 outline-none transition focus:border-black"
                 />
 
-                <div className="mt-2 overflow-hidden rounded-2xl">
+                <div className="mt-2 overflow-hidden">
                   <Image
                     src={contactImageSrc}
                     alt="Contact illustration"
@@ -361,13 +332,13 @@ export default function ContactPage() {
                 </div>
 
                 {error && (
-                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                     {error}
                   </div>
                 )}
 
                 {success && (
-                  <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                  <div className="border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
                     {success}
                   </div>
                 )}
@@ -375,7 +346,8 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="mt-2 h-12 rounded-xl bg-black text-sm uppercase tracking-[0.25em] text-white transition hover:bg-neutral-800 disabled:opacity-70"
+                  className="mt-2 h-12 bg-black text-sm uppercase tracking-[0.25em] text-white transition hover:bg-neutral-800 disabled:opacity-70"
+                  style={futuraLight}
                 >
                   {loading ? t(uiText.sending, lang) : t(uiText.send, lang)}
                 </button>

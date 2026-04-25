@@ -18,21 +18,36 @@ const works = [
   },
 ];
 
+const futuraLight = {
+  fontFamily:
+    '"Futura PT", Futura, "Avenir Next", "Helvetica Neue", Arial, sans-serif',
+  fontWeight: 300,
+};
+
 export default function Gallery() {
   return (
     <section id="works" className="bg-[#f8f7f4] py-28">
       <div className="mx-auto max-w-7xl px-6">
         {/* HEADER */}
         <div className="mb-24 text-center">
-          <p className="mb-4 text-[11px] uppercase tracking-[0.42em] text-neutral-400">
+          <p
+            className="mb-4 text-[10px] uppercase tracking-[0.42em] text-neutral-400"
+            style={futuraLight}
+          >
             Galerie
           </p>
 
-          <h2 className="mb-6 font-serif text-5xl text-neutral-900 sm:text-6xl">
+          <h2
+            className="mb-6 text-[44px] leading-none text-[#8a8a8a] sm:text-[58px]"
+            style={{
+              ...futuraLight,
+              letterSpacing: "0.02em",
+            }}
+          >
             Œuvres
           </h2>
 
-          <div className="mx-auto mb-6 h-[1px] w-24 bg-neutral-300"></div>
+          <div className="mx-auto mb-6 h-[1px] w-24 bg-neutral-300" />
         </div>
 
         {/* ŒUVRE PRINCIPALE */}
@@ -51,11 +66,20 @@ export default function Gallery() {
             </div>
 
             <div className="mt-10 max-w-3xl">
-              <p className="mb-3 text-[11px] uppercase tracking-[0.38em] text-neutral-400">
+              <p
+                className="mb-3 text-[10px] uppercase tracking-[0.38em] text-neutral-400"
+                style={futuraLight}
+              >
                 Œuvre mise en avant
               </p>
 
-              <h3 className="font-serif text-4xl leading-tight text-neutral-900 sm:text-5xl">
+              <h3
+                className="text-[36px] leading-tight text-[#8a8a8a] sm:text-[52px]"
+                style={{
+                  ...futuraLight,
+                  letterSpacing: "0.01em",
+                }}
+              >
                 La forêt intérieure
               </h3>
 
@@ -86,11 +110,17 @@ export default function Gallery() {
               </div>
 
               <div className="mt-6">
-                <p className="mb-2 text-[11px] uppercase tracking-[0.34em] text-neutral-400">
+                <p
+                  className="mb-2 text-[10px] uppercase tracking-[0.34em] text-neutral-400"
+                  style={futuraLight}
+                >
                   {work.category}
                 </p>
 
-                <h3 className="font-serif text-2xl leading-snug text-neutral-900">
+                <h3
+                  className="text-[27px] leading-snug text-[#8a8a8a]"
+                  style={futuraLight}
+                >
                   {work.title}
                 </h3>
               </div>
