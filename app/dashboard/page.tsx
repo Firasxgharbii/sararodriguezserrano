@@ -9,6 +9,7 @@ import {
   Lang,
   LocalizedText,
 } from "../lib/siteContent";
+import DatabaseSection from "./DatabaseSection";
 
 type Tab = "home" | "about" | "contact" | "oeuvres" | "portfolio";
 
@@ -1350,6 +1351,7 @@ function TimelineLocalizedEditor({
     </div>
   );
 }
+<DatabaseSection />
 
 function SelectField({
   label,
