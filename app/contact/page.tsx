@@ -262,7 +262,7 @@ export default function ContactPage() {
                   href={
                     contact.instagram.startsWith("http")
                       ? contact.instagram
-                      : `https://instagram.com/${contact.instagram.replace("@", "")}`
+                      : `https://www.instagram.com/sara_rodriguez_serrano/${contact.instagram.replace("@", "")}`
                   }
                   target="_blank"
                   rel="noreferrer"
