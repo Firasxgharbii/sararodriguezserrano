@@ -65,21 +65,12 @@ export default function OeuvresIntroSection() {
 
       <div className="relative mx-auto flex min-h-[430px] max-w-6xl items-center justify-center px-6 py-20 text-center md:min-h-[540px] md:px-10 md:py-28 lg:py-32">
         <div className="max-w-5xl">
-          <p
-            className="mb-5 text-[10px] lowercase tracking-[0.32em] text-white/85 md:text-[11px]"
-            style={futuraLight}
-          >
-            {t(oeuvres.heroBadge, lang)?.toLowerCase()}
-          </p>
-
           <h1
             className="mx-auto max-w-4xl text-[28px] lowercase leading-[1.25] tracking-[0.12em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.22)] md:text-[42px] lg:text-[52px]"
             style={futuraLight}
           >
             {t(oeuvres.heroTitle, lang)?.toLowerCase()}
           </h1>
-
-          <div className="mx-auto mt-8 h-px w-24 bg-white/45" />
         </div>
       </div>
 

@@ -71,7 +71,7 @@ export default function Footer() {
               style={futuraLight}
             >
               <Mail size={17} strokeWidth={1.5} />
-              Email
+              sararodriguezserrano.art@gmail.com
             </a>
 
             <a
