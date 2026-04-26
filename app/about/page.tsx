@@ -176,8 +176,8 @@ export default function AboutPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <a
                 href="#parcours"
-                className="inline-flex items-center gap-2 border border-neutral-900 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-900 transition duration-300 hover:bg-neutral-900 hover:text-white"
-              >
+className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-700 transition duration-300 hover:border-neutral-900 hover:text-neutral-900"
+>
                 {t(about.parcoursButtonLabel, lang)}
                 <ArrowRight size={16} />
               </a>

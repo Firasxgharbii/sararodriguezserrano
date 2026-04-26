@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   defaultSiteContent,
@@ -14,7 +13,7 @@ import { t } from "../../lib/i18n";
 
 const futuraLight = {
   fontFamily:
-    '"Futura PT", Futura, "Avenir Next", "Helvetica Neue", Arial, sans-serif',
+    '"FuturaLightCustom", "Futura W02 Light", "Futura PT", Futura, "Avenir Next", "Helvetica Neue", Arial, sans-serif',
   fontWeight: 300,
 };
 
@@ -27,6 +26,7 @@ export default function OeuvresIntroSection() {
       setContent(getMergedSiteContent());
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+
       if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
         setLang(savedLang);
       } else {
@@ -66,30 +66,32 @@ export default function OeuvresIntroSection() {
       <div className="relative mx-auto flex min-h-[430px] max-w-6xl items-center justify-center px-6 py-20 text-center md:min-h-[540px] md:px-10 md:py-28 lg:py-32">
         <div className="max-w-5xl">
           <p
-            className="mb-5 text-[10px] uppercase tracking-[0.46em] text-white/85 md:text-[11px]"
+            className="mb-5 text-[10px] lowercase tracking-[0.32em] text-white/85 md:text-[11px]"
             style={futuraLight}
           >
-            {t(oeuvres.heroBadge, lang)}
+            {t(oeuvres.heroBadge, lang)?.toLowerCase()}
           </p>
 
           <h1
-            className="mx-auto max-w-4xl text-[28px] uppercase leading-[1.25] tracking-[0.18em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.22)] md:text-[42px] lg:text-[52px]"
+            className="mx-auto max-w-4xl text-[28px] lowercase leading-[1.25] tracking-[0.12em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.22)] md:text-[42px] lg:text-[52px]"
             style={futuraLight}
           >
-            {t(oeuvres.heroTitle, lang)}
+            {t(oeuvres.heroTitle, lang)?.toLowerCase()}
           </h1>
 
           <div className="mx-auto mt-8 h-px w-24 bg-white/45" />
-
-          <Link
-            href="#gallery"
-            className="mt-10 inline-flex min-h-[48px] items-center justify-center border border-white/60 bg-white/10 px-8 py-3 text-[10px] uppercase tracking-[0.28em] text-white backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-neutral-900"
-            style={futuraLight}
-          >
-            {t(oeuvres.heroButtonText, lang)}
-          </Link>
         </div>
       </div>
+
+      <style jsx global>{`
+        @font-face {
+          font-family: "FuturaLightCustom";
+          src: url("/fonts/Futura-Light.woff2") format("woff2");
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+      `}</style>
     </section>
   );
 }

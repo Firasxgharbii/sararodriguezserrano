@@ -9,6 +9,7 @@ type Lang = "fr" | "en" | "es";
 const INSTAGRAM_URL = "https://www.instagram.com/sara_rodriguez_serrano/";
 const EMAIL_URL = "mailto:sararodriguezserrano.art@gmail.com";
 const LANG_STORAGE_KEY = "site_lang";
+const ARTIST_NAME = "SARA RODRIGUEZ SERRANO";
 
 const translations = {
   fr: {
@@ -18,9 +19,6 @@ const translations = {
     about: "À PROPOS",
     contact: "CONTACT",
     language: "Langue",
-    french: "Français",
-    english: "Anglais",
-    spanish: "Espagnol",
   },
   en: {
     current: "EN",
@@ -29,9 +27,6 @@ const translations = {
     about: "ABOUT",
     contact: "CONTACT",
     language: "Language",
-    french: "French",
-    english: "English",
-    spanish: "Spanish",
   },
   es: {
     current: "ES",
@@ -40,9 +35,6 @@ const translations = {
     about: "ACERCA DE",
     contact: "CONTACTO",
     language: "Idioma",
-    french: "Francés",
-    english: "Inglés",
-    spanish: "Español",
   },
 };
 
@@ -68,7 +60,6 @@ export default function Navbar() {
     localStorage.setItem(LANG_STORAGE_KEY, newLang);
     setLangOpen(false);
     setMobileOpen(false);
-
     window.dispatchEvent(new Event("storage"));
     window.dispatchEvent(new Event("focus"));
   };
@@ -76,7 +67,6 @@ export default function Navbar() {
   useEffect(() => {
     const syncLang = () => {
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
-
       if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
         setLang(savedLang);
       } else {
@@ -85,7 +75,6 @@ export default function Navbar() {
     };
 
     syncLang();
-
     window.addEventListener("storage", syncLang);
     window.addEventListener("focus", syncLang);
 
@@ -136,17 +125,9 @@ export default function Navbar() {
               <Menu size={19} />
             </button>
 
-            <div className="px-3 text-center">
-              <h1
-                className="text-[1.9rem] leading-[1.05] text-[#808080]"
-                style={{
-                  fontFamily:
-                    '"Futura PT", "Futura", "Avenir Next", "Helvetica Neue", sans-serif',
-                  fontWeight: 300,
-                  letterSpacing: "0.08em",
-                }}
-              >
-                Sara Rodriguez Serrano
+            <div className="px-2 text-center">
+              <h1 className="artist-logo text-[1.35rem] leading-[1.05]">
+                {ARTIST_NAME}
               </h1>
             </div>
 
@@ -277,16 +258,8 @@ export default function Navbar() {
                 </div>
               </div>
 
-              <h1
-                className="text-center text-5xl text-[#808080]"
-                style={{
-                  fontFamily:
-                    '"Futura PT", "Futura", "Avenir Next", "Helvetica Neue", sans-serif',
-                  fontWeight: 300,
-                  letterSpacing: "0.2em",
-                }}
-              >
-                Sara Rodriguez Serrano
+              <h1 className="artist-logo text-center text-5xl">
+                {ARTIST_NAME}
               </h1>
             </div>
 
@@ -328,16 +301,8 @@ export default function Navbar() {
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-5">
               <div className="pr-4">
-                <h2
-                  className="text-[1.8rem] leading-[1.05] text-[#808080]"
-                  style={{
-                    fontFamily:
-                      '"Futura PT", "Futura", "Avenir Next", "Helvetica Neue", sans-serif',
-                    fontWeight: 300,
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  Sara Rodriguez Serrano
+                <h2 className="artist-logo text-[1.45rem] leading-[1.05]">
+                  {ARTIST_NAME}
                 </h2>
               </div>
 
@@ -428,23 +393,30 @@ export default function Navbar() {
             </div>
 
             <div className="border-t border-neutral-200 px-5 py-4">
-              <p
-                className="text-xs text-[#808080]"
-                style={{
-                  fontFamily:
-                    '"Futura PT", "Futura", "Avenir Next", "Helvetica Neue", sans-serif',
-                  fontWeight: 300,
-                  letterSpacing: "0.2em",
-                }}
-              >
-                Sara Rodriguez Serrano
-              </p>
+              <p className="artist-logo text-xs">{ARTIST_NAME}</p>
             </div>
           </div>
         </div>
       </div>
 
       <style jsx>{`
+        @font-face {
+          font-family: "FuturaLightCustom";
+          src: url("/fonts/Futura-Light.woff2") format("woff2");
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        .artist-logo {
+          font-family: "FuturaLightCustom", "Futura W02 Light", "Futura PT",
+            "Futura", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+          font-weight: 300;
+          letter-spacing: 0.2em;
+          color: #808080;
+          text-transform: uppercase;
+        }
+
         @keyframes fadeSlide {
           from {
             opacity: 0;

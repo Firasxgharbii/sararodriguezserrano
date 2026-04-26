@@ -16,9 +16,11 @@ import { t } from "../lib/i18n";
 
 const futuraLight = {
   fontFamily:
-    '"Futura PT", Futura, "Avenir Next", "Helvetica Neue", Arial, sans-serif',
+    '"FuturaLightCustom", "Futura W02 Light", "Futura PT", Futura, "Avenir Next", "Helvetica Neue", Arial, sans-serif',
   fontWeight: 300,
 };
+
+const softCardShadow = "shadow-[0_18px_45px_rgba(120,120,120,0.10)]";
 
 export default function ContactPage() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
@@ -183,7 +185,7 @@ export default function ContactPage() {
                 className="mb-6 text-[44px] leading-[1.05] text-[#8a8a8a] sm:text-[58px] lg:text-[68px]"
                 style={{
                   ...futuraLight,
-                  letterSpacing: "0.01em",
+                  letterSpacing: "0.03em",
                 }}
               >
                 {t(contact.title, lang)}
@@ -198,10 +200,10 @@ export default function ContactPage() {
               <div className="mt-10 space-y-4">
                 <a
                   href={`mailto:${contact.email}`}
-                  className="group flex items-center justify-between border border-neutral-200 bg-white px-5 py-4 transition hover:-translate-y-[2px] hover:shadow-sm"
+                  className={`group flex items-center justify-between border border-neutral-200 bg-white px-5 py-4 transition duration-300 hover:-translate-y-[2px] ${softCardShadow}`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center bg-neutral-100">
+                    <div className="flex h-10 w-10 items-center justify-center bg-neutral-100 text-neutral-700">
                       <Mail size={18} />
                     </div>
 
@@ -225,10 +227,10 @@ export default function ContactPage() {
                   href="https://www.instagram.com/sara_rodriguez_serrano/"
                   target="_blank"
                   rel="noreferrer"
-                  className="group flex items-center justify-between border border-neutral-200 bg-white px-5 py-4 transition hover:-translate-y-[2px] hover:shadow-sm"
+                  className={`group flex items-center justify-between border border-neutral-200 bg-white px-5 py-4 transition duration-300 hover:-translate-y-[2px] ${softCardShadow}`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center bg-neutral-100">
+                    <div className="flex h-10 w-10 items-center justify-center bg-neutral-100 text-neutral-700">
                       <Instagram size={18} />
                     </div>
 
@@ -248,8 +250,10 @@ export default function ContactPage() {
                   <ArrowRight className="text-neutral-400 transition group-hover:translate-x-1" />
                 </a>
 
-                <div className="flex items-center gap-4 border border-neutral-200 bg-white px-5 py-4">
-                  <div className="flex h-10 w-10 items-center justify-center bg-neutral-100">
+                <div
+                  className={`flex items-center gap-4 border border-neutral-200 bg-white px-5 py-4 ${softCardShadow}`}
+                >
+                  <div className="flex h-10 w-10 items-center justify-center bg-neutral-100 text-neutral-700">
                     <MapPin size={18} />
                   </div>
 
@@ -268,7 +272,9 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="border border-neutral-200 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)] sm:p-7">
+            <div
+              className={`border border-neutral-200 bg-white p-6 sm:p-7 ${softCardShadow}`}
+            >
               <p
                 className="mb-2 text-xs uppercase tracking-[0.3em] text-neutral-400"
                 style={futuraLight}
@@ -291,7 +297,7 @@ export default function ContactPage() {
                     value={form.name}
                     onChange={handleChange}
                     placeholder={t(uiText.namePlaceholder, lang)}
-                    className="h-12 border border-neutral-200 px-4 outline-none transition focus:border-black"
+                    className="h-12 border border-neutral-200 bg-white px-4 outline-none transition focus:border-neutral-400"
                   />
 
                   <input
@@ -300,7 +306,7 @@ export default function ContactPage() {
                     value={form.email}
                     onChange={handleChange}
                     placeholder={t(uiText.emailPlaceholder, lang)}
-                    className="h-12 border border-neutral-200 px-4 outline-none transition focus:border-black"
+                    className="h-12 border border-neutral-200 bg-white px-4 outline-none transition focus:border-neutral-400"
                   />
                 </div>
 
@@ -310,7 +316,7 @@ export default function ContactPage() {
                   value={form.subject}
                   onChange={handleChange}
                   placeholder={t(uiText.subjectPlaceholder, lang)}
-                  className="h-12 border border-neutral-200 px-4 outline-none transition focus:border-black"
+                  className="h-12 border border-neutral-200 bg-white px-4 outline-none transition focus:border-neutral-400"
                 />
 
                 <textarea
@@ -318,10 +324,10 @@ export default function ContactPage() {
                   value={form.message}
                   onChange={handleChange}
                   placeholder={t(uiText.messagePlaceholder, lang)}
-                  className="h-40 border border-neutral-200 px-4 py-3 outline-none transition focus:border-black"
+                  className="h-40 border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-neutral-400"
                 />
 
-                <div className="mt-2 overflow-hidden">
+                <div className="mt-2 overflow-hidden border border-neutral-100 bg-white">
                   <Image
                     src={contactImageSrc}
                     alt="Contact illustration"
@@ -346,7 +352,7 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="mt-2 h-12 bg-black text-sm uppercase tracking-[0.25em] text-white transition hover:bg-neutral-800 disabled:opacity-70"
+                  className="mt-2 h-12 border border-neutral-200 bg-white text-sm uppercase tracking-[0.25em] text-neutral-700 transition duration-300 hover:border-neutral-400 hover:bg-neutral-50 disabled:opacity-70"
                   style={futuraLight}
                 >
                   {loading ? t(uiText.sending, lang) : t(uiText.send, lang)}
@@ -360,6 +366,16 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      <style jsx global>{`
+        @font-face {
+          font-family: "FuturaLightCustom";
+          src: url("/fonts/Futura-Light.woff2") format("woff2");
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+      `}</style>
 
       <Footer />
     </main>

@@ -1,63 +1,64 @@
+"use client";
+
 import Image from "next/image";
 
 const works = [
   {
     src: "/oeuvres remar2.jpg",
-    title: "Paysage intérieur",
-    category: "Peinture",
+    title: "PAYSAGE INTÉRIEUR",
+    category: "PEINTURE",
   },
   {
     src: "/oeuvres remar3.jpg",
-    title: "Fragments de lumière",
-    category: "Peinture",
+    title: "FRAGMENTS DE LUMIÈRE",
+    category: "PEINTURE",
   },
   {
     src: "/oeuvres remar4.jpg",
-    title: "Éclats nocturnes",
-    category: "Peinture",
+    title: "ÉCLATS NOCTURNES",
+    category: "PEINTURE",
   },
 ];
 
 const futuraLight = {
   fontFamily:
-    '"Futura PT", Futura, "Avenir Next", "Helvetica Neue", Arial, sans-serif',
+    '"FuturaLightCustom", "Futura W02 Light", "Futura PT", Futura, "Avenir Next", "Helvetica Neue", Arial, sans-serif',
   fontWeight: 300,
+  textTransform: "uppercase" as const,
 };
 
 export default function Gallery() {
   return (
     <section id="works" className="bg-[#f8f7f4] py-28">
       <div className="mx-auto max-w-7xl px-6">
-        {/* HEADER */}
         <div className="mb-24 text-center">
           <p
-            className="mb-4 text-[10px] uppercase tracking-[0.42em] text-neutral-400"
+            className="mb-4 text-[10px] tracking-[0.42em] text-neutral-400"
             style={futuraLight}
           >
-            Galerie
+            GALERIE
           </p>
 
           <h2
             className="mb-6 text-[44px] leading-none text-[#8a8a8a] sm:text-[58px]"
             style={{
               ...futuraLight,
-              letterSpacing: "0.02em",
+              letterSpacing: "0.12em",
             }}
           >
-            Œuvres
+            ŒUVRES
           </h2>
 
           <div className="mx-auto mb-6 h-[1px] w-24 bg-neutral-300" />
         </div>
 
-        {/* ŒUVRE PRINCIPALE */}
         <div className="mb-28">
           <article className="group">
             <div className="overflow-hidden bg-white shadow-[0_18px_50px_rgba(0,0,0,0.06)]">
               <div className="relative h-[72vh] min-h-[420px] w-full overflow-hidden">
                 <Image
                   src="/IMAGE Grande.jpg"
-                  alt="La forêt intérieure"
+                  alt="LA FORÊT INTÉRIEURE"
                   fill
                   priority
                   className="object-cover transition duration-700 group-hover:scale-[1.02]"
@@ -67,20 +68,20 @@ export default function Gallery() {
 
             <div className="mt-10 max-w-3xl">
               <p
-                className="mb-3 text-[10px] uppercase tracking-[0.38em] text-neutral-400"
+                className="mb-3 text-[10px] tracking-[0.38em] text-neutral-400"
                 style={futuraLight}
               >
-                Œuvre mise en avant
+                ŒUVRE MISE EN AVANT
               </p>
 
               <h3
                 className="text-[36px] leading-tight text-[#8a8a8a] sm:text-[52px]"
                 style={{
                   ...futuraLight,
-                  letterSpacing: "0.01em",
+                  letterSpacing: "0.08em",
                 }}
               >
-                La forêt intérieure
+                LA FORÊT INTÉRIEURE
               </h3>
 
               <p className="mt-5 max-w-2xl text-[17px] leading-8 text-neutral-600">
@@ -94,7 +95,6 @@ export default function Gallery() {
           </article>
         </div>
 
-        {/* GRILLE */}
         <div className="grid gap-14 md:grid-cols-3">
           {works.map((work, index) => (
             <article key={index} className="group">
@@ -111,7 +111,7 @@ export default function Gallery() {
 
               <div className="mt-6">
                 <p
-                  className="mb-2 text-[10px] uppercase tracking-[0.34em] text-neutral-400"
+                  className="mb-2 text-[10px] tracking-[0.34em] text-neutral-400"
                   style={futuraLight}
                 >
                   {work.category}
@@ -119,7 +119,10 @@ export default function Gallery() {
 
                 <h3
                   className="text-[27px] leading-snug text-[#8a8a8a]"
-                  style={futuraLight}
+                  style={{
+                    ...futuraLight,
+                    letterSpacing: "0.06em",
+                  }}
                 >
                   {work.title}
                 </h3>
@@ -128,6 +131,16 @@ export default function Gallery() {
           ))}
         </div>
       </div>
+
+      <style jsx global>{`
+        @font-face {
+          font-family: "FuturaLightCustom";
+          src: url("/fonts/Futura-Light.woff2") format("woff2");
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+      `}</style>
     </section>
   );
 }
