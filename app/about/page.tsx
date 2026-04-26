@@ -27,6 +27,14 @@ const cvFiles: Record<Lang, string> = {
   es: "/cv/CV Spanish Sara Rodriguez.pdf",
 };
 
+const futuraLight = {
+  fontFamily:
+    '"FuturaLightCustom", "Futura W02 Light", "Futura PT", Futura, "Avenir Next", "Helvetica Neue", Arial, sans-serif',
+  fontWeight: 300,
+};
+
+const softShadow = "shadow-[0_18px_45px_rgba(120,120,120,0.10)]";
+
 function getProfileWrapperSize(size: "small" | "medium" | "large") {
   switch (size) {
     case "small":
@@ -46,7 +54,12 @@ export default function AboutPage() {
   useEffect(() => {
     const syncLang = () => {
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
-      setLang(savedLang === "fr" || savedLang === "en" || savedLang === "es" ? savedLang : "fr");
+
+      setLang(
+        savedLang === "fr" || savedLang === "en" || savedLang === "es"
+          ? savedLang
+          : "fr"
+      );
     };
 
     const loadContent = () => {
@@ -76,19 +89,28 @@ export default function AboutPage() {
       ...defaultSiteContent.about.profileImage,
       ...(content.about?.profileImage ?? {}),
     },
-    publications: content.about?.publications ?? defaultSiteContent.about.publications,
-    collections: content.about?.collections ?? defaultSiteContent.about.collections,
-    exhibitions: content.about?.exhibitions ?? defaultSiteContent.about.exhibitions,
-    formations: content.about?.formations ?? defaultSiteContent.about.formations,
-    distinctions: content.about?.distinctions ?? defaultSiteContent.about.distinctions,
+    publications:
+      content.about?.publications ?? defaultSiteContent.about.publications,
+    collections:
+      content.about?.collections ?? defaultSiteContent.about.collections,
+    exhibitions:
+      content.about?.exhibitions ?? defaultSiteContent.about.exhibitions,
+    formations:
+      content.about?.formations ?? defaultSiteContent.about.formations,
+    distinctions:
+      content.about?.distinctions ?? defaultSiteContent.about.distinctions,
   };
 
   const handleDownloadCV = () => {
     const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+
     const activeLang: Lang =
-      savedLang === "fr" || savedLang === "en" || savedLang === "es" ? savedLang : "fr";
+      savedLang === "fr" || savedLang === "en" || savedLang === "es"
+        ? savedLang
+        : "fr";
 
     const rawPath = cvFiles[activeLang];
+
     const link = document.createElement("a");
     link.href = encodeURI(rawPath);
     link.download = rawPath.split("/").pop() || "cv.pdf";
@@ -115,15 +137,24 @@ export default function AboutPage() {
           />
         </div>
 
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(248,247,244,0.72),rgba(248,247,244,0.94))]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(248,247,244,0.76),rgba(248,247,244,0.96))]" />
 
         <div className="relative mx-auto max-w-7xl px-6 py-24 lg:px-10 lg:py-28">
           <div className="max-w-4xl">
-            <p className="mb-4 text-xs uppercase tracking-[0.38em] text-neutral-400">
+            <p
+              className="mb-4 text-xs uppercase tracking-[0.38em] text-neutral-400"
+              style={futuraLight}
+            >
               {t(about.badge, lang)}
             </p>
 
-            <h1 className="text-4xl font-light leading-tight tracking-[0.04em] text-neutral-800 sm:text-5xl lg:text-6xl">
+            <h1
+              className="text-4xl leading-tight text-[#8a8a8a] sm:text-5xl lg:text-6xl"
+              style={{
+                ...futuraLight,
+                letterSpacing: "0.06em",
+              }}
+            >
               {t(about.title, lang)}
             </h1>
 
@@ -143,7 +174,7 @@ export default function AboutPage() {
               <div className="absolute inset-0 scale-110 bg-[#e9dfd7] opacity-70 blur-3xl" />
 
               <div
-                className={`relative overflow-hidden border border-neutral-200 bg-white p-3 shadow-[0_20px_60px_rgba(0,0,0,0.08)] ${getProfileWrapperSize(
+                className={`relative overflow-hidden border border-neutral-200 bg-white p-3 ${softShadow} ${getProfileWrapperSize(
                   about.profileImage.size
                 )}`}
               >
@@ -160,8 +191,11 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="border border-neutral-200 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
-            <p className="mb-2 text-xs uppercase tracking-[0.28em] text-neutral-400">
+          <div className={`border border-neutral-200 bg-white p-6 ${softShadow}`}>
+            <p
+              className="mb-2 text-xs uppercase tracking-[0.28em] text-neutral-400"
+              style={futuraLight}
+            >
               {t(about.bioTitle, lang)}
             </p>
 
@@ -176,8 +210,9 @@ export default function AboutPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <a
                 href="#parcours"
-className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-700 transition duration-300 hover:border-neutral-900 hover:text-neutral-900"
->
+                className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-700 transition duration-300 hover:border-neutral-400 hover:bg-neutral-50 hover:text-neutral-900"
+                style={futuraLight}
+              >
                 {t(about.parcoursButtonLabel, lang)}
                 <ArrowRight size={16} />
               </a>
@@ -185,7 +220,8 @@ className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 te
               <button
                 type="button"
                 onClick={handleDownloadCV}
-                className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-700 transition duration-300 hover:border-neutral-900 hover:text-neutral-900"
+                className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 text-sm uppercase tracking-[0.22em] text-neutral-700 transition duration-300 hover:border-neutral-400 hover:bg-neutral-50 hover:text-neutral-900"
+                style={futuraLight}
               >
                 {t(about.cvButtonLabel, lang)}
                 <Download size={16} />
@@ -195,16 +231,24 @@ className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 te
         </div>
 
         <div className="mb-20 grid gap-8 lg:grid-cols-2">
-          <div className="border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+          <div className={`border border-neutral-200 bg-white p-7 ${softShadow}`}>
             <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center bg-neutral-100 text-neutral-800">
+              <div className="flex h-11 w-11 items-center justify-center bg-neutral-100 text-neutral-700">
                 <Palette size={18} />
               </div>
+
               <div>
-                <p className="text-xs uppercase tracking-[0.26em] text-neutral-400">
+                <p
+                  className="text-xs uppercase tracking-[0.26em] text-neutral-400"
+                  style={futuraLight}
+                >
                   {t(about.visionBadge, lang)}
                 </p>
-                <h3 className="text-2xl font-light text-neutral-900">
+
+                <h3
+                  className="text-2xl text-[#8a8a8a]"
+                  style={futuraLight}
+                >
                   {t(about.visionTitle, lang)}
                 </h3>
               </div>
@@ -215,16 +259,24 @@ className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 te
             </p>
           </div>
 
-          <div className="border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+          <div className={`border border-neutral-200 bg-white p-7 ${softShadow}`}>
             <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center bg-neutral-100 text-neutral-800">
+              <div className="flex h-11 w-11 items-center justify-center bg-neutral-100 text-neutral-700">
                 <Newspaper size={18} />
               </div>
+
               <div>
-                <p className="text-xs uppercase tracking-[0.26em] text-neutral-400">
+                <p
+                  className="text-xs uppercase tracking-[0.26em] text-neutral-400"
+                  style={futuraLight}
+                >
                   {t(about.publicationsBadge, lang)}
                 </p>
-                <h3 className="text-2xl font-light text-neutral-900">
+
+                <h3
+                  className="text-2xl text-[#8a8a8a]"
+                  style={futuraLight}
+                >
                   {t(about.publicationsTitle, lang)}
                 </h3>
               </div>
@@ -233,7 +285,7 @@ className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 te
             <div className="space-y-4 text-[15px] leading-7 text-neutral-600">
               {about.publications.map((item, index) => (
                 <p key={index}>
-                  <span className="font-medium text-neutral-900">
+                  <span className="font-medium text-neutral-800">
                     {item.year}
                   </span>{" "}
                   — {t(item.text, lang)}
@@ -243,16 +295,24 @@ className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 te
           </div>
         </div>
 
-        <div className="mb-20 border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+        <div className={`mb-20 border border-neutral-200 bg-white p-7 ${softShadow}`}>
           <div className="mb-5 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center bg-neutral-100 text-neutral-800">
+            <div className="flex h-11 w-11 items-center justify-center bg-neutral-100 text-neutral-700">
               <BookOpen size={18} />
             </div>
+
             <div>
-              <p className="text-xs uppercase tracking-[0.26em] text-neutral-400">
+              <p
+                className="text-xs uppercase tracking-[0.26em] text-neutral-400"
+                style={futuraLight}
+              >
                 {t(about.collectionsBadge, lang)}
               </p>
-              <h3 className="text-2xl font-light text-neutral-900">
+
+              <h3
+                className="text-2xl text-[#8a8a8a]"
+                style={futuraLight}
+              >
                 {t(about.collectionsTitle, lang)}
               </h3>
             </div>
@@ -278,25 +338,35 @@ className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 te
 
         <div
           id="parcours"
-          className="border border-neutral-200 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]"
+          className={`border border-neutral-200 bg-white p-7 ${softShadow}`}
         >
-          <p className="mb-2 text-xs uppercase tracking-[0.28em] text-neutral-400">
+          <p
+            className="mb-2 text-xs uppercase tracking-[0.28em] text-neutral-400"
+            style={futuraLight}
+          >
             {t(about.parcoursBadge, lang)}
           </p>
 
-          <h3 className="mb-8 text-4xl font-light text-neutral-900 sm:text-5xl">
+          <h3
+            className="mb-8 text-4xl text-[#8a8a8a] sm:text-5xl"
+            style={futuraLight}
+          >
             {t(about.parcoursTitle, lang)}
           </h3>
 
           <div className="grid gap-10 lg:grid-cols-3">
             <div>
-              <h4 className="mb-4 text-sm font-medium uppercase tracking-[0.22em] text-neutral-500">
+              <h4
+                className="mb-4 text-sm uppercase tracking-[0.22em] text-neutral-500"
+                style={futuraLight}
+              >
                 {t(about.exhibitionsTitle, lang)}
               </h4>
+
               <div className="space-y-3 text-[15px] leading-7 text-neutral-600">
                 {about.exhibitions.map((item, index) => (
                   <p key={index}>
-                    <span className="font-medium text-neutral-900">
+                    <span className="font-medium text-neutral-800">
                       {item.year}
                     </span>{" "}
                     — {t(item.text, lang)}
@@ -306,13 +376,17 @@ className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 te
             </div>
 
             <div>
-              <h4 className="mb-4 text-sm font-medium uppercase tracking-[0.22em] text-neutral-500">
+              <h4
+                className="mb-4 text-sm uppercase tracking-[0.22em] text-neutral-500"
+                style={futuraLight}
+              >
                 {t(about.formationTitle, lang)}
               </h4>
+
               <div className="space-y-3 text-[15px] leading-7 text-neutral-600">
                 {about.formations.map((item, index) => (
                   <p key={index}>
-                    <span className="font-medium text-neutral-900">
+                    <span className="font-medium text-neutral-800">
                       {item.year}
                     </span>{" "}
                     — {t(item.text, lang)}
@@ -322,13 +396,17 @@ className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 te
             </div>
 
             <div>
-              <h4 className="mb-4 text-sm font-medium uppercase tracking-[0.22em] text-neutral-500">
+              <h4
+                className="mb-4 text-sm uppercase tracking-[0.22em] text-neutral-500"
+                style={futuraLight}
+              >
                 {t(about.distinctionsTitle, lang)}
               </h4>
+
               <div className="space-y-3 text-[15px] leading-7 text-neutral-600">
                 {about.distinctions.map((item, index) => (
                   <p key={index}>
-                    <span className="font-medium text-neutral-900">
+                    <span className="font-medium text-neutral-800">
                       {item.year}
                     </span>{" "}
                     — {t(item.text, lang)}
@@ -339,6 +417,16 @@ className="inline-flex items-center gap-2 border border-neutral-200 px-5 py-3 te
           </div>
         </div>
       </section>
+
+      <style jsx global>{`
+        @font-face {
+          font-family: "FuturaLightCustom";
+          src: url("/fonts/Futura-Light.woff2") format("woff2");
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+      `}</style>
 
       <Footer />
     </main>
