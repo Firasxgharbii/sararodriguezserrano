@@ -1,24 +1,9 @@
 "use client";
 
 import Image from "next/image";
-
-const works = [
-  {
-    src: "/oeuvres remar2.jpg",
-    title: "PAYSAGE INTÉRIEUR",
-    category: "PEINTURE",
-  },
-  {
-    src: "/oeuvres remar3.jpg",
-    title: "FRAGMENTS DE LUMIÈRE",
-    category: "PEINTURE",
-  },
-  {
-    src: "/oeuvres remar4.jpg",
-    title: "ÉCLATS NOCTURNES",
-    category: "PEINTURE",
-  },
-];
+import { useEffect, useState } from "react";
+import { defaultSiteContent } from "../../lib/siteContent";
+import { getSiteContent } from "../../lib/getSiteContent";
 
 const futuraLight = {
   fontFamily:
@@ -28,6 +13,24 @@ const futuraLight = {
 };
 
 export default function Gallery() {
+  const [content, setContent] = useState(defaultSiteContent);
+
+  useEffect(() => {
+    const loadContent = () => setContent(getSiteContent());
+
+    loadContent();
+    window.addEventListener("focus", loadContent);
+    window.addEventListener("storage", loadContent);
+
+    return () => {
+      window.removeEventListener("focus", loadContent);
+      window.removeEventListener("storage", loadContent);
+    };
+  }, []);
+
+  const gallery = content.home.gallery ?? defaultSiteContent.home.gallery;
+  const works = gallery.works ?? [];
+
   return (
     <section id="works" className="bg-[#f8f7f4] py-28">
       <div className="mx-auto max-w-7xl px-6">
@@ -36,17 +39,14 @@ export default function Gallery() {
             className="mb-4 text-[10px] tracking-[0.42em] text-neutral-400"
             style={futuraLight}
           >
-            GALERIE
+            {gallery.badge}
           </p>
 
           <h2
             className="mb-6 text-[44px] leading-none text-[#8a8a8a] sm:text-[58px]"
-            style={{
-              ...futuraLight,
-              letterSpacing: "0.12em",
-            }}
+            style={{ ...futuraLight, letterSpacing: "0.12em" }}
           >
-            ŒUVRES
+            {gallery.title}
           </h2>
 
           <div className="mx-auto mb-6 h-[1px] w-24 bg-neutral-300" />
@@ -57,8 +57,8 @@ export default function Gallery() {
             <div className="overflow-hidden bg-white shadow-[0_18px_50px_rgba(0,0,0,0.06)]">
               <div className="relative h-[72vh] min-h-[420px] w-full overflow-hidden">
                 <Image
-                  src="/IMAGE Grande.jpg"
-                  alt="LA FORÊT INTÉRIEURE"
+                  src={gallery.featuredImage}
+                  alt={gallery.featuredTitle}
                   fill
                   priority
                   className="object-cover transition duration-700 group-hover:scale-[1.02]"
@@ -71,25 +71,18 @@ export default function Gallery() {
                 className="mb-3 text-[10px] tracking-[0.38em] text-neutral-400"
                 style={futuraLight}
               >
-                ŒUVRE MISE EN AVANT
+                {gallery.featuredBadge}
               </p>
 
               <h3
                 className="text-[36px] leading-tight text-[#8a8a8a] sm:text-[52px]"
-                style={{
-                  ...futuraLight,
-                  letterSpacing: "0.08em",
-                }}
+                style={{ ...futuraLight, letterSpacing: "0.08em" }}
               >
-                LA FORÊT INTÉRIEURE
+                {gallery.featuredTitle}
               </h3>
 
               <p className="mt-5 max-w-2xl text-[17px] leading-8 text-neutral-600">
-                À travers une pratique inspirée par la nature, Sara Rodríguez
-                Serrano crée des espaces où le paysage devient une expérience
-                intérieure. Entre formes organiques et présence humaine, son
-                travail invite à une exploration sensible de la mémoire et de la
-                transformation.
+                {gallery.featuredText}
               </p>
             </div>
           </article>
@@ -119,10 +112,7 @@ export default function Gallery() {
 
                 <h3
                   className="text-[27px] leading-snug text-[#8a8a8a]"
-                  style={{
-                    ...futuraLight,
-                    letterSpacing: "0.06em",
-                  }}
+                  style={{ ...futuraLight, letterSpacing: "0.06em" }}
                 >
                   {work.title}
                 </h3>

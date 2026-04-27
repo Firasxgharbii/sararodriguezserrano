@@ -13,6 +13,22 @@ export type ImageStyle = {
   position: "left" | "center" | "right";
 };
 
+export type HomeGalleryWork = {
+  src: string;
+  title: string;
+  category: string;
+};
+
+export type HomeGalleryContent = {
+  badge: string;
+  title: string;
+  featuredBadge: string;
+  featuredTitle: string;
+  featuredText: string;
+  featuredImage: string;
+  works: HomeGalleryWork[];
+};
+
 export type HomeContent = {
   badge: LocalizedText;
   title: LocalizedText;
@@ -22,6 +38,7 @@ export type HomeContent = {
   primaryButton: LocalizedText;
   secondaryButton: LocalizedText;
   heroImageStyle: ImageStyle;
+  gallery: HomeGalleryContent;
 };
 
 export type AboutPublication = {
@@ -44,25 +61,20 @@ export type AboutContent = {
   introText: LocalizedText;
   image: string;
   profileImage: ImageStyle;
-
   bioTitle: LocalizedText;
   bioText1: LocalizedText;
   bioText2: LocalizedText;
   cvButtonLabel: LocalizedText;
   parcoursButtonLabel: LocalizedText;
-
   visionBadge: LocalizedText;
   visionTitle: LocalizedText;
   visionText: LocalizedText;
-
   publicationsBadge: LocalizedText;
   publicationsTitle: LocalizedText;
   publications: AboutPublication[];
-
   collectionsBadge: LocalizedText;
   collectionsTitle: LocalizedText;
   collections: AboutCollection[];
-
   parcoursBadge: LocalizedText;
   parcoursTitle: LocalizedText;
   exhibitionsTitle: LocalizedText;
@@ -102,14 +114,11 @@ export type OeuvresContent = {
   heroTitle: LocalizedText;
   heroButtonText: LocalizedText;
   heroImage: string;
-
   introTitle: LocalizedText;
   introText: LocalizedText;
-
   quoteText: LocalizedText;
   quoteAuthor: LocalizedText;
   quoteImage: string;
-
   items: OeuvreItem[];
 };
 
@@ -169,14 +178,36 @@ export const defaultSiteContent: SiteContent = {
       shape: "rounded",
       position: "center",
     },
+    gallery: {
+      badge: "GALERIE",
+      title: "ŒUVRES",
+      featuredBadge: "ŒUVRE MISE EN AVANT",
+      featuredTitle: "LA FORÊT INTÉRIEURE",
+      featuredText:
+        "À travers une pratique inspirée par la nature, Sara Rodríguez Serrano crée des espaces où le paysage devient une expérience intérieure. Entre formes organiques et présence humaine, son travail invite à une exploration sensible de la mémoire et de la transformation.",
+      featuredImage: "/IMAGE Grande.jpg",
+      works: [
+        {
+          src: "/oeuvres remar2.jpg",
+          title: "PAYSAGE INTÉRIEUR",
+          category: "PEINTURE",
+        },
+        {
+          src: "/oeuvres remar3.jpg",
+          title: "FRAGMENTS DE LUMIÈRE",
+          category: "PEINTURE",
+        },
+        {
+          src: "/oeuvres remar4.jpg",
+          title: "ÉCLATS NOCTURNES",
+          category: "PEINTURE",
+        },
+      ],
+    },
   },
 
   about: {
-    badge: {
-      fr: "À propos",
-      en: "About",
-      es: "Acerca de",
-    },
+    badge: { fr: "À propos", en: "About", es: "Acerca de" },
     title: {
       fr: "Une pratique guidée par la mémoire, la couleur et l’émotion",
       en: "A practice guided by memory, color and emotion",
@@ -188,18 +219,8 @@ export const defaultSiteContent: SiteContent = {
       es: "Sara Rodríguez Serrano desarrolla una práctica artística sensible en la que la pintura se convierte en un espacio de diálogo entre la memoria, la emoción y la percepción. A través de composiciones orgánicas e intuitivas, explora las conexiones sutiles entre la experiencia humana y el paisaje interior. Su obra, marcada por una atención cuidadosa al color y a la materia, evoca estados de transformación, silencio y presencia. Cada pieza surge como una huella viva, una invitación a desacelerar, sentir y reconectarse con una dimensión más profunda de la experiencia.",
     },
     image: "/sara1.jpg",
-    profileImage: {
-      src: "/sara1.jpg",
-      size: "large",
-      shape: "circle",
-      position: "center",
-    },
-
-    bioTitle: {
-      fr: "Biographie",
-      en: "Biography",
-      es: "Biografía",
-    },
+    profileImage: { src: "/sara1.jpg", size: "large", shape: "circle", position: "center" },
+    bioTitle: { fr: "Biographie", en: "Biography", es: "Biografía" },
     bioText1: {
       fr: "Artiste visuelle basée à Montréal, sa pratique se concentre principalement sur la peinture contemporaine.",
       en: "A visual artist based in Montreal, her practice focuses mainly on contemporary painting.",
@@ -210,180 +231,49 @@ export const defaultSiteContent: SiteContent = {
       en: "Guided by a naturalistic and largely self-taught spirit, she approaches painting as a way of observing and connecting with the world around her.",
       es: "Guiada por un espíritu naturalista y en gran parte autodidacta, aborda la pintura como una forma de observar y conectarse con el mundo que la rodea.",
     },
-    cvButtonLabel: {
-      fr: "Télécharger CV",
-      en: "Download CV",
-      es: "Descargar CV",
-    },
-    parcoursButtonLabel: {
-      fr: "Parcours artistique",
-      en: "Artistic journey",
-      es: "Trayectoria artística",
-    },
-
-    visionBadge: {
-      fr: "Démarche artistique",
-      en: "Artistic approach",
-      es: "Enfoque artístico",
-    },
-    visionTitle: {
-      fr: "Vision et pratique",
-      en: "Vision and practice",
-      es: "Visión y práctica",
-    },
+    cvButtonLabel: { fr: "Télécharger CV", en: "Download CV", es: "Descargar CV" },
+    parcoursButtonLabel: { fr: "Parcours artistique", en: "Artistic journey", es: "Trayectoria artística" },
+    visionBadge: { fr: "Démarche artistique", en: "Artistic approach", es: "Enfoque artístico" },
+    visionTitle: { fr: "Vision et pratique", en: "Vision and practice", es: "Visión y práctica" },
     visionText: {
       fr: "Je travaille principalement à la peinture à l’huile, attirée par sa texture et la profondeur expressive qu’elle permet.",
       en: "I work mainly with oil painting, drawn to its texture and the expressive depth it allows.",
       es: "Trabajo principalmente con pintura al óleo, atraída por su textura y la profundidad expresiva que permite.",
     },
-
-    publicationsBadge: {
-      fr: "Publications",
-      en: "Publications",
-      es: "Publicaciones",
-    },
-    publicationsTitle: {
-      fr: "Sélection récente",
-      en: "Recent selection",
-      es: "Selección reciente",
-    },
+    publicationsBadge: { fr: "Publications", en: "Publications", es: "Publicaciones" },
+    publicationsTitle: { fr: "Sélection récente", en: "Recent selection", es: "Selección reciente" },
     publications: [
-      {
-        year: "2025",
-        text: {
-          fr: "Livres et projets éditoriaux - Art et Femme, édition 2.",
-          en: "Books and editorial projects - Art et Femme, edition 2.",
-          es: "Libros y proyectos editoriales - Art et Femme, edición 2.",
-        },
-      },
-      {
-        year: "2025",
-        text: {
-          fr: "Articles de Magazine - Artist Close up magazine #36.",
-          en: "Magazine articles - Artist Close Up magazine #36.",
-          es: "Artículos de revista - Artist Close Up magazine #36.",
-        },
-      },
-      {
-        year: "2025",
-        text: {
-          fr: "Interviews, Arts to Hearts Project.",
-          en: "Interviews, Arts to Hearts Project.",
-          es: "Entrevistas, Arts to Hearts Project.",
-        },
-      },
+      { year: "2025", text: { fr: "Livres et projets éditoriaux - Art et Femme, édition 2.", en: "Books and editorial projects - Art et Femme, edition 2.", es: "Libros y proyectos editoriales - Art et Femme, edición 2." } },
+      { year: "2025", text: { fr: "Articles de Magazine - Artist Close up magazine #36.", en: "Magazine articles - Artist Close Up magazine #36.", es: "Artículos de revista - Artist Close Up magazine #36." } },
+      { year: "2025", text: { fr: "Interviews, Arts to Hearts Project.", en: "Interviews, Arts to Hearts Project.", es: "Entrevistas, Arts to Hearts Project." } },
     ],
-
-    collectionsBadge: {
-      fr: "Collections",
-      en: "Collections",
-      es: "Colecciones",
-    },
-    collectionsTitle: {
-      fr: "Présence dans des collections privées",
-      en: "Presence in private collections",
-      es: "Presencia en colecciones privadas",
-    },
+    collectionsBadge: { fr: "Collections", en: "Collections", es: "Colecciones" },
+    collectionsTitle: { fr: "Présence dans des collections privées", en: "Presence in private collections", es: "Presencia en colecciones privadas" },
     collections: [
-      {
-        text: {
-          fr: "Certaines peintures font partie de collections privées en Espagne.",
-          en: "Some paintings are part of private collections in Spain.",
-          es: "Algunas pinturas forman parte de colecciones privadas en España.",
-        },
-      },
-      {
-        text: {
-          fr: "Certaines œuvres sont présentes dans des collections privées à Montréal, Canada.",
-          en: "Some works are present in private collections in Montreal, Canada.",
-          es: "Algunas obras están presentes en colecciones privadas en Montreal, Canadá.",
-        },
-      },
-      {
-        text: {
-          fr: "Les œuvres de l’artiste sont également représentées dans des collections privées en Europe et au Canada.",
-          en: "The artist’s works are also represented in private collections in Europe and Canada.",
-          es: "Las obras de la artista también están representadas en colecciones privadas en Europa y Canadá.",
-        },
-      },
+      { text: { fr: "Certaines peintures font partie de collections privées en Espagne.", en: "Some paintings are part of private collections in Spain.", es: "Algunas pinturas forman parte de colecciones privadas en España." } },
+      { text: { fr: "Certaines œuvres sont présentes dans des collections privées à Montréal, Canada.", en: "Some works are present in private collections in Montreal, Canada.", es: "Algunas obras están presentes en colecciones privadas en Montreal, Canadá." } },
+      { text: { fr: "Les œuvres de l’artiste sont également représentées dans des collections privées en Europe et au Canada.", en: "The artist’s works are also represented in private collections in Europe and Canada.", es: "Las obras de la artista también están representadas en colecciones privadas en Europa y Canadá." } },
     ],
-
-    parcoursBadge: {
-      fr: "Parcours artistique",
-      en: "Artistic journey",
-      es: "Trayectoria artística",
-    },
-    parcoursTitle: {
-      fr: "Expositions, formation et distinctions",
-      en: "Exhibitions, education and distinctions",
-      es: "Exposiciones, formación y distinciones",
-    },
-    exhibitionsTitle: {
-      fr: "Expositions",
-      en: "Exhibitions",
-      es: "Exposiciones",
-    },
+    parcoursBadge: { fr: "Parcours artistique", en: "Artistic journey", es: "Trayectoria artística" },
+    parcoursTitle: { fr: "Expositions, formation et distinctions", en: "Exhibitions, education and distinctions", es: "Exposiciones, formación y distinciones" },
+    exhibitionsTitle: { fr: "Expositions", en: "Exhibitions", es: "Exposiciones" },
     exhibitions: [
-      {
-        year: "2026",
-        text: {
-          fr: "The Inner Forest, Montréal, Canada",
-          en: "The Inner Forest, Montreal, Canada",
-          es: "The Inner Forest, Montreal, Canadá",
-        },
-      },
-      {
-        year: "2014",
-        text: {
-          fr: "Portraits d’animaux, Madrid, Espagne",
-          en: "Animal portraits, Madrid, Spain",
-          es: "Retratos de animales, Madrid, España",
-        },
-      },
+      { year: "2026", text: { fr: "The Inner Forest, Montréal, Canada", en: "The Inner Forest, Montreal, Canada", es: "The Inner Forest, Montreal, Canadá" } },
+      { year: "2014", text: { fr: "Portraits d’animaux, Madrid, Espagne", en: "Animal portraits, Madrid, Spain", es: "Retratos de animales, Madrid, España" } },
     ],
-    formationTitle: {
-      fr: "Formation",
-      en: "Education",
-      es: "Formación",
-    },
+    formationTitle: { fr: "Formation", en: "Education", es: "Formación" },
     formations: [
-      {
-        year: "2024",
-        text: {
-          fr: "Programme de peinture numérique, Procreate",
-          en: "Digital painting program, Procreate",
-          es: "Programa de pintura digital, Procreate",
-        },
-      },
+      { year: "2024", text: { fr: "Programme de peinture numérique, Procreate", en: "Digital painting program, Procreate", es: "Programa de pintura digital, Procreate" } },
     ],
-    distinctionsTitle: {
-      fr: "Distinctions",
-      en: "Distinctions",
-      es: "Distinciones",
-    },
+    distinctionsTitle: { fr: "Distinctions", en: "Distinctions", es: "Distinciones" },
     distinctions: [
-      {
-        year: "2012",
-        text: {
-          fr: "Concours peinture rapide, Madrid",
-          en: "Fast painting competition, Madrid",
-          es: "Concurso de pintura rápida, Madrid",
-        },
-      },
+      { year: "2012", text: { fr: "Concours peinture rapide, Madrid", en: "Fast painting competition, Madrid", es: "Concurso de pintura rápida, Madrid" } },
     ],
   },
 
   contact: {
-    badge: {
-      fr: "Contact",
-      en: "Contact",
-      es: "Contacto",
-    },
-    title: {
-      fr: "Entrer en contact",
-      en: "Get in touch",
-      es: "Ponerse en contacto",
-    },
+    badge: { fr: "Contact", en: "Contact", es: "Contacto" },
+    title: { fr: "Entrer en contact", en: "Get in touch", es: "Ponerse en contacto" },
     text: {
       fr: "Pour toute question concernant mes œuvres, expositions ou collaborations, vous pouvez me contacter directement.",
       en: "For any questions about my works, exhibitions or collaborations, you can contact me directly.",
@@ -391,195 +281,59 @@ export const defaultSiteContent: SiteContent = {
     },
     email: "sararodriguezserrano.art@gmail.com",
     instagram: "@sarose_art",
-    contactImage: {
-      src: "/sara.jpg",
-      size: "medium",
-      shape: "rounded",
-      position: "center",
-    },
+    contactImage: { src: "/sara.jpg", size: "medium", shape: "rounded", position: "center" },
   },
 
   oeuvres: {
-    heroBadge: {
-      fr: "Collection",
-      en: "Collection",
-      es: "Colección",
-    },
-    heroTitle: {
-      fr: "Collections de peinture à l’huile",
-      en: "Oil Painting Collections",
-      es: "Colecciones de pintura al óleo",
-    },
-    heroButtonText: {
-      fr: "Voir les œuvres",
-      en: "View works",
-      es: "Ver obras",
-    },
+    heroBadge: { fr: "Collection", en: "Collection", es: "Colección" },
+    heroTitle: { fr: "Collections de peinture à l’huile", en: "Oil Painting Collections", es: "Colecciones de pintura al óleo" },
+    heroButtonText: { fr: "Voir les œuvres", en: "View works", es: "Ver obras" },
     heroImage: "/5312.jpg",
-
-    introTitle: {
-      fr: "Œuvres",
-      en: "Works",
-      es: "Obras",
-    },
-    introText: {
-      fr: "Découvrez les œuvres de l’artiste.",
-      en: "Discover the artist’s works.",
-      es: "Descubra las obras de la artista.",
-    },
-
+    introTitle: { fr: "Œuvres", en: "Works", es: "Obras" },
+    introText: { fr: "Découvrez les œuvres de l’artiste.", en: "Discover the artist’s works.", es: "Descubra las obras de la artista." },
     quoteText: {
       fr: "Le paysage a la capacité d’offrir un contrepoids au rythme de la vie moderne.",
       en: "Landscape has the ability to offer a counterbalance to the pace of modern life.",
       es: "El paisaje tiene la capacidad de ofrecer un contrapeso al ritmo de la vida moderna.",
     },
-    quoteAuthor: {
-      fr: "Sara Rodriguez Serrano, Artiste",
-      en: "Sara Rodriguez Serrano, Artist",
-      es: "Sara Rodriguez Serrano, Artista",
-    },
+    quoteAuthor: { fr: "Sara Rodriguez Serrano, Artiste", en: "Sara Rodriguez Serrano, Artist", es: "Sara Rodriguez Serrano, Artista" },
     quoteImage: "/IMAGE Grande.jpg",
-
     items: [
       {
         id: 1,
         slug: "reflexion",
-        title: {
-          fr: "Réflexion",
-          en: "Reflection",
-          es: "Reflexión",
-        },
+        title: { fr: "Réflexion", en: "Reflection", es: "Reflexión" },
         year: "2025",
-        description: {
-          fr: "Description de l’œuvre.",
-          en: "Description of the artwork.",
-          es: "Descripción de la obra.",
-        },
-        technique: {
-          fr: "Huile sur toile",
-          en: "Oil on canvas",
-          es: "Óleo sobre lienzo",
-        },
+        description: { fr: "Description de l’œuvre.", en: "Description of the artwork.", es: "Descripción de la obra." },
+        technique: { fr: "Huile sur toile", en: "Oil on canvas", es: "Óleo sobre lienzo" },
         dimensions: '24 x 24"',
-        availability: {
-          fr: "Disponible",
-          en: "Available",
-          es: "Disponible",
-        },
+        availability: { fr: "Disponible", en: "Available", es: "Disponible" },
         image: "/oeuvres/reflexion-cover.jpg",
-        galleryTitle: {
-          fr: "Galerie, Édimbourg, Écosse 2025",
-          en: "Gallery, Edinburgh, Scotland 2025",
-          es: "Galería, Edimburgo, Escocia 2025",
-        },
-        gallerySubtitle: {
-          fr: "Exposition solo 'Beneath the Trees' · Mai 2025",
-          en: "Solo show 'Beneath the Trees' · May 2025",
-          es: "Exposición individual 'Beneath the Trees' · Mayo 2025",
-        },
-        galleryImages: [
-          "/oeuvres/reflexion-1.jpg",
-          "/oeuvres/reflexion-2.jpg",
-          "/oeuvres/reflexion-3.jpg",
-          "/oeuvres/reflexion-4.jpg",
-        ],
+        galleryTitle: { fr: "Galerie, Édimbourg, Écosse 2025", en: "Gallery, Edinburgh, Scotland 2025", es: "Galería, Edimburgo, Escocia 2025" },
+        gallerySubtitle: { fr: "Exposition solo 'Beneath the Trees' · Mai 2025", en: "Solo show 'Beneath the Trees' · May 2025", es: "Exposición individual 'Beneath the Trees' · Mayo 2025" },
+        galleryImages: ["/oeuvres/reflexion-1.jpg", "/oeuvres/reflexion-2.jpg", "/oeuvres/reflexion-3.jpg", "/oeuvres/reflexion-4.jpg"],
       },
       {
         id: 2,
         slug: "ray-of-light",
-        title: {
-          fr: "Rayon de lumière",
-          en: "Ray of Light",
-          es: "Rayo de luz",
-        },
+        title: { fr: "Rayon de lumière", en: "Ray of Light", es: "Rayo de luz" },
         year: "2025",
-        description: {
-          fr: "Description de l’œuvre.",
-          en: "Description of the artwork.",
-          es: "Descripción de la obra.",
-        },
-        technique: {
-          fr: "Huile sur toile",
-          en: "Oil on canvas",
-          es: "Óleo sobre lienzo",
-        },
+        description: { fr: "Description de l’œuvre.", en: "Description of the artwork.", es: "Descripción de la obra." },
+        technique: { fr: "Huile sur toile", en: "Oil on canvas", es: "Óleo sobre lienzo" },
         dimensions: '24 x 24"',
-        availability: {
-          fr: "Disponible",
-          en: "Available",
-          es: "Disponible",
-        },
+        availability: { fr: "Disponible", en: "Available", es: "Disponible" },
         image: "/oeuvres/ray-of-light-cover.jpg",
-        galleryTitle: {
-          fr: "Rayon de lumière, Édimbourg, Écosse 2025",
-          en: "Ray of Light, Edinburgh, Scotland 2025",
-          es: "Rayo de luz, Edimburgo, Escocia 2025",
-        },
-        gallerySubtitle: {
-          fr: "Exposition solo 'Beneath the Trees' · Mai 2025",
-          en: "Solo show 'Beneath the Trees' · May 2025",
-          es: "Exposición individual 'Beneath the Trees' · Mayo 2025",
-        },
-        galleryImages: [
-          "/oeuvres/ray-of-light-1.jpg",
-          "/oeuvres/ray-of-light-2.jpg",
-        ],
+        galleryTitle: { fr: "Rayon de lumière, Édimbourg, Écosse 2025", en: "Ray of Light, Edinburgh, Scotland 2025", es: "Rayo de luz, Edimburgo, Escocia 2025" },
+        gallerySubtitle: { fr: "Exposition solo 'Beneath the Trees' · Mai 2025", en: "Solo show 'Beneath the Trees' · May 2025", es: "Exposición individual 'Beneath the Trees' · Mayo 2025" },
+        galleryImages: ["/oeuvres/ray-of-light-1.jpg", "/oeuvres/ray-of-light-2.jpg"],
       },
     ],
   },
 
   portfolio: [
-    {
-      image: "/gallery/1.jpg",
-      title: {
-        fr: "Coupe signature",
-        en: "Signature cut",
-        es: "Corte distintivo",
-      },
-      category: {
-        fr: "Barbe Blanche",
-        en: "White Beard",
-        es: "Barba Blanca",
-      },
-    },
-    {
-      image: "/gallery/2.jpg",
-      title: {
-        fr: "Dégradé moderne",
-        en: "Modern fade",
-        es: "Degradado moderno",
-      },
-      category: {
-        fr: "Salon Premium",
-        en: "Premium salon",
-        es: "Salón premium",
-      },
-    },
-    {
-      image: "/gallery/3.jpg",
-      title: {
-        fr: "Finition précise",
-        en: "Precise finish",
-        es: "Acabado preciso",
-      },
-      category: {
-        fr: "Style & détail",
-        en: "Style & detail",
-        es: "Estilo y detalle",
-      },
-    },
-    {
-      image: "/gallery/4.jpg",
-      title: {
-        fr: "Look élégant",
-        en: "Elegant look",
-        es: "Look elegante",
-      },
-      category: {
-        fr: "Coupe homme",
-        en: "Men’s haircut",
-        es: "Corte masculino",
-      },
-    },
+    { image: "/gallery/1.jpg", title: { fr: "", en: "", es: "" }, category: { fr: "", en: "", es: "" } },
+    { image: "/gallery/2.jpg", title: { fr: "", en: "", es: "" }, category: { fr: "", en: "", es: "" } },
+    { image: "/gallery/3.jpg", title: { fr: "", en: "", es: "" }, category: { fr: "", en: "", es: "" } },
+    { image: "/gallery/4.jpg", title: { fr: "", en: "", es: "" }, category: { fr: "", en: "", es: "" } },
   ],
 };
