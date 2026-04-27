@@ -114,13 +114,13 @@ export default function Hero() {
                 <span className="ml-3">→</span>
               </a>
 
-              <a
-                href="#about"
-                className="group inline-flex min-h-[56px] items-center justify-center rounded-full bg-[#9f9f9f] px-8 py-4 text-center text-sm font-medium uppercase tracking-[0.22em] text-white transition duration-300 hover:bg-[#8d8d8d]"
-              >
-                {t(hero.secondaryButton, lang)}
-                <span className="ml-3">→</span>
-              </a>
+             <a
+  href="/about"
+  className="group inline-flex min-h-[56px] items-center justify-center rounded-full bg-[#9f9f9f] px-8 py-4 text-center text-sm font-medium uppercase tracking-[0.22em] text-white transition duration-300 hover:bg-[#8d8d8d]"
+>
+  {t(hero.secondaryButton, lang)}
+  <span className="ml-3">→</span>
+</a>
             </div>
           </div>
         </div>

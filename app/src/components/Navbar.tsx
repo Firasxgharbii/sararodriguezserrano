@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Globe, Instagram, Mail, Menu, X } from "lucide-react";
 
@@ -39,6 +40,8 @@ const translations = {
 };
 
 export default function Navbar() {
+  const pathname = usePathname();
+
   const [lang, setLang] = useState<Lang>("fr");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -54,6 +57,11 @@ export default function Navbar() {
     { href: "/about", label: t.about },
     { href: "/contact", label: t.contact },
   ];
+
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   const handleChangeLang = (newLang: Lang) => {
     setLang(newLang);
@@ -264,16 +272,26 @@ export default function Navbar() {
             </div>
 
             <nav className="flex justify-center gap-10 pb-6 text-[13px] tracking-[0.28em] text-neutral-800">
-              {navItems.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="group relative pb-1 transition duration-300 hover:text-black"
-                >
-                  {item.label}
-                  <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-neutral-900 transition-all duration-300 group-hover:w-full" />
-                </Link>
-              ))}
+              {navItems.map((item) => {
+                const active = isActive(item.href);
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`group relative pb-1 transition duration-300 hover:text-black ${
+                      active ? "text-black" : ""
+                    }`}
+                  >
+                    {item.label}
+                    <span
+                      className={`absolute bottom-0 left-0 h-[1px] bg-neutral-900 transition-all duration-300 ${
+                        active ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
+                    />
+                  </Link>
+                );
+              })}
             </nav>
           </div>
         </div>
@@ -318,25 +336,35 @@ export default function Navbar() {
 
             <div className="flex-1 overflow-y-auto px-5 py-6">
               <nav className="flex flex-col gap-2">
-                {navItems.map((item, index) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="group rounded-2xl px-3 py-4 text-[0.95rem] tracking-[0.22em] text-neutral-900 transition duration-300 hover:bg-neutral-50"
-                    style={{
-                      animation: mobileOpen
-                        ? `fadeSlide .35s ease forwards ${index * 0.08}s`
-                        : "none",
-                      opacity: 0,
-                    }}
-                  >
-                    <span className="relative inline-block">
-                      {item.label}
-                      <span className="absolute -bottom-1 left-0 h-[1px] w-0 bg-neutral-900 transition-all duration-300 group-hover:w-full" />
-                    </span>
-                  </Link>
-                ))}
+                {navItems.map((item, index) => {
+                  const active = isActive(item.href);
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`group rounded-2xl px-3 py-4 text-[0.95rem] tracking-[0.22em] text-neutral-900 transition duration-300 hover:bg-neutral-50 ${
+                        active ? "bg-neutral-50" : ""
+                      }`}
+                      style={{
+                        animation: mobileOpen
+                          ? `fadeSlide .35s ease forwards ${index * 0.08}s`
+                          : "none",
+                        opacity: 0,
+                      }}
+                    >
+                      <span className="relative inline-block">
+                        {item.label}
+                        <span
+                          className={`absolute -bottom-1 left-0 h-[1px] bg-neutral-900 transition-all duration-300 ${
+                            active ? "w-full" : "w-0 group-hover:w-full"
+                          }`}
+                        />
+                      </span>
+                    </Link>
+                  );
+                })}
               </nav>
 
               <div className="mt-8 border-t border-neutral-200 pt-6">
