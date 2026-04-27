@@ -39,6 +39,16 @@ export default function DashboardPage() {
             ...defaultSiteContent.home.heroImageStyle,
             ...(parsed.home?.heroImageStyle ?? {}),
           },
+          gallery: {
+            ...defaultSiteContent.home.gallery,
+            ...(parsed.home?.gallery ?? {}),
+            works: (parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works).map(
+              (item: any, index: number) => ({
+                ...(defaultSiteContent.home.gallery.works[index] ?? {}),
+                ...item,
+              })
+            ),
+          },
         },
 
         about: {
@@ -288,6 +298,200 @@ export default function DashboardPage() {
                     })
                   }
                 />
+
+                <div className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6">
+                  <h3 className="mb-5 text-xl font-medium text-[#201c19]">
+                    Galerie page d’accueil
+                  </h3>
+
+                  <div className="grid gap-5">
+                    <Field
+                      label="Badge galerie"
+                      value={content.home.gallery.badge}
+                      onChange={(value) =>
+                        setContent({
+                          ...content,
+                          home: {
+                            ...content.home,
+                            gallery: {
+                              ...content.home.gallery,
+                              badge: value,
+                            },
+                          },
+                        })
+                      }
+                    />
+
+                    <Field
+                      label="Titre galerie"
+                      value={content.home.gallery.title}
+                      onChange={(value) =>
+                        setContent({
+                          ...content,
+                          home: {
+                            ...content.home,
+                            gallery: {
+                              ...content.home.gallery,
+                              title: value,
+                            },
+                          },
+                        })
+                      }
+                    />
+
+                    <ImageUploadField
+                      label="Grande image"
+                      value={content.home.gallery.featuredImage}
+                      onChange={(value) =>
+                        setContent({
+                          ...content,
+                          home: {
+                            ...content.home,
+                            gallery: {
+                              ...content.home.gallery,
+                              featuredImage: value,
+                            },
+                          },
+                        })
+                      }
+                    />
+
+                    <Field
+                      label="Badge œuvre mise en avant"
+                      value={content.home.gallery.featuredBadge}
+                      onChange={(value) =>
+                        setContent({
+                          ...content,
+                          home: {
+                            ...content.home,
+                            gallery: {
+                              ...content.home.gallery,
+                              featuredBadge: value,
+                            },
+                          },
+                        })
+                      }
+                    />
+
+                    <Field
+                      label="Titre œuvre mise en avant"
+                      value={content.home.gallery.featuredTitle}
+                      onChange={(value) =>
+                        setContent({
+                          ...content,
+                          home: {
+                            ...content.home,
+                            gallery: {
+                              ...content.home.gallery,
+                              featuredTitle: value,
+                            },
+                          },
+                        })
+                      }
+                    />
+
+                    <TextareaField
+                      label="Paragraphe œuvre mise en avant"
+                      value={content.home.gallery.featuredText}
+                      onChange={(value) =>
+                        setContent({
+                          ...content,
+                          home: {
+                            ...content.home,
+                            gallery: {
+                              ...content.home.gallery,
+                              featuredText: value,
+                            },
+                          },
+                        })
+                      }
+                    />
+
+                    <div className="grid gap-6">
+                      {content.home.gallery.works.map((work, index) => (
+                        <div
+                          key={index}
+                          className="rounded-[22px] border border-[#eadfd8] bg-white p-5"
+                        >
+                          <h4 className="mb-5 text-lg font-medium text-[#201c19]">
+                            Œuvre accueil {index + 1}
+                          </h4>
+
+                          <div className="grid gap-5">
+                            <ImageUploadField
+                              label="Image"
+                              value={work.src}
+                              onChange={(value) => {
+                                const updated = [...content.home.gallery.works];
+                                updated[index] = {
+                                  ...updated[index],
+                                  src: value,
+                                };
+
+                                setContent({
+                                  ...content,
+                                  home: {
+                                    ...content.home,
+                                    gallery: {
+                                      ...content.home.gallery,
+                                      works: updated,
+                                    },
+                                  },
+                                });
+                              }}
+                            />
+
+                            <Field
+                              label="Titre"
+                              value={work.title}
+                              onChange={(value) => {
+                                const updated = [...content.home.gallery.works];
+                                updated[index] = {
+                                  ...updated[index],
+                                  title: value,
+                                };
+
+                                setContent({
+                                  ...content,
+                                  home: {
+                                    ...content.home,
+                                    gallery: {
+                                      ...content.home.gallery,
+                                      works: updated,
+                                    },
+                                  },
+                                });
+                              }}
+                            />
+
+                            <Field
+                              label="Catégorie"
+                              value={work.category}
+                              onChange={(value) => {
+                                const updated = [...content.home.gallery.works];
+                                updated[index] = {
+                                  ...updated[index],
+                                  category: value,
+                                };
+
+                                setContent({
+                                  ...content,
+                                  home: {
+                                    ...content.home,
+                                    gallery: {
+                                      ...content.home.gallery,
+                                      works: updated,
+                                    },
+                                  },
+                                });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </EditorBlock>
             )}
 
