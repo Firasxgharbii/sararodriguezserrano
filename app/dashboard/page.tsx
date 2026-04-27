@@ -6,7 +6,6 @@ import {
   SiteContent,
   STORAGE_KEY,
   ImageStyle,
-  Lang,
   LocalizedText,
 } from "../lib/siteContent";
 import DatabaseSection from "./DatabaseSection";
@@ -746,34 +745,12 @@ export default function DashboardPage() {
                 subtitle="Gestion complète des œuvres"
               >
                 <LocalizedField
-                  label="Badge hero"
-                  value={content.oeuvres.heroBadge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      oeuvres: { ...content.oeuvres, heroBadge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
                   label="Titre hero"
                   value={content.oeuvres.heroTitle}
                   onChange={(value) =>
                     setContent({
                       ...content,
                       oeuvres: { ...content.oeuvres, heroTitle: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Texte bouton hero"
-                  value={content.oeuvres.heroButtonText}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      oeuvres: { ...content.oeuvres, heroButtonText: value },
                     })
                   }
                 />
@@ -789,131 +766,88 @@ export default function DashboardPage() {
                   }
                 />
 
-                <LocalizedField
-                  label="Titre intro"
-                  value={content.oeuvres.introTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      oeuvres: { ...content.oeuvres, introTitle: value },
-                    })
-                  }
-                />
+                <div className="mt-8">
+                  <div className="mb-6 flex flex-col gap-4 rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                    <div>
+                      <h3 className="text-xl font-medium text-[#201c19]">
+                        Œuvres
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-[#8a7971]">
+                        Gérez les œuvres affichées sur la page.
+                      </p>
+                    </div>
 
-                <LocalizedTextareaField
-                  label="Texte intro"
-                  value={content.oeuvres.introText}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      oeuvres: { ...content.oeuvres, introText: value },
-                    })
-                  }
-                />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newItem = {
+                          id: Date.now(),
+                          slug: `nouvelle-oeuvre-${Date.now()}`,
+                          title: { fr: "", en: "", es: "" },
+                          year: "2026",
+                          description: { fr: "", en: "", es: "" },
+                          technique: { fr: "", en: "", es: "" },
+                          dimensions: '24 x 24"',
+                          availability: { fr: "", en: "", es: "" },
+                          image: "",
+                          galleryTitle: { fr: "", en: "", es: "" },
+                          gallerySubtitle: { fr: "", en: "", es: "" },
+                          galleryImages: ["", "", "", ""],
+                        };
 
-                <LocalizedTextareaField
-                  label="Citation"
-                  value={content.oeuvres.quoteText}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      oeuvres: { ...content.oeuvres, quoteText: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Auteur citation"
-                  value={content.oeuvres.quoteAuthor}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      oeuvres: { ...content.oeuvres, quoteAuthor: value },
-                    })
-                  }
-                />
-
-                <ImageUploadField
-                  label="Image section citation"
-                  value={content.oeuvres.quoteImage}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      oeuvres: { ...content.oeuvres, quoteImage: value },
-                    })
-                  }
-                />
-
-                <div className="mt-8 space-y-8">
-                  {content.oeuvres.items.map((item, index) => (
-                    <div
-                      key={item.id}
-                      className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6"
+                        setContent({
+                          ...content,
+                          oeuvres: {
+                            ...content.oeuvres,
+                            items: [...content.oeuvres.items, newItem],
+                          },
+                        });
+                      }}
+                      className="inline-flex h-[52px] items-center justify-center rounded-full bg-[#191614] px-6 text-[13px] font-medium uppercase tracking-[0.16em] text-white shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition hover:-translate-y-[1px]"
                     >
-                      <div className="mb-5 flex items-center justify-between gap-4">
-                        <h3 className="text-xl font-medium text-[#201c19]">
-                          Œuvre {index + 1}
-                        </h3>
+                      Ajouter une œuvre
+                    </button>
+                  </div>
 
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const updated = [...content.oeuvres.items];
-                            updated.splice(index, 1);
-                            setContent({
-                              ...content,
-                              oeuvres: {
-                                ...content.oeuvres,
-                                items: updated,
-                              },
-                            });
-                          }}
-                          className="rounded-full border border-[#e4d8d1] px-4 py-2 text-sm text-[#7c6760] transition hover:bg-white"
-                        >
-                          Supprimer
-                        </button>
-                      </div>
+                  <div className="space-y-8">
+                    {content.oeuvres.items.map((item, index) => (
+                      <div
+                        key={item.id}
+                        className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6"
+                      >
+                        <div className="mb-5 flex items-center justify-between gap-4">
+                          <h3 className="text-xl font-medium text-[#201c19]">
+                            Œuvre {index + 1}
+                          </h3>
 
-                      <div className="grid gap-5">
-                        <Field
-                          label="Slug"
-                          value={item.slug}
-                          onChange={(value) => {
-                            const updated = [...content.oeuvres.items];
-                            updated[index].slug = value;
-                            setContent({
-                              ...content,
-                              oeuvres: {
-                                ...content.oeuvres,
-                                items: updated,
-                              },
-                            });
-                          }}
-                        />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...content.oeuvres.items];
+                              updated.splice(index, 1);
 
-                        <LocalizedField
-                          label="Titre"
-                          value={item.title}
-                          onChange={(value) => {
-                            const updated = [...content.oeuvres.items];
-                            updated[index].title = value;
-                            setContent({
-                              ...content,
-                              oeuvres: {
-                                ...content.oeuvres,
-                                items: updated,
-                              },
-                            });
-                          }}
-                        />
+                              setContent({
+                                ...content,
+                                oeuvres: {
+                                  ...content.oeuvres,
+                                  items: updated,
+                                },
+                              });
+                            }}
+                            className="rounded-full border border-[#e4d8d1] px-4 py-2 text-sm text-[#7c6760] transition hover:bg-white"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
 
-                        <div className="grid gap-5 sm:grid-cols-2">
+                        <div className="grid gap-5">
                           <Field
-                            label="Année"
-                            value={item.year}
+                            label="Slug"
+                            value={item.slug}
                             onChange={(value) => {
                               const updated = [...content.oeuvres.items];
-                              updated[index].year = value;
+                              updated[index].slug = value;
+
                               setContent({
                                 ...content,
                                 oeuvres: {
@@ -925,45 +859,12 @@ export default function DashboardPage() {
                           />
 
                           <LocalizedField
-                            label="Disponibilité"
-                            value={item.availability}
+                            label="Titre"
+                            value={item.title}
                             onChange={(value) => {
                               const updated = [...content.oeuvres.items];
-                              updated[index].availability = value;
-                              setContent({
-                                ...content,
-                                oeuvres: {
-                                  ...content.oeuvres,
-                                  items: updated,
-                                },
-                              });
-                            }}
-                          />
-                        </div>
+                              updated[index].title = value;
 
-                        <LocalizedTextareaField
-                          label="Description"
-                          value={item.description}
-                          onChange={(value) => {
-                            const updated = [...content.oeuvres.items];
-                            updated[index].description = value;
-                            setContent({
-                              ...content,
-                              oeuvres: {
-                                ...content.oeuvres,
-                                items: updated,
-                              },
-                            });
-                          }}
-                        />
-
-                        <div className="grid gap-5 sm:grid-cols-2">
-                          <LocalizedField
-                            label="Technique"
-                            value={item.technique}
-                            onChange={(value) => {
-                              const updated = [...content.oeuvres.items];
-                              updated[index].technique = value;
                               setContent({
                                 ...content,
                                 oeuvres: {
@@ -974,84 +875,13 @@ export default function DashboardPage() {
                             }}
                           />
 
-                          <Field
-                            label="Dimensions"
-                            value={item.dimensions}
-                            onChange={(value) => {
-                              const updated = [...content.oeuvres.items];
-                              updated[index].dimensions = value;
-                              setContent({
-                                ...content,
-                                oeuvres: {
-                                  ...content.oeuvres,
-                                  items: updated,
-                                },
-                              });
-                            }}
-                          />
-                        </div>
-
-                        <ImageUploadField
-                          label="Image carte"
-                          value={item.image}
-                          onChange={(value) => {
-                            const updated = [...content.oeuvres.items];
-                            updated[index].image = value;
-                            setContent({
-                              ...content,
-                              oeuvres: {
-                                ...content.oeuvres,
-                                items: updated,
-                              },
-                            });
-                          }}
-                        />
-
-                        <LocalizedField
-                          label="Titre page détail"
-                          value={item.galleryTitle}
-                          onChange={(value) => {
-                            const updated = [...content.oeuvres.items];
-                            updated[index].galleryTitle = value;
-                            setContent({
-                              ...content,
-                              oeuvres: {
-                                ...content.oeuvres,
-                                items: updated,
-                              },
-                            });
-                          }}
-                        />
-
-                        <LocalizedTextareaField
-                          label="Sous-titre page détail"
-                          value={item.gallerySubtitle}
-                          onChange={(value) => {
-                            const updated = [...content.oeuvres.items];
-                            updated[index].gallerySubtitle = value;
-                            setContent({
-                              ...content,
-                              oeuvres: {
-                                ...content.oeuvres,
-                                items: updated,
-                              },
-                            });
-                          }}
-                        />
-
-                        <div className="grid gap-5 sm:grid-cols-2">
-                          {item.galleryImages.map((galleryImage, imageIndex) => (
-                            <ImageUploadField
-                              key={`${item.id}-gallery-${imageIndex}`}
-                              label={`Image galerie ${imageIndex + 1}`}
-                              value={galleryImage}
+                          <div className="grid gap-5 sm:grid-cols-2">
+                            <Field
+                              label="Année"
+                              value={item.year}
                               onChange={(value) => {
                                 const updated = [...content.oeuvres.items];
-                                const nextImages = [
-                                  ...updated[index].galleryImages,
-                                ];
-                                nextImages[imageIndex] = value;
-                                updated[index].galleryImages = nextImages;
+                                updated[index].year = value;
 
                                 setContent({
                                   ...content,
@@ -1062,44 +892,159 @@ export default function DashboardPage() {
                                 });
                               }}
                             />
-                          ))}
+
+                            <LocalizedField
+                              label="Disponibilité"
+                              value={item.availability}
+                              onChange={(value) => {
+                                const updated = [...content.oeuvres.items];
+                                updated[index].availability = value;
+
+                                setContent({
+                                  ...content,
+                                  oeuvres: {
+                                    ...content.oeuvres,
+                                    items: updated,
+                                  },
+                                });
+                              }}
+                            />
+                          </div>
+
+                          <LocalizedTextareaField
+                            label="Description"
+                            value={item.description}
+                            onChange={(value) => {
+                              const updated = [...content.oeuvres.items];
+                              updated[index].description = value;
+
+                              setContent({
+                                ...content,
+                                oeuvres: {
+                                  ...content.oeuvres,
+                                  items: updated,
+                                },
+                              });
+                            }}
+                          />
+
+                          <div className="grid gap-5 sm:grid-cols-2">
+                            <LocalizedField
+                              label="Technique"
+                              value={item.technique}
+                              onChange={(value) => {
+                                const updated = [...content.oeuvres.items];
+                                updated[index].technique = value;
+
+                                setContent({
+                                  ...content,
+                                  oeuvres: {
+                                    ...content.oeuvres,
+                                    items: updated,
+                                  },
+                                });
+                              }}
+                            />
+
+                            <Field
+                              label="Dimensions"
+                              value={item.dimensions}
+                              onChange={(value) => {
+                                const updated = [...content.oeuvres.items];
+                                updated[index].dimensions = value;
+
+                                setContent({
+                                  ...content,
+                                  oeuvres: {
+                                    ...content.oeuvres,
+                                    items: updated,
+                                  },
+                                });
+                              }}
+                            />
+                          </div>
+
+                          <ImageUploadField
+                            label="Image carte"
+                            value={item.image}
+                            onChange={(value) => {
+                              const updated = [...content.oeuvres.items];
+                              updated[index].image = value;
+
+                              setContent({
+                                ...content,
+                                oeuvres: {
+                                  ...content.oeuvres,
+                                  items: updated,
+                                },
+                              });
+                            }}
+                          />
+
+                          <LocalizedField
+                            label="Titre page détail"
+                            value={item.galleryTitle}
+                            onChange={(value) => {
+                              const updated = [...content.oeuvres.items];
+                              updated[index].galleryTitle = value;
+
+                              setContent({
+                                ...content,
+                                oeuvres: {
+                                  ...content.oeuvres,
+                                  items: updated,
+                                },
+                              });
+                            }}
+                          />
+
+                          <LocalizedTextareaField
+                            label="Sous-titre page détail"
+                            value={item.gallerySubtitle}
+                            onChange={(value) => {
+                              const updated = [...content.oeuvres.items];
+                              updated[index].gallerySubtitle = value;
+
+                              setContent({
+                                ...content,
+                                oeuvres: {
+                                  ...content.oeuvres,
+                                  items: updated,
+                                },
+                              });
+                            }}
+                          />
+
+                          <div className="grid gap-5 sm:grid-cols-2">
+                            {item.galleryImages.map((galleryImage, imageIndex) => (
+                              <ImageUploadField
+                                key={`${item.id}-gallery-${imageIndex}`}
+                                label={`Image galerie ${imageIndex + 1}`}
+                                value={galleryImage}
+                                onChange={(value) => {
+                                  const updated = [...content.oeuvres.items];
+                                  const nextImages = [
+                                    ...updated[index].galleryImages,
+                                  ];
+
+                                  nextImages[imageIndex] = value;
+                                  updated[index].galleryImages = nextImages;
+
+                                  setContent({
+                                    ...content,
+                                    oeuvres: {
+                                      ...content.oeuvres,
+                                      items: updated,
+                                    },
+                                  });
+                                }}
+                              />
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-8">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newItem = {
-                        id: Date.now(),
-                        slug: `nouvelle-oeuvre-${Date.now()}`,
-                        title: { fr: "", en: "", es: "" },
-                        year: "2026",
-                        description: { fr: "", en: "", es: "" },
-                        technique: { fr: "", en: "", es: "" },
-                        dimensions: '24 x 24"',
-                        availability: { fr: "", en: "", es: "" },
-                        image: "",
-                        galleryTitle: { fr: "", en: "", es: "" },
-                        gallerySubtitle: { fr: "", en: "", es: "" },
-                        galleryImages: ["", "", "", ""],
-                      };
-
-                      setContent({
-                        ...content,
-                        oeuvres: {
-                          ...content.oeuvres,
-                          items: [...content.oeuvres.items, newItem],
-                        },
-                      });
-                    }}
-                    className="inline-flex h-[52px] items-center justify-center rounded-full border border-[#e2d6cf] bg-white px-6 text-[14px] font-medium text-[#6d5a53] transition hover:bg-[#faf7f4]"
-                  >
-                    Ajouter une œuvre
-                  </button>
+                    ))}
+                  </div>
                 </div>
               </EditorBlock>
             )}
@@ -1107,7 +1052,7 @@ export default function DashboardPage() {
             {activeTab === "portfolio" && (
               <EditorBlock
                 title="Portfolio"
-                subtitle="Modifier les 4 images du portfolio"
+                subtitle="Modifier seulement les images du portfolio"
               >
                 <div className="space-y-8">
                   {content.portfolio.map((item, index) => (
@@ -1116,49 +1061,26 @@ export default function DashboardPage() {
                       className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6"
                     >
                       <h3 className="mb-5 text-xl font-medium text-[#201c19]">
-                        Portfolio image {index + 1}
+                        Image portfolio {index + 1}
                       </h3>
 
-                      <div className="grid gap-5">
-                        <ImageUploadField
-                          label="Image"
-                          value={item.image}
-                          onChange={(value) => {
-                            const updated = [...content.portfolio];
-                            updated[index].image = value;
-                            setContent({
-                              ...content,
-                              portfolio: updated,
-                            });
-                          }}
-                        />
+                      <ImageUploadField
+                        label="Image"
+                        value={item.image}
+                        onChange={(value) => {
+                          const updated = [...content.portfolio];
 
-                        <LocalizedField
-                          label="Titre"
-                          value={item.title}
-                          onChange={(value) => {
-                            const updated = [...content.portfolio];
-                            updated[index].title = value;
-                            setContent({
-                              ...content,
-                              portfolio: updated,
-                            });
-                          }}
-                        />
+                          updated[index] = {
+                            ...updated[index],
+                            image: value,
+                          };
 
-                        <LocalizedField
-                          label="Catégorie"
-                          value={item.category}
-                          onChange={(value) => {
-                            const updated = [...content.portfolio];
-                            updated[index].category = value;
-                            setContent({
-                              ...content,
-                              portfolio: updated,
-                            });
-                          }}
-                        />
-                      </div>
+                          setContent({
+                            ...content,
+                            portfolio: updated,
+                          });
+                        }}
+                      />
                     </div>
                   ))}
                 </div>
@@ -1167,9 +1089,6 @@ export default function DashboardPage() {
 
             {activeTab === "database" && <DatabaseSection />}
           </section>
-
-          
-
         </div>
       </div>
     </main>

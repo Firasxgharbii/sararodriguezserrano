@@ -6,12 +6,7 @@ import { getSiteContent } from "../../lib/getSiteContent";
 
 function ArrowLeftIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className="h-5 w-5"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
       <path
         d="M19 12H5"
         stroke="currentColor"
@@ -31,12 +26,7 @@ function ArrowLeftIcon() {
 
 function ArrowRightIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className="h-5 w-5"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
       <path
         d="M5 12H19"
         stroke="currentColor"
@@ -58,6 +48,7 @@ export default function PortfolioSection() {
   const [content, setContent] = useState(defaultSiteContent);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
@@ -78,22 +69,22 @@ export default function PortfolioSection() {
   }, []);
 
   const portfolioItems =
-    content.portfolio?.length === 4
-      ? content.portfolio
+    content.portfolio?.length > 0
+      ? content.portfolio.filter((item) => item.image)
       : defaultSiteContent.portfolio;
 
   const total = portfolioItems.length;
+
+  const activeItem = useMemo(
+    () => portfolioItems[activeIndex],
+    [portfolioItems, activeIndex]
+  );
 
   useEffect(() => {
     if (activeIndex > total - 1) {
       setActiveIndex(0);
     }
   }, [activeIndex, total]);
-
-  const activeItem = useMemo(
-    () => portfolioItems[activeIndex],
-    [portfolioItems, activeIndex]
-  );
 
   const goPrev = () => {
     setActiveIndex((prev) => (prev === 0 ? total - 1 : prev - 1));
@@ -104,14 +95,14 @@ export default function PortfolioSection() {
   };
 
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || total <= 1) return;
 
     const timer = setInterval(() => {
-      setActiveIndex((prev) => (prev === total - 1 ? 0 : prev + 1));
+      goNext();
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [total, isPaused]);
+  }, [isPaused, total]);
 
   const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     touchStartX.current = e.targetTouches[0].clientX;
@@ -126,11 +117,8 @@ export default function PortfolioSection() {
 
     const distance = touchStartX.current - touchEndX.current;
 
-    if (distance > 50) {
-      goNext();
-    } else if (distance < -50) {
-      goPrev();
-    }
+    if (distance > 50) goNext();
+    if (distance < -50) goPrev();
 
     touchStartX.current = null;
     touchEndX.current = null;
@@ -158,25 +146,27 @@ export default function PortfolioSection() {
 
           <div className="absolute inset-0 bg-black/10" />
 
-          <div className="absolute left-4 top-4 z-20 flex items-center gap-3 sm:left-6 sm:top-6 lg:left-8 lg:top-8">
-            <button
-              type="button"
-              onClick={goPrev}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-sm transition duration-300 hover:bg-black/35 active:scale-95"
-              aria-label="Précédent"
-            >
-              <ArrowLeftIcon />
-            </button>
+          {total > 1 && (
+            <div className="absolute left-4 top-4 z-20 flex items-center gap-3 sm:left-6 sm:top-6 lg:left-8 lg:top-8">
+              <button
+                type="button"
+                onClick={goPrev}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-sm transition duration-300 hover:bg-black/35 active:scale-95"
+                aria-label="Précédent"
+              >
+                <ArrowLeftIcon />
+              </button>
 
-            <button
-              type="button"
-              onClick={goNext}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-sm transition duration-300 hover:bg-black/35 active:scale-95"
-              aria-label="Suivant"
-            >
-              <ArrowRightIcon />
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={goNext}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-sm transition duration-300 hover:bg-black/35 active:scale-95"
+                aria-label="Suivant"
+              >
+                <ArrowRightIcon />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </section>

@@ -183,9 +183,9 @@ export const defaultSiteContent: SiteContent = {
       es: "Una práctica guiada por la memoria, el color y la emoción",
     },
     introText: {
-      fr: "Mon travail explore la relation entre la mémoire, le paysage intérieur et le silence.",
-      en: "My work explores the relationship between memory, inner landscape and silence.",
-      es: "Mi trabajo explora la relación entre la memoria, el paisaje interior y el silencio.",
+      fr: "Sara Rodríguez Serrano développe une pratique artistique sensible, où la peinture devient un espace de dialogue entre mémoire, émotion et perception. À travers des compositions organiques et intuitives, elle explore les liens subtils entre l’humain et son environnement intérieur. Son travail, marqué par une attention particulière à la couleur et à la matière, évoque des états de transformation, de silence et de présence. Chaque œuvre s’inscrit comme une trace vivante, une invitation à ralentir, ressentir et se reconnecter à une dimension plus profonde de l’expérience.",
+      en: "Sara Rodríguez Serrano develops a sensitive artistic practice in which painting becomes a space of dialogue between memory, emotion, and perception. Through organic and intuitive compositions, she explores the subtle connections between the human experience and the inner landscape. Her work, marked by a careful attention to color and material, evokes states of transformation, silence, and presence. Each piece emerges as a living trace—an invitation to slow down, to feel, and to reconnect with a deeper dimension of experience.",
+      es: "Sara Rodríguez Serrano desarrolla una práctica artística sensible en la que la pintura se convierte en un espacio de diálogo entre la memoria, la emoción y la percepción. A través de composiciones orgánicas e intuitivas, explora las conexiones sutiles entre la experiencia humana y el paisaje interior. Su obra, marcada por una atención cuidadosa al color y a la materia, evoca estados de transformación, silencio y presencia. Cada pieza surge como una huella viva, una invitación a desacelerar, sentir y reconectarse con una dimensión más profunda de la experiencia.",
     },
     image: "/sara1.jpg",
     profileImage: {
