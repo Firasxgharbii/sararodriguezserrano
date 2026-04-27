@@ -2,7 +2,11 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { defaultSiteContent } from "../../lib/siteContent";
+import {
+  defaultSiteContent,
+  LANG_STORAGE_KEY,
+  type Lang,
+} from "../../lib/siteContent";
 import { getSiteContent } from "../../lib/getSiteContent";
 
 const futuraLight = {
@@ -12,13 +16,30 @@ const futuraLight = {
   textTransform: "uppercase" as const,
 };
 
+function getSavedLang(): Lang {
+  if (typeof window === "undefined") return "fr";
+
+  const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
+
+  if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
+    return savedLang;
+  }
+
+  return "fr";
+}
+
 export default function Gallery() {
   const [content, setContent] = useState(defaultSiteContent);
+  const [lang, setLang] = useState<Lang>("fr");
 
   useEffect(() => {
-    const loadContent = () => setContent(getSiteContent());
+    const loadContent = () => {
+      setContent(getSiteContent());
+      setLang(getSavedLang());
+    };
 
     loadContent();
+
     window.addEventListener("focus", loadContent);
     window.addEventListener("storage", loadContent);
 
@@ -28,7 +49,7 @@ export default function Gallery() {
     };
   }, []);
 
-  const gallery = content.home.gallery ?? defaultSiteContent.home.gallery;
+  const gallery = content.home.gallery;
   const works = gallery.works ?? [];
 
   return (
@@ -39,14 +60,17 @@ export default function Gallery() {
             className="mb-4 text-[10px] tracking-[0.42em] text-neutral-400"
             style={futuraLight}
           >
-            {gallery.badge}
+            {gallery.badge[lang]}
           </p>
 
           <h2
             className="mb-6 text-[44px] leading-none text-[#8a8a8a] sm:text-[58px]"
-            style={{ ...futuraLight, letterSpacing: "0.12em" }}
+            style={{
+              ...futuraLight,
+              letterSpacing: "0.12em",
+            }}
           >
-            {gallery.title}
+            {gallery.title[lang]}
           </h2>
 
           <div className="mx-auto mb-6 h-[1px] w-24 bg-neutral-300" />
@@ -58,7 +82,7 @@ export default function Gallery() {
               <div className="relative h-[72vh] min-h-[420px] w-full overflow-hidden">
                 <Image
                   src={gallery.featuredImage}
-                  alt={gallery.featuredTitle}
+                  alt={gallery.featuredTitle[lang]}
                   fill
                   priority
                   className="object-cover transition duration-700 group-hover:scale-[1.02]"
@@ -71,18 +95,21 @@ export default function Gallery() {
                 className="mb-3 text-[10px] tracking-[0.38em] text-neutral-400"
                 style={futuraLight}
               >
-                {gallery.featuredBadge}
+                {gallery.featuredBadge[lang]}
               </p>
 
               <h3
                 className="text-[36px] leading-tight text-[#8a8a8a] sm:text-[52px]"
-                style={{ ...futuraLight, letterSpacing: "0.08em" }}
+                style={{
+                  ...futuraLight,
+                  letterSpacing: "0.08em",
+                }}
               >
-                {gallery.featuredTitle}
+                {gallery.featuredTitle[lang]}
               </h3>
 
               <p className="mt-5 max-w-2xl text-[17px] leading-8 text-neutral-600">
-                {gallery.featuredText}
+                {gallery.featuredText[lang]}
               </p>
             </div>
           </article>
@@ -95,7 +122,7 @@ export default function Gallery() {
                 <div className="relative h-[360px] w-full overflow-hidden">
                   <Image
                     src={work.src}
-                    alt={work.title}
+                    alt={work.title[lang]}
                     fill
                     className="object-cover transition duration-700 group-hover:scale-[1.04]"
                   />
@@ -107,14 +134,17 @@ export default function Gallery() {
                   className="mb-2 text-[10px] tracking-[0.34em] text-neutral-400"
                   style={futuraLight}
                 >
-                  {work.category}
+                  {work.category[lang]}
                 </p>
 
                 <h3
                   className="text-[27px] leading-snug text-[#8a8a8a]"
-                  style={{ ...futuraLight, letterSpacing: "0.06em" }}
+                  style={{
+                    ...futuraLight,
+                    letterSpacing: "0.06em",
+                  }}
                 >
-                  {work.title}
+                  {work.title[lang]}
                 </h3>
               </div>
             </article>

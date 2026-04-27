@@ -15,16 +15,16 @@ export type ImageStyle = {
 
 export type HomeGalleryWork = {
   src: string;
-  title: string;
-  category: string;
+  title: LocalizedText;
+  category: LocalizedText;
 };
 
 export type HomeGalleryContent = {
-  badge: string;
-  title: string;
-  featuredBadge: string;
-  featuredTitle: string;
-  featuredText: string;
+  badge: LocalizedText;
+  title: LocalizedText;
+  featuredBadge: LocalizedText;
+  featuredTitle: LocalizedText;
+  featuredText: LocalizedText;
   featuredImage: string;
   works: HomeGalleryWork[];
 };
@@ -179,28 +179,71 @@ export const defaultSiteContent: SiteContent = {
       position: "center",
     },
     gallery: {
-      badge: "GALERIE",
-      title: "ŒUVRES",
-      featuredBadge: "ŒUVRE MISE EN AVANT",
-      featuredTitle: "LA FORÊT INTÉRIEURE",
-      featuredText:
-        "À travers une pratique inspirée par la nature, Sara Rodríguez Serrano crée des espaces où le paysage devient une expérience intérieure. Entre formes organiques et présence humaine, son travail invite à une exploration sensible de la mémoire et de la transformation.",
+      badge: {
+        fr: "Galerie",
+        en: "Gallery",
+        es: "Galería",
+      },
+      title: {
+        fr: "Œuvres",
+        en: "Works",
+        es: "Obras",
+      },
+      featuredBadge: {
+        fr: "Œuvre mise en avant",
+        en: "Featured work",
+        es: "Obra destacada",
+      },
+      featuredTitle: {
+        fr: "La forêt intérieure",
+        en: "The Inner Forest",
+        es: "El bosque interior",
+      },
+      featuredText: {
+        fr: "À travers une pratique inspirée par la nature, Sara Rodríguez Serrano crée des espaces où le paysage devient une expérience intérieure. Entre formes organiques et présence humaine, son travail invite à une exploration sensible de la mémoire et de la transformation.",
+        en: "Through a practice inspired by nature, Sara Rodríguez Serrano creates spaces where landscape becomes an inner experience. Between organic forms and human presence, her work invites a sensitive exploration of memory and transformation.",
+        es: "A través de una práctica inspirada en la naturaleza, Sara Rodríguez Serrano crea espacios donde el paisaje se convierte en una experiencia interior. Entre formas orgánicas y presencia humana, su obra invita a una exploración sensible de la memoria y la transformación.",
+      },
       featuredImage: "/IMAGE Grande.jpg",
       works: [
         {
           src: "/oeuvres remar2.jpg",
-          title: "PAYSAGE INTÉRIEUR",
-          category: "PEINTURE",
+          title: {
+            fr: "Paysage intérieur",
+            en: "Inner Landscape",
+            es: "Paisaje interior",
+          },
+          category: {
+            fr: "Peinture",
+            en: "Painting",
+            es: "Pintura",
+          },
         },
         {
           src: "/oeuvres remar3.jpg",
-          title: "FRAGMENTS DE LUMIÈRE",
-          category: "PEINTURE",
+          title: {
+            fr: "Fragments de lumière",
+            en: "Fragments of Light",
+            es: "Fragmentos de luz",
+          },
+          category: {
+            fr: "Peinture",
+            en: "Painting",
+            es: "Pintura",
+          },
         },
         {
           src: "/oeuvres remar4.jpg",
-          title: "ÉCLATS NOCTURNES",
-          category: "PEINTURE",
+          title: {
+            fr: "Éclats nocturnes",
+            en: "Nocturnal Shards",
+            es: "Destellos nocturnos",
+          },
+          category: {
+            fr: "Peinture",
+            en: "Painting",
+            es: "Pintura",
+          },
         },
       ],
     },

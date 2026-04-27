@@ -305,7 +305,7 @@ export default function DashboardPage() {
                   </h3>
 
                   <div className="grid gap-5">
-                    <Field
+                    <LocalizedField
                       label="Badge galerie"
                       value={content.home.gallery.badge}
                       onChange={(value) =>
@@ -322,7 +322,7 @@ export default function DashboardPage() {
                       }
                     />
 
-                    <Field
+                    <LocalizedField
                       label="Titre galerie"
                       value={content.home.gallery.title}
                       onChange={(value) =>
@@ -356,7 +356,7 @@ export default function DashboardPage() {
                       }
                     />
 
-                    <Field
+                    <LocalizedField
                       label="Badge œuvre mise en avant"
                       value={content.home.gallery.featuredBadge}
                       onChange={(value) =>
@@ -373,7 +373,7 @@ export default function DashboardPage() {
                       }
                     />
 
-                    <Field
+                    <LocalizedField
                       label="Titre œuvre mise en avant"
                       value={content.home.gallery.featuredTitle}
                       onChange={(value) =>
@@ -390,7 +390,7 @@ export default function DashboardPage() {
                       }
                     />
 
-                    <TextareaField
+                    <LocalizedTextareaField
                       label="Paragraphe œuvre mise en avant"
                       value={content.home.gallery.featuredText}
                       onChange={(value) =>
@@ -441,7 +441,7 @@ export default function DashboardPage() {
                               }}
                             />
 
-                            <Field
+                            <LocalizedField
                               label="Titre"
                               value={work.title}
                               onChange={(value) => {
@@ -464,7 +464,7 @@ export default function DashboardPage() {
                               }}
                             />
 
-                            <Field
+                            <LocalizedField
                               label="Catégorie"
                               value={work.category}
                               onChange={(value) => {
