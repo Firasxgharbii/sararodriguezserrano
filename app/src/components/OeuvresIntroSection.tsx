@@ -8,7 +8,6 @@ import {
   type Lang,
   LANG_STORAGE_KEY,
 } from "../../lib/siteContent";
-import { getMergedSiteContent } from "../../lib/getSiteContent";
 import { t } from "../../lib/i18n";
 
 const futuraLight = {
@@ -17,13 +16,41 @@ const futuraLight = {
   fontWeight: 300,
 };
 
+function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
+  if (!parsed) return defaultSiteContent;
+
+  return {
+    ...defaultSiteContent,
+    ...parsed,
+    oeuvres: {
+      ...defaultSiteContent.oeuvres,
+      ...(parsed.oeuvres ?? {}),
+      items: parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items,
+    },
+  };
+}
+
 export default function OeuvresIntroSection() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [lang, setLang] = useState<Lang>("fr");
 
   useEffect(() => {
-    const loadData = () => {
-      setContent(getMergedSiteContent());
+    const loadData = async () => {
+      try {
+        const res = await fetch("/api/site-content", {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          setContent(defaultSiteContent);
+        } else {
+          const data = await res.json();
+          setContent(mergeSiteContent(data));
+        }
+      } catch (error) {
+        console.error("Erreur chargement Aiven:", error);
+        setContent(defaultSiteContent);
+      }
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
 
@@ -37,11 +64,9 @@ export default function OeuvresIntroSection() {
     loadData();
 
     window.addEventListener("focus", loadData);
-    window.addEventListener("storage", loadData);
 
     return () => {
       window.removeEventListener("focus", loadData);
-      window.removeEventListener("storage", loadData);
     };
   }, []);
 

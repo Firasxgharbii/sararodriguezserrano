@@ -8,12 +8,10 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import {
   defaultSiteContent,
-  SiteContent,
-  STORAGE_KEY,
-  Lang,
+  type SiteContent,
+  type Lang,
   LANG_STORAGE_KEY,
 } from "../../lib/siteContent";
-
 import { t } from "../../lib/i18n";
 
 type ParsedSiteContent = Partial<SiteContent> & {
@@ -23,7 +21,86 @@ type ParsedSiteContent = Partial<SiteContent> & {
   oeuvres?: Partial<SiteContent["oeuvres"]> & {
     items?: any[];
   };
+  portfolio?: SiteContent["portfolio"];
 };
+
+function mergeSiteContent(parsed: ParsedSiteContent | null): SiteContent {
+  if (!parsed) return defaultSiteContent;
+
+  return {
+    ...defaultSiteContent,
+    ...parsed,
+
+    home: {
+      ...defaultSiteContent.home,
+      ...(parsed.home ?? {}),
+      heroImageStyle: {
+        ...defaultSiteContent.home.heroImageStyle,
+        ...(parsed.home?.heroImageStyle ?? {}),
+      },
+      gallery: {
+        ...defaultSiteContent.home.gallery,
+        ...(parsed.home?.gallery ?? {}),
+        works: (
+          parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works
+        ).map((item: any, index: number) => ({
+          ...(defaultSiteContent.home.gallery.works[index] ?? {}),
+          ...item,
+        })),
+      },
+    },
+
+    about: {
+      ...defaultSiteContent.about,
+      ...(parsed.about ?? {}),
+      profileImage: {
+        ...defaultSiteContent.about.profileImage,
+        ...(parsed.about?.profileImage ?? {}),
+      },
+      publications:
+        parsed.about?.publications ?? defaultSiteContent.about.publications,
+      collections:
+        parsed.about?.collections ?? defaultSiteContent.about.collections,
+      exhibitions:
+        parsed.about?.exhibitions ?? defaultSiteContent.about.exhibitions,
+      formations:
+        parsed.about?.formations ?? defaultSiteContent.about.formations,
+      distinctions:
+        parsed.about?.distinctions ?? defaultSiteContent.about.distinctions,
+    },
+
+    contact: {
+      ...defaultSiteContent.contact,
+      ...(parsed.contact ?? {}),
+      contactImage: {
+        ...defaultSiteContent.contact.contactImage,
+        ...(parsed.contact?.contactImage ?? {}),
+      },
+    },
+
+    oeuvres: {
+      ...defaultSiteContent.oeuvres,
+      ...(parsed.oeuvres ?? {}),
+      items: (
+        parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items
+      ).map((item: any, index: number) => ({
+        ...(defaultSiteContent.oeuvres.items[index] ?? {}),
+        ...item,
+        galleryImages:
+          item?.galleryImages ??
+          defaultSiteContent.oeuvres.items[index]?.galleryImages ??
+          [],
+      })),
+    },
+
+    portfolio: (parsed.portfolio ?? defaultSiteContent.portfolio).map(
+      (item: any, index: number) => ({
+        ...(defaultSiteContent.portfolio[index] ?? {}),
+        ...item,
+      })
+    ),
+  };
+}
 
 export default function OeuvresPageClient() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
@@ -31,85 +108,24 @@ export default function OeuvresPageClient() {
   const [lang, setLang] = useState<Lang>("fr");
 
   useEffect(() => {
-    const loadData = () => {
-      const stored = localStorage.getItem(STORAGE_KEY);
+    const loadData = async () => {
+      try {
+        const res = await fetch("/api/site-content", {
+          cache: "no-store",
+        });
 
-      if (!stored) {
-        setContent(defaultSiteContent);
-      } else {
-        try {
-          const parsed: ParsedSiteContent = JSON.parse(stored);
-
-          setContent({
-            ...defaultSiteContent,
-            ...parsed,
-
-            home: {
-              ...defaultSiteContent.home,
-              ...(parsed.home ?? {}),
-              heroImageStyle: {
-                ...defaultSiteContent.home.heroImageStyle,
-                ...(parsed.home?.heroImageStyle ?? {}),
-              },
-            },
-
-            about: {
-              ...defaultSiteContent.about,
-              ...(parsed.about ?? {}),
-              profileImage: {
-                ...defaultSiteContent.about.profileImage,
-                ...(parsed.about?.profileImage ?? {}),
-              },
-              publications:
-                parsed.about?.publications ??
-                defaultSiteContent.about.publications,
-              collections:
-                parsed.about?.collections ??
-                defaultSiteContent.about.collections,
-              exhibitions:
-                parsed.about?.exhibitions ??
-                defaultSiteContent.about.exhibitions,
-              formations:
-                parsed.about?.formations ??
-                defaultSiteContent.about.formations,
-              distinctions:
-                parsed.about?.distinctions ??
-                defaultSiteContent.about.distinctions,
-            },
-
-            contact: {
-              ...defaultSiteContent.contact,
-              ...(parsed.contact ?? {}),
-              contactImage: {
-                ...defaultSiteContent.contact.contactImage,
-                ...(parsed.contact?.contactImage ?? {}),
-              },
-            },
-
-            oeuvres: {
-              ...defaultSiteContent.oeuvres,
-              ...(parsed.oeuvres ?? {}),
-              items: (
-                parsed.oeuvres?.items ??
-                defaultSiteContent.oeuvres.items
-              ).map((item: any, index: number) => ({
-                ...(defaultSiteContent.oeuvres.items[index] ?? {}),
-                ...item,
-                galleryImages:
-                  item?.galleryImages ??
-                  defaultSiteContent.oeuvres.items[index]?.galleryImages ??
-                  [],
-              })),
-            },
-          });
-        } catch {
+        if (!res.ok) {
           setContent(defaultSiteContent);
+        } else {
+          const data = await res.json();
+          setContent(mergeSiteContent(data));
         }
+      } catch (error) {
+        console.error("Erreur chargement Aiven:", error);
+        setContent(defaultSiteContent);
       }
 
-      const savedLang = localStorage.getItem(
-        LANG_STORAGE_KEY
-      ) as Lang | null;
+      const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
 
       if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
         setLang(savedLang);
@@ -123,11 +139,9 @@ export default function OeuvresPageClient() {
     loadData();
 
     window.addEventListener("focus", loadData);
-    window.addEventListener("storage", loadData);
 
     return () => {
       window.removeEventListener("focus", loadData);
-      window.removeEventListener("storage", loadData);
     };
   }, []);
 
@@ -135,17 +149,16 @@ export default function OeuvresPageClient() {
 
   const oeuvres = content.oeuvres;
 
-  const visibleItems = oeuvres.items.filter(
-    (item) => item.title || item.image
-  );
+  const visibleItems = oeuvres.items.filter((item) => {
+    const title = t(item.title, lang);
+    return title || item.image;
+  });
 
   return (
     <>
       <Navbar />
 
       <main className="min-h-screen bg-[#f7f5f1] text-[#1a1a1a]">
-        
-        {/* HERO */}
         <section className="relative w-full overflow-hidden bg-[#f7f4f3]">
           <div className="absolute inset-0">
             <Image
@@ -153,6 +166,7 @@ export default function OeuvresPageClient() {
               alt="Œuvres"
               fill
               priority
+              sizes="100vw"
               className="object-cover"
             />
           </div>
@@ -181,8 +195,10 @@ export default function OeuvresPageClient() {
           </div>
         </section>
 
-        {/* GRID */}
-        <section id="gallery" className="mx-auto max-w-[1550px] px-8 pt-24 pb-20">
+        <section
+          id="gallery"
+          className="mx-auto max-w-[1550px] px-8 pb-20 pt-24"
+        >
           <div className="grid grid-cols-1 gap-24 sm:grid-cols-2 lg:grid-cols-3">
             {visibleItems.map((item) => (
               <Link key={item.id} href={`/oeuvres/${item.slug}`}>
@@ -190,8 +206,9 @@ export default function OeuvresPageClient() {
                   <div className="relative aspect-square overflow-hidden bg-[#e8e4df]">
                     <Image
                       src={item.image || "/5312.jpg"}
-                      alt="Œuvre"
+                      alt={t(item.title, lang) || "Œuvre"}
                       fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover transition group-hover:scale-[1.03]"
                     />
                   </div>
@@ -205,14 +222,14 @@ export default function OeuvresPageClient() {
           </div>
         </section>
 
-        {/* QUOTE */}
         <section className="mt-20 w-full bg-[#f7f4f3]">
           <div className="grid min-h-[720px] lg:grid-cols-2">
             <div className="relative min-h-[420px]">
               <Image
                 src={oeuvres.quoteImage || "/IMAGE Grande.jpg"}
-                alt="Citation"
+                alt={t(oeuvres.quoteAuthor, lang) || "Citation"}
                 fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
             </div>
@@ -232,7 +249,6 @@ export default function OeuvresPageClient() {
             </div>
           </div>
         </section>
-
       </main>
 
       <Footer />

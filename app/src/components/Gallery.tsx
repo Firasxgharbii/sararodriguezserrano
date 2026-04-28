@@ -6,8 +6,8 @@ import {
   defaultSiteContent,
   LANG_STORAGE_KEY,
   type Lang,
+  type SiteContent,
 } from "../../lib/siteContent";
-import { getSiteContent } from "../../lib/getSiteContent";
 
 const futuraLight = {
   fontFamily:
@@ -28,24 +28,64 @@ function getSavedLang(): Lang {
   return "fr";
 }
 
+function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
+  if (!parsed) return defaultSiteContent;
+
+  return {
+    ...defaultSiteContent,
+    ...parsed,
+    home: {
+      ...defaultSiteContent.home,
+      ...(parsed.home ?? {}),
+      heroImageStyle: {
+        ...defaultSiteContent.home.heroImageStyle,
+        ...(parsed.home?.heroImageStyle ?? {}),
+      },
+      gallery: {
+        ...defaultSiteContent.home.gallery,
+        ...(parsed.home?.gallery ?? {}),
+        works: (
+          parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works
+        ).map((item: any, index: number) => ({
+          ...(defaultSiteContent.home.gallery.works[index] ?? {}),
+          ...item,
+        })),
+      },
+    },
+  };
+}
+
 export default function Gallery() {
-  const [content, setContent] = useState(defaultSiteContent);
+  const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [lang, setLang] = useState<Lang>("fr");
 
   useEffect(() => {
-    const loadContent = () => {
-      setContent(getSiteContent());
+    const loadContent = async () => {
+      try {
+        const res = await fetch("/api/site-content", {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          setContent(defaultSiteContent);
+        } else {
+          const data = await res.json();
+          setContent(mergeSiteContent(data));
+        }
+      } catch (error) {
+        console.error("Erreur chargement Aiven:", error);
+        setContent(defaultSiteContent);
+      }
+
       setLang(getSavedLang());
     };
 
     loadContent();
 
     window.addEventListener("focus", loadContent);
-    window.addEventListener("storage", loadContent);
 
     return () => {
       window.removeEventListener("focus", loadContent);
-      window.removeEventListener("storage", loadContent);
     };
   }, []);
 
@@ -60,7 +100,7 @@ export default function Gallery() {
             className="mb-4 text-[10px] tracking-[0.42em] text-neutral-400"
             style={futuraLight}
           >
-            {gallery.badge[lang]}
+            {gallery.badge?.[lang]}
           </p>
 
           <h2
@@ -70,7 +110,7 @@ export default function Gallery() {
               letterSpacing: "0.12em",
             }}
           >
-            {gallery.title[lang]}
+            {gallery.title?.[lang]}
           </h2>
 
           <div className="mx-auto mb-6 h-[1px] w-24 bg-neutral-300" />
@@ -81,10 +121,11 @@ export default function Gallery() {
             <div className="overflow-hidden bg-white shadow-[0_18px_50px_rgba(0,0,0,0.06)]">
               <div className="relative h-[72vh] min-h-[420px] w-full overflow-hidden">
                 <Image
-                  src={gallery.featuredImage}
-                  alt={gallery.featuredTitle[lang]}
+                  src={gallery.featuredImage || "/5312.jpg"}
+                  alt={gallery.featuredTitle?.[lang] || "Œuvre"}
                   fill
                   priority
+                  sizes="100vw"
                   className="object-cover transition duration-700 group-hover:scale-[1.02]"
                 />
               </div>
@@ -95,7 +136,7 @@ export default function Gallery() {
                 className="mb-3 text-[10px] tracking-[0.38em] text-neutral-400"
                 style={futuraLight}
               >
-                {gallery.featuredBadge[lang]}
+                {gallery.featuredBadge?.[lang]}
               </p>
 
               <h3
@@ -105,11 +146,11 @@ export default function Gallery() {
                   letterSpacing: "0.08em",
                 }}
               >
-                {gallery.featuredTitle[lang]}
+                {gallery.featuredTitle?.[lang]}
               </h3>
 
               <p className="mt-5 max-w-2xl text-[17px] leading-8 text-neutral-600">
-                {gallery.featuredText[lang]}
+                {gallery.featuredText?.[lang]}
               </p>
             </div>
           </article>
@@ -121,9 +162,10 @@ export default function Gallery() {
               <div className="overflow-hidden bg-white shadow-[0_14px_36px_rgba(0,0,0,0.05)]">
                 <div className="relative h-[360px] w-full overflow-hidden">
                   <Image
-                    src={work.src}
-                    alt={work.title[lang]}
+                    src={work.src || "/5312.jpg"}
+                    alt={work.title?.[lang] || "Œuvre"}
                     fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition duration-700 group-hover:scale-[1.04]"
                   />
                 </div>
@@ -134,7 +176,7 @@ export default function Gallery() {
                   className="mb-2 text-[10px] tracking-[0.34em] text-neutral-400"
                   style={futuraLight}
                 >
-                  {work.category[lang]}
+                  {work.category?.[lang]}
                 </p>
 
                 <h3
@@ -144,7 +186,7 @@ export default function Gallery() {
                     letterSpacing: "0.06em",
                   }}
                 >
-                  {work.title[lang]}
+                  {work.title?.[lang]}
                 </h3>
               </div>
             </article>

@@ -8,7 +8,6 @@ import {
   type Lang,
   LANG_STORAGE_KEY,
 } from "../../lib/siteContent";
-import { getSiteContent } from "../../lib/getSiteContent";
 import { t } from "../../lib/i18n";
 
 function getImageHeight(size: "small" | "medium" | "large") {
@@ -35,15 +34,53 @@ function getImageObjectPosition(position: "left" | "center" | "right") {
   }
 }
 
+function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
+  if (!parsed) return defaultSiteContent;
+
+  return {
+    ...defaultSiteContent,
+    ...parsed,
+    home: {
+      ...defaultSiteContent.home,
+      ...(parsed.home ?? {}),
+      heroImageStyle: {
+        ...defaultSiteContent.home.heroImageStyle,
+        ...(parsed.home?.heroImageStyle ?? {}),
+      },
+      gallery: {
+        ...defaultSiteContent.home.gallery,
+        ...(parsed.home?.gallery ?? {}),
+        works:
+          parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works,
+      },
+    },
+  };
+}
+
 export default function Hero() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [lang, setLang] = useState<Lang>("fr");
 
   useEffect(() => {
-    const loadContent = () => {
-      setContent(getSiteContent());
+    const loadContent = async () => {
+      try {
+        const res = await fetch("/api/site-content", {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          setContent(defaultSiteContent);
+        } else {
+          const data = await res.json();
+          setContent(mergeSiteContent(data));
+        }
+      } catch (error) {
+        console.error("Erreur chargement Aiven:", error);
+        setContent(defaultSiteContent);
+      }
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+
       if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
         setLang(savedLang);
       } else {
@@ -54,11 +91,9 @@ export default function Hero() {
     loadContent();
 
     window.addEventListener("focus", loadContent);
-    window.addEventListener("storage", loadContent);
 
     return () => {
       window.removeEventListener("focus", loadContent);
-      window.removeEventListener("storage", loadContent);
     };
   }, []);
 
@@ -79,7 +114,11 @@ export default function Hero() {
         <div className="grid grid-cols-1 items-center gap-10 md:gap-12 lg:grid-cols-2 lg:gap-20">
           <div className="relative order-1">
             <div className="relative overflow-hidden rounded-none shadow-[0_18px_45px_rgba(0,0,0,0.10)]">
-              <div className={`relative w-full ${getImageHeight(imageStyle.size)}`}>
+              <div
+                className={`relative w-full ${getImageHeight(
+                  imageStyle.size
+                )}`}
+              >
                 <Image
                   src={imageSrc}
                   alt="Sara Rodriguez Serrano"
@@ -114,13 +153,13 @@ export default function Hero() {
                 <span className="ml-3">→</span>
               </a>
 
-             <a
-  href="/about"
-  className="group inline-flex min-h-[56px] items-center justify-center rounded-full bg-[#9f9f9f] px-8 py-4 text-center text-sm font-medium uppercase tracking-[0.22em] text-white transition duration-300 hover:bg-[#8d8d8d]"
->
-  {t(hero.secondaryButton, lang)}
-  <span className="ml-3">→</span>
-</a>
+              <a
+                href="/about"
+                className="group inline-flex min-h-[56px] items-center justify-center rounded-full bg-[#9f9f9f] px-8 py-4 text-center text-sm font-medium uppercase tracking-[0.22em] text-white transition duration-300 hover:bg-[#8d8d8d]"
+              >
+                {t(hero.secondaryButton, lang)}
+                <span className="ml-3">→</span>
+              </a>
             </div>
           </div>
         </div>

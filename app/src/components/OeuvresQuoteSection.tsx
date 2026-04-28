@@ -8,18 +8,47 @@ import {
   type Lang,
   LANG_STORAGE_KEY,
 } from "../../lib/siteContent";
-import { getMergedSiteContent } from "../../lib/getSiteContent";
 import { t } from "../../lib/i18n";
+
+function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
+  if (!parsed) return defaultSiteContent;
+
+  return {
+    ...defaultSiteContent,
+    ...parsed,
+    oeuvres: {
+      ...defaultSiteContent.oeuvres,
+      ...(parsed.oeuvres ?? {}),
+      items: parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items,
+    },
+  };
+}
 
 export default function OeuvresQuoteSection() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [lang, setLang] = useState<Lang>("fr");
 
   useEffect(() => {
-    const loadData = () => {
-      setContent(getMergedSiteContent());
+    const loadData = async () => {
+      try {
+        const res = await fetch("/api/site-content", {
+          cache: "no-store",
+        });
+
+        const data = await res.json();
+
+        if (data) {
+          setContent(mergeSiteContent(data));
+        } else {
+          setContent(defaultSiteContent);
+        }
+      } catch (error) {
+        console.error("Erreur chargement contenu Aiven:", error);
+        setContent(defaultSiteContent);
+      }
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+
       if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
         setLang(savedLang);
       } else {
@@ -30,11 +59,9 @@ export default function OeuvresQuoteSection() {
     loadData();
 
     window.addEventListener("focus", loadData);
-    window.addEventListener("storage", loadData);
 
     return () => {
       window.removeEventListener("focus", loadData);
-      window.removeEventListener("storage", loadData);
     };
   }, []);
 

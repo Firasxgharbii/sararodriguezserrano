@@ -9,18 +9,46 @@ import {
   type Lang,
   LANG_STORAGE_KEY,
 } from "../../lib/siteContent";
-import { getMergedSiteContent } from "../../lib/getSiteContent";
 import { t } from "../../lib/i18n";
+
+function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
+  if (!parsed) return defaultSiteContent;
+
+  return {
+    ...defaultSiteContent,
+    ...parsed,
+    oeuvres: {
+      ...defaultSiteContent.oeuvres,
+      ...(parsed.oeuvres ?? {}),
+      items: parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items,
+    },
+  };
+}
 
 export default function OeuvresGallerySection() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [lang, setLang] = useState<Lang>("fr");
 
   useEffect(() => {
-    const loadData = () => {
-      setContent(getMergedSiteContent());
+    const loadData = async () => {
+      try {
+        const res = await fetch("/api/site-content", {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          setContent(defaultSiteContent);
+        } else {
+          const data = await res.json();
+          setContent(mergeSiteContent(data));
+        }
+      } catch (error) {
+        console.error("Erreur chargement Aiven:", error);
+        setContent(defaultSiteContent);
+      }
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+
       if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
         setLang(savedLang);
       } else {
@@ -31,11 +59,9 @@ export default function OeuvresGallerySection() {
     loadData();
 
     window.addEventListener("focus", loadData);
-    window.addEventListener("storage", loadData);
 
     return () => {
       window.removeEventListener("focus", loadData);
-      window.removeEventListener("storage", loadData);
     };
   }, []);
 
@@ -46,7 +72,7 @@ export default function OeuvresGallerySection() {
   return (
     <section
       id="gallery"
-      className="mx-auto max-w-[1550px] px-8 pt-24 pb-20 md:px-12 md:pt-28 md:pb-28 lg:px-16 lg:pt-32"
+      className="mx-auto max-w-[1550px] px-8 pb-20 pt-24 md:px-12 md:pb-28 md:pt-28 lg:px-16 lg:pt-32"
     >
       <div className="grid grid-cols-1 gap-x-24 gap-y-24 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-28">
         {items.map((oeuvre) => (
