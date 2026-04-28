@@ -167,8 +167,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                 Œuvre
               </p>
 
-              <h1 className="futura-text max-w-[620px] text-[34px] font-light leading-[1.15] tracking-[0.16em] text-[#8b7771] md:text-[58px]">
-                {title}
+<h1 className="futura-text max-w-[900px] text-[54px] font-light leading-[0.95] tracking-[0.12em] text-[#3f3f3f] sm:text-[72px] md:text-[96px] lg:text-[118px]">                {title}
               </h1>
             </div>
 
