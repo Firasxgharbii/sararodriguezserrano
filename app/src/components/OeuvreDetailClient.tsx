@@ -24,6 +24,16 @@ type ParsedSiteContent = Partial<SiteContent> & {
   };
 };
 
+function isAvailable(value: string) {
+  const text = value.toLowerCase().trim();
+
+  return (
+    text.includes("disponible") ||
+    text.includes("available") ||
+    text.includes("disponibilidad")
+  );
+}
+
 export default function OeuvreDetailClient({ slug }: { slug: string }) {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [ready, setReady] = useState(false);
@@ -89,8 +99,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
               ...defaultSiteContent.oeuvres,
               ...(parsed.oeuvres ?? {}),
               items: (
-                parsed.oeuvres?.items ??
-                defaultSiteContent.oeuvres.items
+                parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items
               ).map((item: any, index: number) => ({
                 ...(defaultSiteContent.oeuvres.items[index] ?? {}),
                 ...item,
@@ -106,9 +115,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
         }
       }
 
-      const savedLang = localStorage.getItem(
-        LANG_STORAGE_KEY
-      ) as Lang | null;
+      const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
 
       if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
         setLang(savedLang);
@@ -137,6 +144,12 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
   if (!ready) return null;
   if (!oeuvre) notFound();
 
+  const title = t(oeuvre.galleryTitle, lang) || t(oeuvre.title, lang);
+  const subtitle = t(oeuvre.gallerySubtitle, lang) || t(oeuvre.description, lang);
+  const technique = t(oeuvre.technique, lang);
+  const availabilityText = t(oeuvre.availability, lang);
+  const available = isAvailable(availabilityText);
+
   const galleryImages = (oeuvre.galleryImages ?? []).filter(
     (img) => typeof img === "string" && img.trim() !== ""
   );
@@ -147,25 +160,28 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
 
       <main className="min-h-screen bg-[#ecebea] text-[#7f6e67]">
         <section className="mx-auto max-w-[1280px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-20">
-          
           <div className="grid grid-cols-1 gap-10 md:grid-cols-[1.5fr_0.8fr] md:items-start">
-            
             <div>
-              <h1 className="max-w-4xl text-[28px] font-light leading-[1.2] tracking-[0.12em] text-[#8e7a72] md:text-[52px]">
-                {t(oeuvre.galleryTitle, lang) || t(oeuvre.title, lang)}
+              <p className="futura-text mb-5 text-[11px] uppercase tracking-[0.35em] text-[#a7958e]">
+                Œuvre
+              </p>
+
+              <h1 className="futura-text max-w-4xl text-[30px] font-light leading-[1.15] tracking-[0.16em] text-[#81716b] md:text-[54px]">
+                {title}
               </h1>
             </div>
 
             <div className="md:pt-3">
-              <p className="text-[16px] leading-8 text-[#a28f87]">
-                {t(oeuvre.gallerySubtitle, lang) ||
-                  t(oeuvre.description, lang)}
-              </p>
+              {subtitle && (
+                <p className="text-[16px] leading-8 text-[#a28f87]">
+                  {subtitle}
+                </p>
+              )}
 
               <div className="mt-8">
                 <Link
                   href="/oeuvres"
-                  className="inline-flex items-center text-[12px] uppercase tracking-[0.22em] text-[#9b847b] transition-opacity duration-300 hover:opacity-70"
+                  className="futura-text inline-flex items-center text-[12px] uppercase tracking-[0.25em] text-[#9b847b] transition-opacity duration-300 hover:opacity-70"
                 >
                   ← Retour aux œuvres
                 </Link>
@@ -174,38 +190,108 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
           </div>
 
           {galleryImages.length > 0 && (
-            <div className="mt-24 columns-1 gap-20 sm:columns-2 lg:gap-24">
+            <div className="mt-24 grid grid-cols-1 gap-x-20 gap-y-24 sm:grid-cols-2">
               {galleryImages.map((image, index) => (
-                <div
-                  key={`${oeuvre.slug}-${index}`}
-                  className="mb-20 break-inside-avoid overflow-hidden"
-                >
-                  <Image
-                    src={image}
-                    alt={`${t(oeuvre.title, lang)} ${index + 1}`}
-                    width={1400}
-                    height={1800}
-                    className="h-auto w-full object-cover"
-                  />
-                </div>
+                <article key={`${oeuvre.slug}-${index}`} className="group">
+                  <div className="overflow-hidden bg-white">
+                    <Image
+                      src={image}
+                      alt={`${title} ${index + 1}`}
+                      width={1400}
+                      height={1800}
+                      className="h-auto w-full object-cover transition duration-700 group-hover:scale-[1.015]"
+                    />
+                  </div>
+
+                  <div className="mt-6 border-t border-[#d9d2ce] pt-5">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <h2 className="futura-text text-[17px] uppercase tracking-[0.22em] text-[#7d6d67]">
+                          {title}
+                        </h2>
+
+                        <div className="mt-4 grid gap-2 text-[14px] leading-7 text-[#97867f]">
+                          {oeuvre.year && (
+                            <p>
+                              <span className="futura-text uppercase tracking-[0.18em] text-[#7c6b65]">
+                                Année :
+                              </span>{" "}
+                              {oeuvre.year}
+                            </p>
+                          )}
+
+                          {technique && (
+                            <p>
+                              <span className="futura-text uppercase tracking-[0.18em] text-[#7c6b65]">
+                                Technique :
+                              </span>{" "}
+                              {technique}
+                            </p>
+                          )}
+
+                          {oeuvre.dimensions && (
+                            <p>
+                              <span className="futura-text uppercase tracking-[0.18em] text-[#7c6b65]">
+                                Dimensions :
+                              </span>{" "}
+                              {oeuvre.dimensions}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {availabilityText && (
+                        <div
+                          className={`futura-text inline-flex w-fit items-center rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.22em] ${
+                            available
+                              ? "border-green-600/30 bg-green-50 text-green-700"
+                              : "border-red-600/30 bg-red-50 text-red-700"
+                          }`}
+                        >
+                          <span
+                            className={`mr-2 h-2 w-2 rounded-full ${
+                              available ? "bg-green-600" : "bg-red-600"
+                            }`}
+                          />
+                          {availabilityText}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </article>
               ))}
             </div>
           )}
 
-          <div className="mt-12 flex justify-end">
+          <div className="mt-16 flex justify-end">
             <Link
               href="/oeuvres"
-              className="inline-flex items-center gap-3 text-[12px] uppercase tracking-[0.22em] text-[#b09086] transition-opacity duration-300 hover:opacity-70"
+              className="futura-text inline-flex items-center gap-3 text-[12px] uppercase tracking-[0.25em] text-[#b09086] transition-opacity duration-300 hover:opacity-70"
             >
               Retour
               <span className="text-lg">›</span>
             </Link>
           </div>
-
         </section>
       </main>
 
       <Footer />
+
+      <style jsx>{`
+        @font-face {
+          font-family: "FuturaLightCustom";
+          src: url("/fonts/Futura-Light.woff2") format("woff2");
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        .futura-text {
+          font-family: "FuturaLightCustom", "Futura W02 Light", "Futura PT",
+            "Futura", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+          font-weight: 300;
+        }
+      `}</style>
     </>
   );
 }
