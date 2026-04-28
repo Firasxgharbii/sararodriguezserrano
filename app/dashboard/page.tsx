@@ -46,7 +46,8 @@ export default function DashboardPage() {
             ...defaultSiteContent.home.gallery,
             ...(parsed.home?.gallery ?? {}),
             works: (
-              parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works
+              parsed.home?.gallery?.works ??
+              defaultSiteContent.home.gallery.works
             ).map((item: any, index: number) => ({
               ...(defaultSiteContent.home.gallery.works[index] ?? {}),
               ...item,
@@ -131,11 +132,9 @@ export default function DashboardPage() {
             <p className="text-[12px] uppercase tracking-[0.35em] text-[#b49686]">
               Dashboard global
             </p>
-
             <h1 className="mt-3 text-4xl font-light tracking-[-0.04em] text-[#191614] sm:text-5xl">
               Gestion de toutes les pages
             </h1>
-
             <p className="mt-4 max-w-2xl text-[16px] leading-8 text-[#8f7d76]">
               Modifiez les textes, les images et les œuvres depuis une seule
               interface.
@@ -224,7 +223,10 @@ export default function DashboardPage() {
                           ...content,
                           home: {
                             ...content.home,
-                            gallery: { ...content.home.gallery, badge: value },
+                            gallery: {
+                              ...content.home.gallery,
+                              badge: value,
+                            },
                           },
                         })
                       }
@@ -238,7 +240,10 @@ export default function DashboardPage() {
                           ...content,
                           home: {
                             ...content.home,
-                            gallery: { ...content.home.gallery, title: value },
+                            gallery: {
+                              ...content.home.gallery,
+                              title: value,
+                            },
                           },
                         })
                       }
@@ -363,10 +368,7 @@ export default function DashboardPage() {
                               value={work.category}
                               onChange={(value) => {
                                 const updated = [...content.home.gallery.works];
-                                updated[index] = {
-                                  ...updated[index],
-                                  category: value,
-                                };
+                                updated[index] = { ...updated[index], category: value };
                                 setContent({
                                   ...content,
                                   home: {
@@ -614,7 +616,11 @@ export default function DashboardPage() {
                           description: { fr: "", en: "", es: "" },
                           technique: { fr: "", en: "", es: "" },
                           dimensions: '24 x 24"',
-                          availability: { fr: "", en: "", es: "" },
+                          availability: {
+                            fr: "Disponible",
+                            en: "Available",
+                            es: "Disponible",
+                          },
                           image: "",
                           galleryTitle: { fr: "", en: "", es: "" },
                           gallerySubtitle: { fr: "", en: "", es: "" },
@@ -637,7 +643,10 @@ export default function DashboardPage() {
 
                   <div className="space-y-8">
                     {content.oeuvres.items.map((item, index) => (
-                      <div key={item.id} className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6">
+                      <div
+                        key={item.id}
+                        className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6"
+                      >
                         <div className="mb-5 flex items-center justify-between gap-4">
                           <h3 className="text-xl font-medium text-[#201c19]">
                             Œuvre {index + 1}
@@ -717,7 +726,7 @@ export default function DashboardPage() {
                             />
 
                             <Field
-                              label="Dimensions"
+                              label="Dimensions du cadre"
                               value={item.dimensions}
                               onChange={(value) => {
                                 const updated = [...content.oeuvres.items];
@@ -733,6 +742,40 @@ export default function DashboardPage() {
                               }}
                             />
                           </div>
+
+                          <LocalizedField
+                            label="Technique"
+                            value={item.technique}
+                            onChange={(value) => {
+                              const updated = [...content.oeuvres.items];
+                              updated[index].technique = value;
+
+                              setContent({
+                                ...content,
+                                oeuvres: {
+                                  ...content.oeuvres,
+                                  items: updated,
+                                },
+                              });
+                            }}
+                          />
+
+                          <LocalizedField
+                            label="Disponibilité"
+                            value={item.availability}
+                            onChange={(value) => {
+                              const updated = [...content.oeuvres.items];
+                              updated[index].availability = value;
+
+                              setContent({
+                                ...content,
+                                oeuvres: {
+                                  ...content.oeuvres,
+                                  items: updated,
+                                },
+                              });
+                            }}
+                          />
 
                           <ImageUploadField
                             label="Image carte"
@@ -825,7 +868,10 @@ export default function DashboardPage() {
                             {(item.galleryImages ?? []).length > 0 ? (
                               <div className="grid gap-5 sm:grid-cols-2">
                                 {(item.galleryImages ?? []).map((galleryImage, imageIndex) => (
-                                  <div key={`${item.id}-gallery-${imageIndex}`} className="rounded-[22px] border border-[#eadfd8] bg-[#fcfaf8] p-4">
+                                  <div
+                                    key={`${item.id}-gallery-${imageIndex}`}
+                                    className="rounded-[22px] border border-[#eadfd8] bg-[#fcfaf8] p-4"
+                                  >
                                     <div className="mb-4 flex items-center justify-between gap-3">
                                       <p className="text-sm font-medium text-[#5f534d]">
                                         Image galerie {imageIndex + 1}
@@ -881,7 +927,6 @@ export default function DashboardPage() {
                                 <p className="text-sm font-medium text-[#5f534d]">
                                   Aucune image galerie ajoutée.
                                 </p>
-
                                 <p className="mt-2 text-sm text-[#8a7971]">
                                   Cliquez sur “Ajouter une image” pour commencer.
                                 </p>
@@ -1051,9 +1096,21 @@ function LocalizedField({
       <h3 className="mb-5 text-lg font-medium text-[#201c19]">{label}</h3>
 
       <div className="grid gap-5 sm:grid-cols-3">
-        <Field label="Français" value={value?.fr ?? ""} onChange={(next) => onChange({ ...value, fr: next })} />
-        <Field label="English" value={value?.en ?? ""} onChange={(next) => onChange({ ...value, en: next })} />
-        <Field label="Español" value={value?.es ?? ""} onChange={(next) => onChange({ ...value, es: next })} />
+        <Field
+          label="Français"
+          value={value?.fr ?? ""}
+          onChange={(next) => onChange({ ...value, fr: next })}
+        />
+        <Field
+          label="English"
+          value={value?.en ?? ""}
+          onChange={(next) => onChange({ ...value, en: next })}
+        />
+        <Field
+          label="Español"
+          value={value?.es ?? ""}
+          onChange={(next) => onChange({ ...value, es: next })}
+        />
       </div>
     </div>
   );
@@ -1073,9 +1130,21 @@ function LocalizedTextareaField({
       <h3 className="mb-5 text-lg font-medium text-[#201c19]">{label}</h3>
 
       <div className="grid gap-5">
-        <TextareaField label="Français" value={value?.fr ?? ""} onChange={(next) => onChange({ ...value, fr: next })} />
-        <TextareaField label="English" value={value?.en ?? ""} onChange={(next) => onChange({ ...value, en: next })} />
-        <TextareaField label="Español" value={value?.es ?? ""} onChange={(next) => onChange({ ...value, es: next })} />
+        <TextareaField
+          label="Français"
+          value={value?.fr ?? ""}
+          onChange={(next) => onChange({ ...value, fr: next })}
+        />
+        <TextareaField
+          label="English"
+          value={value?.en ?? ""}
+          onChange={(next) => onChange({ ...value, en: next })}
+        />
+        <TextareaField
+          label="Español"
+          value={value?.es ?? ""}
+          onChange={(next) => onChange({ ...value, es: next })}
+        />
       </div>
     </div>
   );
@@ -1095,8 +1164,17 @@ function TimelineLocalizedEditor({
       <h3 className="mb-5 text-lg font-medium text-[#201c19]">{title}</h3>
 
       <div className="grid gap-5">
-        <Field label="Année" value={item.year} onChange={(year) => onChange({ ...item, year })} />
-        <LocalizedTextareaField label="Texte" value={item.text} onChange={(text) => onChange({ ...item, text })} />
+        <Field
+          label="Année"
+          value={item.year}
+          onChange={(year) => onChange({ ...item, year })}
+        />
+
+        <LocalizedTextareaField
+          label="Texte"
+          value={item.text}
+          onChange={(text) => onChange({ ...item, text })}
+        />
       </div>
     </div>
   );
@@ -1148,7 +1226,11 @@ function ImageStyleEditor({
       <h3 className="mb-5 text-lg font-medium text-[#201c19]">{title}</h3>
 
       <div className="grid gap-5">
-        <ImageUploadField label="Source image" value={value.src} onChange={(newValue) => onChange({ ...value, src: newValue })} />
+        <ImageUploadField
+          label="Source image"
+          value={value.src}
+          onChange={(newValue) => onChange({ ...value, src: newValue })}
+        />
 
         <div className="grid gap-5 sm:grid-cols-3">
           <SelectField
@@ -1283,7 +1365,8 @@ function ImageUploadField({
         )}
 
         <p className="mt-4 text-xs leading-6 text-[#8a7971]">
-          Formats acceptés : JPG, PNG, WEBP. L’image est envoyée vers Cloudinary.
+          Formats acceptés : JPG, PNG, WEBP. L’image est envoyée vers
+          Cloudinary.
         </p>
       </div>
     </div>
