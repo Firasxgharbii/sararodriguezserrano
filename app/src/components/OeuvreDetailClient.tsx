@@ -37,6 +37,16 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
   };
 }
 
+function isAvailable(value: string) {
+  const text = value.toLowerCase().trim();
+
+  return (
+    text.includes("disponible") ||
+    text.includes("available") ||
+    text.includes("disponibilidad")
+  );
+}
+
 export default function OeuvreDetailClient({ slug }: { slug: string }) {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [ready, setReady] = useState(false);
@@ -72,7 +82,6 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
     };
 
     loadData();
-
     window.addEventListener("focus", loadData);
 
     return () => {
@@ -90,6 +99,10 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
   const title = t(oeuvre.galleryTitle, lang) || t(oeuvre.title, lang);
   const subtitle =
     t(oeuvre.gallerySubtitle, lang) || t(oeuvre.description, lang);
+
+  const technique = t(oeuvre.technique, lang);
+  const availabilityText = t(oeuvre.availability, lang);
+  const available = availabilityText ? isAvailable(availabilityText) : false;
 
   const galleryImages = (oeuvre.galleryImages ?? []).filter(
     (img) => typeof img === "string" && img.trim() !== ""
@@ -130,10 +143,66 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
           </div>
 
           {galleryImages.length > 0 && (
-            <div className="mt-24 grid grid-cols-1 gap-x-20 gap-y-24 sm:grid-cols-2">
+            <div className="mt-24 grid grid-cols-1 gap-x-20 gap-y-28 sm:grid-cols-2">
               {galleryImages.map((image, index) => (
                 <article key={`${oeuvre.slug}-${index}`} className="group">
-                  <div className="overflow-hidden bg-white">
+                  <div className="mb-6 border-t border-[#d6ccc7] pt-5">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <h2 className="futura-text text-[15px] uppercase tracking-[0.22em] text-[#6f625d]">
+                          {title}
+                        </h2>
+
+                        <div className="mt-4 grid gap-2 text-[14px] leading-7 text-[#8d7d76]">
+                          {oeuvre.dimensions && (
+                            <p>
+                              <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
+                                Dimensions :
+                              </span>{" "}
+                              {oeuvre.dimensions}
+                            </p>
+                          )}
+
+                          {oeuvre.year && (
+                            <p>
+                              <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
+                                Année :
+                              </span>{" "}
+                              {oeuvre.year}
+                            </p>
+                          )}
+
+                          {technique && (
+                            <p>
+                              <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
+                                Technique :
+                              </span>{" "}
+                              {technique}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {availabilityText && (
+                        <div
+                          className={`futura-text inline-flex w-fit items-center rounded-full border px-4 py-2 text-[10px] uppercase tracking-[0.2em] ${
+                            available
+                              ? "border-green-600/25 bg-green-50 text-green-700"
+                              : "border-red-600/25 bg-red-50 text-red-700"
+                          }`}
+                        >
+                          <span
+                            className={`mr-2 h-2 w-2 rounded-full ${
+                              available ? "bg-green-600" : "bg-red-600"
+                            }`}
+                          />
+                          {availabilityText}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)]">
                     <Image
                       src={image}
                       alt={`${title} ${index + 1}`}
@@ -150,6 +219,26 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
       </main>
 
       <Footer />
+
+      <style jsx>{`
+        @font-face {
+          font-family: "FuturaLightCustom";
+          src: url("/fonts/Futura-Light.woff2") format("woff2");
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        .futura-text {
+          font-family: "FuturaLightCustom", "Futura W02 Light", "Futura PT",
+            "Futura", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+          font-weight: 300;
+        }
+
+        .serif-text {
+          font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+        }
+      `}</style>
     </>
   );
 }

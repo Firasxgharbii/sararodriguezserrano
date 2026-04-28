@@ -146,7 +146,7 @@ export default function Hero() {
 
             <div className="mt-8 flex flex-col gap-4 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-5">
               <a
-                href="#works"
+                href="/oeuvres"
                 className="group inline-flex min-h-[56px] items-center justify-center rounded-full bg-[#9f9f9f] px-8 py-4 text-center text-sm font-medium uppercase tracking-[0.22em] text-white transition duration-300 hover:bg-[#8d8d8d]"
               >
                 {t(hero.primaryButton, lang)}
