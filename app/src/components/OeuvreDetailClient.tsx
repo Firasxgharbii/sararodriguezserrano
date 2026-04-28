@@ -71,12 +71,11 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
       }
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
-
-      if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
-        setLang(savedLang);
-      } else {
-        setLang("fr");
-      }
+      setLang(
+        savedLang === "fr" || savedLang === "en" || savedLang === "es"
+          ? savedLang
+          : "fr"
+      );
 
       setReady(true);
     };
@@ -84,9 +83,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
     loadData();
     window.addEventListener("focus", loadData);
 
-    return () => {
-      window.removeEventListener("focus", loadData);
-    };
+    return () => window.removeEventListener("focus", loadData);
   }, []);
 
   const oeuvre = useMemo(() => {
