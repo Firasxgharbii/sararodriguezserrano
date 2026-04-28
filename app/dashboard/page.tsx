@@ -12,6 +12,9 @@ import DatabaseSection from "./DatabaseSection";
 
 type Tab = "home" | "about" | "contact" | "oeuvres" | "portfolio" | "database";
 
+const MAX_OEUVRES = 20;
+const MAX_GALLERY_IMAGES = 20;
+
 export default function DashboardPage() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [activeTab, setActiveTab] = useState<Tab>("home");
@@ -42,12 +45,12 @@ export default function DashboardPage() {
           gallery: {
             ...defaultSiteContent.home.gallery,
             ...(parsed.home?.gallery ?? {}),
-            works: (parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works).map(
-              (item: any, index: number) => ({
-                ...(defaultSiteContent.home.gallery.works[index] ?? {}),
-                ...item,
-              })
-            ),
+            works: (
+              parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works
+            ).map((item: any, index: number) => ({
+              ...(defaultSiteContent.home.gallery.works[index] ?? {}),
+              ...item,
+            })),
           },
         },
 
@@ -82,16 +85,17 @@ export default function DashboardPage() {
         oeuvres: {
           ...defaultSiteContent.oeuvres,
           ...(parsed.oeuvres ?? {}),
-          items: (parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items).map(
-            (item: any, index: number) => ({
+          items: (
+            parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items
+          )
+            .slice(0, MAX_OEUVRES)
+            .map((item: any, index: number) => ({
               ...(defaultSiteContent.oeuvres.items[index] ?? {}),
               ...item,
-              galleryImages:
-                item?.galleryImages ??
-                defaultSiteContent.oeuvres.items[index]?.galleryImages ??
-                ["", "", "", ""],
-            })
-          ),
+              galleryImages: Array.isArray(item?.galleryImages)
+                ? item.galleryImages.slice(0, MAX_GALLERY_IMAGES)
+                : [],
+            })),
         },
 
         portfolio: (parsed.portfolio ?? defaultSiteContent.portfolio).map(
@@ -127,9 +131,11 @@ export default function DashboardPage() {
             <p className="text-[12px] uppercase tracking-[0.35em] text-[#b49686]">
               Dashboard global
             </p>
+
             <h1 className="mt-3 text-4xl font-light tracking-[-0.04em] text-[#191614] sm:text-5xl">
               Gestion de toutes les pages
             </h1>
+
             <p className="mt-4 max-w-2xl text-[16px] leading-8 text-[#8f7d76]">
               Modifiez les textes, les images et les œuvres depuis une seule
               interface.
@@ -163,88 +169,21 @@ export default function DashboardPage() {
 
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
           <aside className="h-fit rounded-[28px] border border-[#e7ddd6] bg-white/80 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.04)] backdrop-blur-xl">
-            <TabButton
-              active={activeTab === "home"}
-              onClick={() => setActiveTab("home")}
-              label="Page d’accueil"
-            />
-            <TabButton
-              active={activeTab === "about"}
-              onClick={() => setActiveTab("about")}
-              label="Page à propos"
-            />
-            <TabButton
-              active={activeTab === "contact"}
-              onClick={() => setActiveTab("contact")}
-              label="Page contact"
-            />
-            <TabButton
-              active={activeTab === "oeuvres"}
-              onClick={() => setActiveTab("oeuvres")}
-              label="Page œuvres"
-            />
-            <TabButton
-              active={activeTab === "portfolio"}
-              onClick={() => setActiveTab("portfolio")}
-              label="Portfolio"
-            />
-
-            <TabButton
-  active={activeTab === "database"}
-  onClick={() => setActiveTab("database")}
-  label="Base de données"
-/>
+            <TabButton active={activeTab === "home"} onClick={() => setActiveTab("home")} label="Page d’accueil" />
+            <TabButton active={activeTab === "about"} onClick={() => setActiveTab("about")} label="Page à propos" />
+            <TabButton active={activeTab === "contact"} onClick={() => setActiveTab("contact")} label="Page contact" />
+            <TabButton active={activeTab === "oeuvres"} onClick={() => setActiveTab("oeuvres")} label="Page œuvres" />
+            <TabButton active={activeTab === "portfolio"} onClick={() => setActiveTab("portfolio")} label="Portfolio" />
+            <TabButton active={activeTab === "database"} onClick={() => setActiveTab("database")} label="Base de données" />
           </aside>
 
           <section className="rounded-[30px] border border-[#e7ddd6] bg-white/80 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.04)] backdrop-blur-xl sm:p-8">
             {activeTab === "home" && (
-              <EditorBlock
-                title="Page d’accueil"
-                subtitle="Modifier la section principale"
-              >
-                <LocalizedField
-                  label="Badge"
-                  value={content.home.badge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      home: { ...content.home, badge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre"
-                  value={content.home.title}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      home: { ...content.home, title: value },
-                    })
-                  }
-                />
-
-                <LocalizedTextareaField
-                  label="Texte 1"
-                  value={content.home.text1}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      home: { ...content.home, text1: value },
-                    })
-                  }
-                />
-
-                <LocalizedTextareaField
-                  label="Texte 2"
-                  value={content.home.text2}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      home: { ...content.home, text2: value },
-                    })
-                  }
-                />
+              <EditorBlock title="Page d’accueil" subtitle="Modifier la section principale">
+                <LocalizedField label="Badge" value={content.home.badge} onChange={(value) => setContent({ ...content, home: { ...content.home, badge: value } })} />
+                <LocalizedField label="Titre" value={content.home.title} onChange={(value) => setContent({ ...content, home: { ...content.home, title: value } })} />
+                <LocalizedTextareaField label="Texte 1" value={content.home.text1} onChange={(value) => setContent({ ...content, home: { ...content.home, text1: value } })} />
+                <LocalizedTextareaField label="Texte 2" value={content.home.text2} onChange={(value) => setContent({ ...content, home: { ...content.home, text2: value } })} />
 
                 <ImageUploadField
                   label="Image principale"
@@ -265,39 +204,11 @@ export default function DashboardPage() {
                 />
 
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <LocalizedField
-                    label="Bouton principal"
-                    value={content.home.primaryButton}
-                    onChange={(value) =>
-                      setContent({
-                        ...content,
-                        home: { ...content.home, primaryButton: value },
-                      })
-                    }
-                  />
-
-                  <LocalizedField
-                    label="Bouton secondaire"
-                    value={content.home.secondaryButton}
-                    onChange={(value) =>
-                      setContent({
-                        ...content,
-                        home: { ...content.home, secondaryButton: value },
-                      })
-                    }
-                  />
+                  <LocalizedField label="Bouton principal" value={content.home.primaryButton} onChange={(value) => setContent({ ...content, home: { ...content.home, primaryButton: value } })} />
+                  <LocalizedField label="Bouton secondaire" value={content.home.secondaryButton} onChange={(value) => setContent({ ...content, home: { ...content.home, secondaryButton: value } })} />
                 </div>
 
-                <ImageStyleEditor
-                  title="Style de l’image hero"
-                  value={content.home.heroImageStyle}
-                  onChange={(style) =>
-                    setContent({
-                      ...content,
-                      home: { ...content.home, heroImageStyle: style },
-                    })
-                  }
-                />
+                <ImageStyleEditor title="Style de l’image hero" value={content.home.heroImageStyle} onChange={(style) => setContent({ ...content, home: { ...content.home, heroImageStyle: style } })} />
 
                 <div className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6">
                   <h3 className="mb-5 text-xl font-medium text-[#201c19]">
@@ -313,10 +224,7 @@ export default function DashboardPage() {
                           ...content,
                           home: {
                             ...content.home,
-                            gallery: {
-                              ...content.home.gallery,
-                              badge: value,
-                            },
+                            gallery: { ...content.home.gallery, badge: value },
                           },
                         })
                       }
@@ -330,10 +238,7 @@ export default function DashboardPage() {
                           ...content,
                           home: {
                             ...content.home,
-                            gallery: {
-                              ...content.home.gallery,
-                              title: value,
-                            },
+                            gallery: { ...content.home.gallery, title: value },
                           },
                         })
                       }
@@ -409,10 +314,7 @@ export default function DashboardPage() {
 
                     <div className="grid gap-6">
                       {content.home.gallery.works.map((work, index) => (
-                        <div
-                          key={index}
-                          className="rounded-[22px] border border-[#eadfd8] bg-white p-5"
-                        >
+                        <div key={index} className="rounded-[22px] border border-[#eadfd8] bg-white p-5">
                           <h4 className="mb-5 text-lg font-medium text-[#201c19]">
                             Œuvre accueil {index + 1}
                           </h4>
@@ -423,11 +325,7 @@ export default function DashboardPage() {
                               value={work.src}
                               onChange={(value) => {
                                 const updated = [...content.home.gallery.works];
-                                updated[index] = {
-                                  ...updated[index],
-                                  src: value,
-                                };
-
+                                updated[index] = { ...updated[index], src: value };
                                 setContent({
                                   ...content,
                                   home: {
@@ -446,11 +344,7 @@ export default function DashboardPage() {
                               value={work.title}
                               onChange={(value) => {
                                 const updated = [...content.home.gallery.works];
-                                updated[index] = {
-                                  ...updated[index],
-                                  title: value,
-                                };
-
+                                updated[index] = { ...updated[index], title: value };
                                 setContent({
                                   ...content,
                                   home: {
@@ -473,7 +367,6 @@ export default function DashboardPage() {
                                   ...updated[index],
                                   category: value,
                                 };
-
                                 setContent({
                                   ...content,
                                   home: {
@@ -496,42 +389,10 @@ export default function DashboardPage() {
             )}
 
             {activeTab === "about" && (
-              <EditorBlock
-                title="Page à propos"
-                subtitle="Modifier le contenu principal"
-              >
-                <LocalizedField
-                  label="Badge hero"
-                  value={content.about.badge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, badge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre hero"
-                  value={content.about.title}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, title: value },
-                    })
-                  }
-                />
-
-                <LocalizedTextareaField
-                  label="Texte hero"
-                  value={content.about.introText}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, introText: value },
-                    })
-                  }
-                />
+              <EditorBlock title="Page à propos" subtitle="Modifier le contenu principal">
+                <LocalizedField label="Badge hero" value={content.about.badge} onChange={(value) => setContent({ ...content, about: { ...content.about, badge: value } })} />
+                <LocalizedField label="Titre hero" value={content.about.title} onChange={(value) => setContent({ ...content, about: { ...content.about, title: value } })} />
+                <LocalizedTextareaField label="Texte hero" value={content.about.introText} onChange={(value) => setContent({ ...content, about: { ...content.about, introText: value } })} />
 
                 <ImageUploadField
                   label="Image fond / image principale"
@@ -551,132 +412,21 @@ export default function DashboardPage() {
                   }
                 />
 
-                <ImageStyleEditor
-                  title="Style de l’image profil"
-                  value={content.about.profileImage}
-                  onChange={(style) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, profileImage: style },
-                    })
-                  }
-                />
+                <ImageStyleEditor title="Style de l’image profil" value={content.about.profileImage} onChange={(style) => setContent({ ...content, about: { ...content.about, profileImage: style } })} />
 
-                <LocalizedField
-                  label="Titre biographie"
-                  value={content.about.bioTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, bioTitle: value },
-                    })
-                  }
-                />
-
-                <LocalizedTextareaField
-                  label="Biographie texte 1"
-                  value={content.about.bioText1}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, bioText1: value },
-                    })
-                  }
-                />
-
-                <LocalizedTextareaField
-                  label="Biographie texte 2"
-                  value={content.about.bioText2}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, bioText2: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Texte bouton CV"
-                  value={content.about.cvButtonLabel}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, cvButtonLabel: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Texte bouton parcours"
-                  value={content.about.parcoursButtonLabel}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, parcoursButtonLabel: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Badge démarche"
-                  value={content.about.visionBadge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, visionBadge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre démarche"
-                  value={content.about.visionTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, visionTitle: value },
-                    })
-                  }
-                />
-
-                <LocalizedTextareaField
-                  label="Texte démarche"
-                  value={content.about.visionText}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, visionText: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Badge publications"
-                  value={content.about.publicationsBadge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, publicationsBadge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre publications"
-                  value={content.about.publicationsTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, publicationsTitle: value },
-                    })
-                  }
-                />
+                <LocalizedField label="Titre biographie" value={content.about.bioTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, bioTitle: value } })} />
+                <LocalizedTextareaField label="Biographie texte 1" value={content.about.bioText1} onChange={(value) => setContent({ ...content, about: { ...content.about, bioText1: value } })} />
+                <LocalizedTextareaField label="Biographie texte 2" value={content.about.bioText2} onChange={(value) => setContent({ ...content, about: { ...content.about, bioText2: value } })} />
+                <LocalizedField label="Texte bouton CV" value={content.about.cvButtonLabel} onChange={(value) => setContent({ ...content, about: { ...content.about, cvButtonLabel: value } })} />
+                <LocalizedField label="Texte bouton parcours" value={content.about.parcoursButtonLabel} onChange={(value) => setContent({ ...content, about: { ...content.about, parcoursButtonLabel: value } })} />
+                <LocalizedField label="Badge démarche" value={content.about.visionBadge} onChange={(value) => setContent({ ...content, about: { ...content.about, visionBadge: value } })} />
+                <LocalizedField label="Titre démarche" value={content.about.visionTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, visionTitle: value } })} />
+                <LocalizedTextareaField label="Texte démarche" value={content.about.visionText} onChange={(value) => setContent({ ...content, about: { ...content.about, visionText: value } })} />
+                <LocalizedField label="Badge publications" value={content.about.publicationsBadge} onChange={(value) => setContent({ ...content, about: { ...content.about, publicationsBadge: value } })} />
+                <LocalizedField label="Titre publications" value={content.about.publicationsTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, publicationsTitle: value } })} />
 
                 {content.about.publications.map((item, index) => (
-                  <div
-                    key={`publication-${index}`}
-                    className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5"
-                  >
+                  <div key={`publication-${index}`} className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5">
                     <Field
                       label={`Publication ${index + 1} — année`}
                       value={item.year}
@@ -689,6 +439,7 @@ export default function DashboardPage() {
                         });
                       }}
                     />
+
                     <div className="mt-5">
                       <LocalizedTextareaField
                         label={`Publication ${index + 1} — texte`}
@@ -706,33 +457,11 @@ export default function DashboardPage() {
                   </div>
                 ))}
 
-                <LocalizedField
-                  label="Badge collections"
-                  value={content.about.collectionsBadge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, collectionsBadge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre collections"
-                  value={content.about.collectionsTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, collectionsTitle: value },
-                    })
-                  }
-                />
+                <LocalizedField label="Badge collections" value={content.about.collectionsBadge} onChange={(value) => setContent({ ...content, about: { ...content.about, collectionsBadge: value } })} />
+                <LocalizedField label="Titre collections" value={content.about.collectionsTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, collectionsTitle: value } })} />
 
                 {content.about.collections.map((item, index) => (
-                  <div
-                    key={`collection-${index}`}
-                    className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5"
-                  >
+                  <div key={`collection-${index}`} className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5">
                     <LocalizedTextareaField
                       label={`Collection ${index + 1}`}
                       value={item.text}
@@ -748,38 +477,9 @@ export default function DashboardPage() {
                   </div>
                 ))}
 
-                <LocalizedField
-                  label="Badge parcours"
-                  value={content.about.parcoursBadge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, parcoursBadge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre parcours"
-                  value={content.about.parcoursTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, parcoursTitle: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre expositions"
-                  value={content.about.exhibitionsTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, exhibitionsTitle: value },
-                    })
-                  }
-                />
+                <LocalizedField label="Badge parcours" value={content.about.parcoursBadge} onChange={(value) => setContent({ ...content, about: { ...content.about, parcoursBadge: value } })} />
+                <LocalizedField label="Titre parcours" value={content.about.parcoursTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, parcoursTitle: value } })} />
+                <LocalizedField label="Titre expositions" value={content.about.exhibitionsTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, exhibitionsTitle: value } })} />
 
                 {content.about.exhibitions.map((item, index) => (
                   <TimelineLocalizedEditor
@@ -797,16 +497,7 @@ export default function DashboardPage() {
                   />
                 ))}
 
-                <LocalizedField
-                  label="Titre formation"
-                  value={content.about.formationTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, formationTitle: value },
-                    })
-                  }
-                />
+                <LocalizedField label="Titre formation" value={content.about.formationTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, formationTitle: value } })} />
 
                 {content.about.formations.map((item, index) => (
                   <TimelineLocalizedEditor
@@ -824,16 +515,7 @@ export default function DashboardPage() {
                   />
                 ))}
 
-                <LocalizedField
-                  label="Titre distinctions"
-                  value={content.about.distinctionsTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, distinctionsTitle: value },
-                    })
-                  }
-                />
+                <LocalizedField label="Titre distinctions" value={content.about.distinctionsTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, distinctionsTitle: value } })} />
 
                 {content.about.distinctions.map((item, index) => (
                   <TimelineLocalizedEditor
@@ -854,64 +536,12 @@ export default function DashboardPage() {
             )}
 
             {activeTab === "contact" && (
-              <EditorBlock
-                title="Page contact"
-                subtitle="Modifier les informations visibles"
-              >
-                <LocalizedField
-                  label="Badge"
-                  value={content.contact.badge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      contact: { ...content.contact, badge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre"
-                  value={content.contact.title}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      contact: { ...content.contact, title: value },
-                    })
-                  }
-                />
-
-                <LocalizedTextareaField
-                  label="Texte"
-                  value={content.contact.text}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      contact: { ...content.contact, text: value },
-                    })
-                  }
-                />
-
-                <Field
-                  label="Email"
-                  value={content.contact.email}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      contact: { ...content.contact, email: value },
-                    })
-                  }
-                />
-
-                <Field
-                  label="Instagram"
-                  value={content.contact.instagram}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      contact: { ...content.contact, instagram: value },
-                    })
-                  }
-                />
+              <EditorBlock title="Page contact" subtitle="Modifier les informations visibles">
+                <LocalizedField label="Badge" value={content.contact.badge} onChange={(value) => setContent({ ...content, contact: { ...content.contact, badge: value } })} />
+                <LocalizedField label="Titre" value={content.contact.title} onChange={(value) => setContent({ ...content, contact: { ...content.contact, title: value } })} />
+                <LocalizedTextareaField label="Texte" value={content.contact.text} onChange={(value) => setContent({ ...content, contact: { ...content.contact, text: value } })} />
+                <Field label="Email" value={content.contact.email} onChange={(value) => setContent({ ...content, contact: { ...content.contact, email: value } })} />
+                <Field label="Instagram" value={content.contact.instagram} onChange={(value) => setContent({ ...content, contact: { ...content.contact, instagram: value } })} />
 
                 <ImageUploadField
                   label="Image"
@@ -930,24 +560,12 @@ export default function DashboardPage() {
                   }
                 />
 
-                <ImageStyleEditor
-                  title="Style de l’image contact"
-                  value={content.contact.contactImage}
-                  onChange={(style) =>
-                    setContent({
-                      ...content,
-                      contact: { ...content.contact, contactImage: style },
-                    })
-                  }
-                />
+                <ImageStyleEditor title="Style de l’image contact" value={content.contact.contactImage} onChange={(style) => setContent({ ...content, contact: { ...content.contact, contactImage: style } })} />
               </EditorBlock>
             )}
 
             {activeTab === "oeuvres" && (
-              <EditorBlock
-                title="Page œuvres"
-                subtitle="Gestion complète des œuvres"
-              >
+              <EditorBlock title="Page œuvres" subtitle="Gestion complète des œuvres">
                 <LocalizedField
                   label="Titre hero"
                   value={content.oeuvres.heroTitle}
@@ -976,14 +594,18 @@ export default function DashboardPage() {
                       <h3 className="text-xl font-medium text-[#201c19]">
                         Œuvres
                       </h3>
+
                       <p className="mt-2 text-sm leading-6 text-[#8a7971]">
-                        Gérez les œuvres affichées sur la page.
+                        {content.oeuvres.items.length} / {MAX_OEUVRES} œuvres ajoutées.
                       </p>
                     </div>
 
                     <button
                       type="button"
+                      disabled={content.oeuvres.items.length >= MAX_OEUVRES}
                       onClick={() => {
+                        if (content.oeuvres.items.length >= MAX_OEUVRES) return;
+
                         const newItem = {
                           id: Date.now(),
                           slug: `nouvelle-oeuvre-${Date.now()}`,
@@ -996,7 +618,7 @@ export default function DashboardPage() {
                           image: "",
                           galleryTitle: { fr: "", en: "", es: "" },
                           gallerySubtitle: { fr: "", en: "", es: "" },
-                          galleryImages: ["", "", "", ""],
+                          galleryImages: [],
                         };
 
                         setContent({
@@ -1007,7 +629,7 @@ export default function DashboardPage() {
                           },
                         });
                       }}
-                      className="inline-flex h-[52px] items-center justify-center rounded-full bg-[#191614] px-6 text-[13px] font-medium uppercase tracking-[0.16em] text-white shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition hover:-translate-y-[1px]"
+                      className="inline-flex h-[52px] items-center justify-center rounded-full bg-[#191614] px-6 text-[13px] font-medium uppercase tracking-[0.16em] text-white shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
                     >
                       Ajouter une œuvre
                     </button>
@@ -1015,10 +637,7 @@ export default function DashboardPage() {
 
                   <div className="space-y-8">
                     {content.oeuvres.items.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6"
-                      >
+                      <div key={item.id} className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6">
                         <div className="mb-5 flex items-center justify-between gap-4">
                           <h3 className="text-xl font-medium text-[#201c19]">
                             Œuvre {index + 1}
@@ -1086,59 +705,6 @@ export default function DashboardPage() {
                               onChange={(value) => {
                                 const updated = [...content.oeuvres.items];
                                 updated[index].year = value;
-
-                                setContent({
-                                  ...content,
-                                  oeuvres: {
-                                    ...content.oeuvres,
-                                    items: updated,
-                                  },
-                                });
-                              }}
-                            />
-
-                            <LocalizedField
-                              label="Disponibilité"
-                              value={item.availability}
-                              onChange={(value) => {
-                                const updated = [...content.oeuvres.items];
-                                updated[index].availability = value;
-
-                                setContent({
-                                  ...content,
-                                  oeuvres: {
-                                    ...content.oeuvres,
-                                    items: updated,
-                                  },
-                                });
-                              }}
-                            />
-                          </div>
-
-                          <LocalizedTextareaField
-                            label="Description"
-                            value={item.description}
-                            onChange={(value) => {
-                              const updated = [...content.oeuvres.items];
-                              updated[index].description = value;
-
-                              setContent({
-                                ...content,
-                                oeuvres: {
-                                  ...content.oeuvres,
-                                  items: updated,
-                                },
-                              });
-                            }}
-                          />
-
-                          <div className="grid gap-5 sm:grid-cols-2">
-                            <LocalizedField
-                              label="Technique"
-                              value={item.technique}
-                              onChange={(value) => {
-                                const updated = [...content.oeuvres.items];
-                                updated[index].technique = value;
 
                                 setContent({
                                   ...content,
@@ -1219,20 +785,28 @@ export default function DashboardPage() {
                             }}
                           />
 
-                          <div className="grid gap-5 sm:grid-cols-2">
-                            {item.galleryImages.map((galleryImage, imageIndex) => (
-                              <ImageUploadField
-                                key={`${item.id}-gallery-${imageIndex}`}
-                                label={`Image galerie ${imageIndex + 1}`}
-                                value={galleryImage}
-                                onChange={(value) => {
-                                  const updated = [...content.oeuvres.items];
-                                  const nextImages = [
-                                    ...updated[index].galleryImages,
-                                  ];
+                          <div className="rounded-[24px] border border-[#ece3dc] bg-white p-5 sm:p-6">
+                            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                              <div>
+                                <h4 className="text-lg font-medium text-[#201c19]">
+                                  Images galerie page détail
+                                </h4>
 
-                                  nextImages[imageIndex] = value;
-                                  updated[index].galleryImages = nextImages;
+                                <p className="mt-2 text-sm text-[#8a7971]">
+                                  {(item.galleryImages ?? []).length} / {MAX_GALLERY_IMAGES} images.
+                                </p>
+                              </div>
+
+                              <button
+                                type="button"
+                                disabled={(item.galleryImages ?? []).length >= MAX_GALLERY_IMAGES}
+                                onClick={() => {
+                                  const updated = [...content.oeuvres.items];
+                                  const currentImages = updated[index].galleryImages ?? [];
+
+                                  if (currentImages.length >= MAX_GALLERY_IMAGES) return;
+
+                                  updated[index].galleryImages = [...currentImages, ""];
 
                                   setContent({
                                     ...content,
@@ -1242,8 +816,77 @@ export default function DashboardPage() {
                                     },
                                   });
                                 }}
-                              />
-                            ))}
+                                className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+                              >
+                                Ajouter une image
+                              </button>
+                            </div>
+
+                            {(item.galleryImages ?? []).length > 0 ? (
+                              <div className="grid gap-5 sm:grid-cols-2">
+                                {(item.galleryImages ?? []).map((galleryImage, imageIndex) => (
+                                  <div key={`${item.id}-gallery-${imageIndex}`} className="rounded-[22px] border border-[#eadfd8] bg-[#fcfaf8] p-4">
+                                    <div className="mb-4 flex items-center justify-between gap-3">
+                                      <p className="text-sm font-medium text-[#5f534d]">
+                                        Image galerie {imageIndex + 1}
+                                      </p>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const updated = [...content.oeuvres.items];
+                                          const nextImages = [...(updated[index].galleryImages ?? [])];
+
+                                          nextImages.splice(imageIndex, 1);
+                                          updated[index].galleryImages = nextImages;
+
+                                          setContent({
+                                            ...content,
+                                            oeuvres: {
+                                              ...content.oeuvres,
+                                              items: updated,
+                                            },
+                                          });
+                                        }}
+                                        className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]"
+                                      >
+                                        Supprimer
+                                      </button>
+                                    </div>
+
+                                    <ImageUploadField
+                                      label=""
+                                      value={galleryImage}
+                                      onChange={(value) => {
+                                        const updated = [...content.oeuvres.items];
+                                        const nextImages = [...(updated[index].galleryImages ?? [])];
+
+                                        nextImages[imageIndex] = value;
+                                        updated[index].galleryImages = nextImages;
+
+                                        setContent({
+                                          ...content,
+                                          oeuvres: {
+                                            ...content.oeuvres,
+                                            items: updated,
+                                          },
+                                        });
+                                      }}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="rounded-[20px] border border-dashed border-[#ddd1ca] bg-[#fcfaf8] px-5 py-10 text-center">
+                                <p className="text-sm font-medium text-[#5f534d]">
+                                  Aucune image galerie ajoutée.
+                                </p>
+
+                                <p className="mt-2 text-sm text-[#8a7971]">
+                                  Cliquez sur “Ajouter une image” pour commencer.
+                                </p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1254,16 +897,10 @@ export default function DashboardPage() {
             )}
 
             {activeTab === "portfolio" && (
-              <EditorBlock
-                title="Portfolio"
-                subtitle="Modifier seulement les images du portfolio"
-              >
+              <EditorBlock title="Portfolio" subtitle="Modifier seulement les images du portfolio">
                 <div className="space-y-8">
                   {content.portfolio.map((item, index) => (
-                    <div
-                      key={index}
-                      className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6"
-                    >
+                    <div key={index} className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6">
                       <h3 className="mb-5 text-xl font-medium text-[#201c19]">
                         Image portfolio {index + 1}
                       </h3>
@@ -1337,9 +974,11 @@ function EditorBlock({
       <p className="text-[12px] uppercase tracking-[0.35em] text-[#b49686]">
         {title}
       </p>
+
       <h2 className="mt-3 text-3xl font-light tracking-[-0.03em] text-[#191614]">
         {subtitle}
       </h2>
+
       <div className="mt-8 grid gap-6">{children}</div>
     </div>
   );
@@ -1356,9 +995,12 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-3 block text-[15px] font-medium text-[#5f534d]">
-        {label}
-      </label>
+      {label && (
+        <label className="mb-3 block text-[15px] font-medium text-[#5f534d]">
+          {label}
+        </label>
+      )}
+
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -1379,9 +1021,12 @@ function TextareaField({
 }) {
   return (
     <div>
-      <label className="mb-3 block text-[15px] font-medium text-[#5f534d]">
-        {label}
-      </label>
+      {label && (
+        <label className="mb-3 block text-[15px] font-medium text-[#5f534d]">
+          {label}
+        </label>
+      )}
+
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -1404,22 +1049,11 @@ function LocalizedField({
   return (
     <div className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6">
       <h3 className="mb-5 text-lg font-medium text-[#201c19]">{label}</h3>
+
       <div className="grid gap-5 sm:grid-cols-3">
-        <Field
-          label="Français"
-          value={value?.fr ?? ""}
-          onChange={(next) => onChange({ ...value, fr: next })}
-        />
-        <Field
-          label="English"
-          value={value?.en ?? ""}
-          onChange={(next) => onChange({ ...value, en: next })}
-        />
-        <Field
-          label="Español"
-          value={value?.es ?? ""}
-          onChange={(next) => onChange({ ...value, es: next })}
-        />
+        <Field label="Français" value={value?.fr ?? ""} onChange={(next) => onChange({ ...value, fr: next })} />
+        <Field label="English" value={value?.en ?? ""} onChange={(next) => onChange({ ...value, en: next })} />
+        <Field label="Español" value={value?.es ?? ""} onChange={(next) => onChange({ ...value, es: next })} />
       </div>
     </div>
   );
@@ -1437,22 +1071,11 @@ function LocalizedTextareaField({
   return (
     <div className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6">
       <h3 className="mb-5 text-lg font-medium text-[#201c19]">{label}</h3>
+
       <div className="grid gap-5">
-        <TextareaField
-          label="Français"
-          value={value?.fr ?? ""}
-          onChange={(next) => onChange({ ...value, fr: next })}
-        />
-        <TextareaField
-          label="English"
-          value={value?.en ?? ""}
-          onChange={(next) => onChange({ ...value, en: next })}
-        />
-        <TextareaField
-          label="Español"
-          value={value?.es ?? ""}
-          onChange={(next) => onChange({ ...value, es: next })}
-        />
+        <TextareaField label="Français" value={value?.fr ?? ""} onChange={(next) => onChange({ ...value, fr: next })} />
+        <TextareaField label="English" value={value?.en ?? ""} onChange={(next) => onChange({ ...value, en: next })} />
+        <TextareaField label="Español" value={value?.es ?? ""} onChange={(next) => onChange({ ...value, es: next })} />
       </div>
     </div>
   );
@@ -1470,22 +1093,14 @@ function TimelineLocalizedEditor({
   return (
     <div className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6">
       <h3 className="mb-5 text-lg font-medium text-[#201c19]">{title}</h3>
+
       <div className="grid gap-5">
-        <Field
-          label="Année"
-          value={item.year}
-          onChange={(year) => onChange({ ...item, year })}
-        />
-        <LocalizedTextareaField
-          label="Texte"
-          value={item.text}
-          onChange={(text) => onChange({ ...item, text })}
-        />
+        <Field label="Année" value={item.year} onChange={(year) => onChange({ ...item, year })} />
+        <LocalizedTextareaField label="Texte" value={item.text} onChange={(text) => onChange({ ...item, text })} />
       </div>
     </div>
   );
 }
-
 
 function SelectField({
   label,
@@ -1503,6 +1118,7 @@ function SelectField({
       <label className="mb-3 block text-[15px] font-medium text-[#5f534d]">
         {label}
       </label>
+
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -1532,11 +1148,7 @@ function ImageStyleEditor({
       <h3 className="mb-5 text-lg font-medium text-[#201c19]">{title}</h3>
 
       <div className="grid gap-5">
-        <ImageUploadField
-          label="Source image"
-          value={value.src}
-          onChange={(newValue) => onChange({ ...value, src: newValue })}
-        />
+        <ImageUploadField label="Source image" value={value.src} onChange={(newValue) => onChange({ ...value, src: newValue })} />
 
         <div className="grid gap-5 sm:grid-cols-3">
           <SelectField
@@ -1597,10 +1209,9 @@ function ImageUploadField({
 }) {
   const [loading, setLoading] = useState(false);
 
-  const handleFileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (!file) return;
 
     try {
@@ -1617,14 +1228,17 @@ function ImageUploadField({
 
   return (
     <div>
-      <label className="mb-3 block text-[15px] font-medium text-[#5f534d]">
-        {label}
-      </label>
+      {label && (
+        <label className="mb-3 block text-[15px] font-medium text-[#5f534d]">
+          {label}
+        </label>
+      )}
 
       <div className="rounded-[24px] border border-[#eadfd8] bg-[#fcfaf8] p-5 sm:p-6">
         <div className="flex flex-wrap gap-3">
           <label className="inline-flex h-[48px] cursor-pointer items-center justify-center rounded-full border border-[#d9ccc4] bg-white px-5 text-[14px] font-medium text-[#5f534d] transition hover:bg-[#f7f2ee]">
             {loading ? "Importation..." : "Choisir une image"}
+
             <input
               type="file"
               accept="image/*"
@@ -1660,6 +1274,7 @@ function ImageUploadField({
               <p className="text-[15px] font-medium text-[#5f534d]">
                 Aucune image sélectionnée
               </p>
+
               <p className="mt-2 text-sm text-[#8a7971]">
                 Importez une image depuis votre ordinateur ou votre téléphone.
               </p>
@@ -1684,6 +1299,7 @@ async function uploadToCloudinary(file: File): Promise<string> {
   }
 
   const formData = new FormData();
+
   formData.append("file", file);
   formData.append("upload_preset", uploadPreset);
 
