@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import {
   defaultSiteContent,
   SiteContent,
-  STORAGE_KEY,
+  
   ImageStyle,
   LocalizedText,
-} from "../lib/siteContent";
+} from "../lib/siteContent"
 import DatabaseSection from "./DatabaseSection";
 
 type Tab = "home" | "about" | "contact" | "oeuvres" | "portfolio" | "database";

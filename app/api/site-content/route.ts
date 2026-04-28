@@ -8,7 +8,9 @@ function getDbConfig() {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    ssl: { rejectUnauthorized: false },
+    ssl: {
+      rejectUnauthorized: false,
+    },
   };
 }
 
@@ -19,18 +21,29 @@ export async function GET() {
     db = await mysql.createConnection(getDbConfig());
 
     const [rows] = await db.execute<any[]>(
-      "SELECT field_value FROM site_content WHERE page_name = ? AND section_name = ? AND field_name = ? LIMIT 1",
+      `
+      SELECT field_value
+      FROM site_content
+      WHERE page_name = ? 
+        AND section_name = ? 
+        AND field_name = ?
+      LIMIT 1
+      `,
       ["global", "content", "json"]
     );
 
-    if (!rows.length) {
+    if (!rows.length || !rows[0].field_value) {
       return NextResponse.json(null);
     }
 
     return NextResponse.json(JSON.parse(rows[0].field_value));
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Erreur lecture contenu" }, { status: 500 });
+    console.error("GET /api/site-content error:", error);
+
+    return NextResponse.json(
+      { error: "Erreur lecture site_content" },
+      { status: 500 }
+    );
   } finally {
     if (db) await db.end();
   }
@@ -46,9 +59,10 @@ export async function POST(req: Request) {
 
     await db.execute(
       `
-      INSERT INTO site_content (page_name, section_name, field_name, field_value)
+      INSERT INTO site_content 
+        (page_name, section_name, field_name, field_value)
       VALUES (?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE 
+      ON DUPLICATE KEY UPDATE
         field_value = VALUES(field_value),
         updated_at = CURRENT_TIMESTAMP
       `,
@@ -57,8 +71,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Erreur sauvegarde contenu" }, { status: 500 });
+    console.error("POST /api/site-content error:", error);
+
+    return NextResponse.json(
+      { error: "Erreur sauvegarde site_content" },
+      { status: 500 }
+    );
   } finally {
     if (db) await db.end();
   }
