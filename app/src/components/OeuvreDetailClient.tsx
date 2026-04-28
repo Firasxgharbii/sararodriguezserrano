@@ -145,7 +145,8 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
   if (!oeuvre) notFound();
 
   const title = t(oeuvre.galleryTitle, lang) || t(oeuvre.title, lang);
-  const subtitle = t(oeuvre.gallerySubtitle, lang) || t(oeuvre.description, lang);
+  const subtitle =
+    t(oeuvre.gallerySubtitle, lang) || t(oeuvre.description, lang);
   const technique = t(oeuvre.technique, lang);
   const availabilityText = t(oeuvre.availability, lang);
   const available = isAvailable(availabilityText);
@@ -160,13 +161,13 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
 
       <main className="min-h-screen bg-[#ecebea] text-[#7f6e67]">
         <section className="mx-auto max-w-[1280px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-20">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-[1.5fr_0.8fr] md:items-start">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-[0.95fr_0.7fr] md:items-start">
             <div>
-              <p className="futura-text mb-5 text-[11px] uppercase tracking-[0.35em] text-[#a7958e]">
+              <p className="futura-text mb-5 text-[11px] uppercase tracking-[0.35em] text-[#b9a29a]">
                 Œuvre
               </p>
 
-              <h1 className="futura-text max-w-4xl text-[30px] font-light leading-[1.15] tracking-[0.16em] text-[#81716b] md:text-[54px]">
+              <h1 className="futura-text max-w-[620px] text-[34px] font-light leading-[1.15] tracking-[0.16em] text-[#8b7771] md:text-[58px]">
                 {title}
               </h1>
             </div>
@@ -206,7 +207,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                   <div className="mt-6 border-t border-[#d9d2ce] pt-5">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <h2 className="futura-text text-[17px] uppercase tracking-[0.22em] text-[#7d6d67]">
+                        <h2 className="futura-text max-w-[520px] text-[17px] uppercase tracking-[0.22em] text-[#7d6d67]">
                           {title}
                         </h2>
 
