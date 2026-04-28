@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { defaultSiteContent } from "../../lib/siteContent";
-import { getSiteContent } from "../../lib/getSiteContent";
+import { defaultSiteContent, type SiteContent } from "../../lib/siteContent";
 
 function ArrowLeftIcon() {
   return (
@@ -44,8 +43,85 @@ function ArrowRightIcon() {
   );
 }
 
+function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
+  if (!parsed) return defaultSiteContent;
+
+  return {
+    ...defaultSiteContent,
+    ...parsed,
+
+    home: {
+      ...defaultSiteContent.home,
+      ...(parsed.home ?? {}),
+      heroImageStyle: {
+        ...defaultSiteContent.home.heroImageStyle,
+        ...(parsed.home?.heroImageStyle ?? {}),
+      },
+      gallery: {
+        ...defaultSiteContent.home.gallery,
+        ...(parsed.home?.gallery ?? {}),
+        works: (
+          parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works
+        ).map((item: any, index: number) => ({
+          ...(defaultSiteContent.home.gallery.works[index] ?? {}),
+          ...item,
+        })),
+      },
+    },
+
+    about: {
+      ...defaultSiteContent.about,
+      ...(parsed.about ?? {}),
+      profileImage: {
+        ...defaultSiteContent.about.profileImage,
+        ...(parsed.about?.profileImage ?? {}),
+      },
+      publications:
+        parsed.about?.publications ?? defaultSiteContent.about.publications,
+      collections:
+        parsed.about?.collections ?? defaultSiteContent.about.collections,
+      exhibitions:
+        parsed.about?.exhibitions ?? defaultSiteContent.about.exhibitions,
+      formations: parsed.about?.formations ?? defaultSiteContent.about.formations,
+      distinctions:
+        parsed.about?.distinctions ?? defaultSiteContent.about.distinctions,
+    },
+
+    contact: {
+      ...defaultSiteContent.contact,
+      ...(parsed.contact ?? {}),
+      contactImage: {
+        ...defaultSiteContent.contact.contactImage,
+        ...(parsed.contact?.contactImage ?? {}),
+      },
+    },
+
+    oeuvres: {
+      ...defaultSiteContent.oeuvres,
+      ...(parsed.oeuvres ?? {}),
+      items: (
+        parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items
+      ).map((item: any, index: number) => ({
+        ...(defaultSiteContent.oeuvres.items[index] ?? {}),
+        ...item,
+        galleryImages:
+          item?.galleryImages ??
+          defaultSiteContent.oeuvres.items[index]?.galleryImages ??
+          [],
+      })),
+    },
+
+    portfolio: (parsed.portfolio ?? defaultSiteContent.portfolio).map(
+      (item: any, index: number) => ({
+        ...(defaultSiteContent.portfolio[index] ?? {}),
+        ...item,
+      })
+    ),
+  };
+}
+
 export default function PortfolioSection() {
-  const [content, setContent] = useState(defaultSiteContent);
+  const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -53,18 +129,31 @@ export default function PortfolioSection() {
   const touchEndX = useRef<number | null>(null);
 
   useEffect(() => {
-    const loadContent = () => {
-      setContent(getSiteContent());
+    const loadContent = async () => {
+      try {
+        const res = await fetch("/api/site-content", {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          setContent(defaultSiteContent);
+          return;
+        }
+
+        const data = await res.json();
+        setContent(mergeSiteContent(data));
+      } catch (error) {
+        console.error("Erreur chargement portfolio:", error);
+        setContent(defaultSiteContent);
+      }
     };
 
     loadContent();
 
     window.addEventListener("focus", loadContent);
-    window.addEventListener("storage", loadContent);
 
     return () => {
       window.removeEventListener("focus", loadContent);
-      window.removeEventListener("storage", loadContent);
     };
   }, []);
 
@@ -87,10 +176,12 @@ export default function PortfolioSection() {
   }, [activeIndex, total]);
 
   const goPrev = () => {
+    if (total <= 0) return;
     setActiveIndex((prev) => (prev === 0 ? total - 1 : prev - 1));
   };
 
   const goNext = () => {
+    if (total <= 0) return;
     setActiveIndex((prev) => (prev === total - 1 ? 0 : prev + 1));
   };
 
