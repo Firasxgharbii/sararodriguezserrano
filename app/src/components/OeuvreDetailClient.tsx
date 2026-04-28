@@ -24,16 +24,6 @@ type ParsedSiteContent = Partial<SiteContent> & {
   };
 };
 
-function isAvailable(value: string) {
-  const text = value.toLowerCase().trim();
-
-  return (
-    text.includes("disponible") ||
-    text.includes("available") ||
-    text.includes("disponibilidad")
-  );
-}
-
 export default function OeuvreDetailClient({ slug }: { slug: string }) {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [ready, setReady] = useState(false);
@@ -52,49 +42,6 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
           setContent({
             ...defaultSiteContent,
             ...parsed,
-
-            home: {
-              ...defaultSiteContent.home,
-              ...(parsed.home ?? {}),
-              heroImageStyle: {
-                ...defaultSiteContent.home.heroImageStyle,
-                ...(parsed.home?.heroImageStyle ?? {}),
-              },
-            },
-
-            about: {
-              ...defaultSiteContent.about,
-              ...(parsed.about ?? {}),
-              profileImage: {
-                ...defaultSiteContent.about.profileImage,
-                ...(parsed.about?.profileImage ?? {}),
-              },
-              publications:
-                parsed.about?.publications ??
-                defaultSiteContent.about.publications,
-              collections:
-                parsed.about?.collections ??
-                defaultSiteContent.about.collections,
-              exhibitions:
-                parsed.about?.exhibitions ??
-                defaultSiteContent.about.exhibitions,
-              formations:
-                parsed.about?.formations ??
-                defaultSiteContent.about.formations,
-              distinctions:
-                parsed.about?.distinctions ??
-                defaultSiteContent.about.distinctions,
-            },
-
-            contact: {
-              ...defaultSiteContent.contact,
-              ...(parsed.contact ?? {}),
-              contactImage: {
-                ...defaultSiteContent.contact.contactImage,
-                ...(parsed.contact?.contactImage ?? {}),
-              },
-            },
-
             oeuvres: {
               ...defaultSiteContent.oeuvres,
               ...(parsed.oeuvres ?? {}),
@@ -147,9 +94,6 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
   const title = t(oeuvre.galleryTitle, lang) || t(oeuvre.title, lang);
   const subtitle =
     t(oeuvre.gallerySubtitle, lang) || t(oeuvre.description, lang);
-  const technique = t(oeuvre.technique, lang);
-  const availabilityText = t(oeuvre.availability, lang);
-  const available = isAvailable(availabilityText);
 
   const galleryImages = (oeuvre.galleryImages ?? []).filter(
     (img) => typeof img === "string" && img.trim() !== ""
@@ -161,29 +105,30 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
 
       <main className="min-h-screen bg-[#ecebea] text-[#7f6e67]">
         <section className="mx-auto max-w-[1280px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-20">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-[0.95fr_0.7fr] md:items-start">
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-[0.95fr_0.7fr] md:items-start">
             <div>
-              <p className="futura-text mb-5 text-[11px] uppercase tracking-[0.35em] text-[#b9a29a]">
-                Œuvre
-              </p>
+            
 
-<h1 className="futura-text max-w-[900px] text-[54px] font-light leading-[0.95] tracking-[0.12em] text-[#3f3f3f] sm:text-[72px] md:text-[96px] lg:text-[118px]">                {title}
+              <h1 className="futura-text max-w-[620px] text-[28px] font-light leading-[1.08] tracking-[0.14em] text-[#8b7771] sm:text-[36px] md:text-[44px] lg:text-[50px]">
+                {title}
               </h1>
             </div>
 
-            <div className="md:pt-3">
-              {subtitle && (
-                <p className="text-[16px] leading-8 text-[#a28f87]">
-                  {subtitle}
-                </p>
+<div className="ml-auto flex w-full max-w-[430px] flex-col items-end text-right md:pt-8">
+                {subtitle && (
+<div className="border-r border-[#c9b9b2] pr-6">
+                    <p className="serif-text text-[20px] font-light italic leading-[1.7] tracking-[0.01em] text-[#8f766d] md:text-[23px]">
+                    {subtitle}
+                  </p>
+                </div>
               )}
 
-              <div className="mt-8">
+              <div className="mt-9">
                 <Link
                   href="/oeuvres"
-                  className="futura-text inline-flex items-center text-[12px] uppercase tracking-[0.25em] text-[#9b847b] transition-opacity duration-300 hover:opacity-70"
-                >
-                  ← Retour aux œuvres
+className="futura-text inline-flex items-center justify-end gap-3 text-[12px] uppercase tracking-[0.28em] text-[#9b847b] transition-opacity duration-300 hover:opacity-70"                >
+                  <span>←</span>
+                  Retour aux œuvres
                 </Link>
               </div>
             </div>
@@ -204,57 +149,27 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                   </div>
 
                   <div className="mt-6 border-t border-[#d9d2ce] pt-5">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <h2 className="futura-text max-w-[520px] text-[17px] uppercase tracking-[0.22em] text-[#7d6d67]">
-                          {title}
-                        </h2>
+                    <h2 className="futura-text max-w-[520px] text-[15px] uppercase tracking-[0.22em] text-[#7d6d67]">
+                      {title}
+                    </h2>
 
-                        <div className="mt-4 grid gap-2 text-[14px] leading-7 text-[#97867f]">
-                          {oeuvre.year && (
-                            <p>
-                              <span className="futura-text uppercase tracking-[0.18em] text-[#7c6b65]">
-                                Année :
-                              </span>{" "}
-                              {oeuvre.year}
-                            </p>
-                          )}
+                    <div className="mt-4 grid gap-2 text-[14px] leading-7 text-[#97867f]">
+                      {oeuvre.year && (
+                        <p>
+                          <span className="futura-text uppercase tracking-[0.18em] text-[#7c6b65]">
+                            Année :
+                          </span>{" "}
+                          {oeuvre.year}
+                        </p>
+                      )}
 
-                          {technique && (
-                            <p>
-                              <span className="futura-text uppercase tracking-[0.18em] text-[#7c6b65]">
-                                Technique :
-                              </span>{" "}
-                              {technique}
-                            </p>
-                          )}
-
-                          {oeuvre.dimensions && (
-                            <p>
-                              <span className="futura-text uppercase tracking-[0.18em] text-[#7c6b65]">
-                                Dimensions :
-                              </span>{" "}
-                              {oeuvre.dimensions}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {availabilityText && (
-                        <div
-                          className={`futura-text inline-flex w-fit items-center rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.22em] ${
-                            available
-                              ? "border-green-600/30 bg-green-50 text-green-700"
-                              : "border-red-600/30 bg-red-50 text-red-700"
-                          }`}
-                        >
-                          <span
-                            className={`mr-2 h-2 w-2 rounded-full ${
-                              available ? "bg-green-600" : "bg-red-600"
-                            }`}
-                          />
-                          {availabilityText}
-                        </div>
+                      {oeuvre.dimensions && (
+                        <p>
+                          <span className="futura-text uppercase tracking-[0.18em] text-[#7c6b65]">
+                            Dimensions :
+                          </span>{" "}
+                          {oeuvre.dimensions}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -290,6 +205,10 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
           font-family: "FuturaLightCustom", "Futura W02 Light", "Futura PT",
             "Futura", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
           font-weight: 300;
+        }
+
+        .serif-text {
+          font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
         }
       `}</style>
     </>

@@ -20,16 +20,19 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-
-    if (!stored) {
-      setContent(defaultSiteContent);
-      return;
-    }
-
+ useEffect(() => {
+  const loadContent = async () => {
     try {
-      const parsed = JSON.parse(stored);
+      const res = await fetch("/api/site-content", {
+        cache: "no-store",
+      });
+
+      const parsed = await res.json();
+
+      if (!parsed) {
+        setContent(defaultSiteContent);
+        return;
+      }
 
       setContent({
         ...defaultSiteContent,
@@ -46,8 +49,7 @@ export default function DashboardPage() {
             ...defaultSiteContent.home.gallery,
             ...(parsed.home?.gallery ?? {}),
             works: (
-              parsed.home?.gallery?.works ??
-              defaultSiteContent.home.gallery.works
+              parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works
             ).map((item: any, index: number) => ({
               ...(defaultSiteContent.home.gallery.works[index] ?? {}),
               ...item,
@@ -86,17 +88,16 @@ export default function DashboardPage() {
         oeuvres: {
           ...defaultSiteContent.oeuvres,
           ...(parsed.oeuvres ?? {}),
-          items: (
-            parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items
-          )
-            .slice(0, MAX_OEUVRES)
-            .map((item: any, index: number) => ({
+          items: (parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items).map(
+            (item: any, index: number) => ({
               ...(defaultSiteContent.oeuvres.items[index] ?? {}),
               ...item,
-              galleryImages: Array.isArray(item?.galleryImages)
-                ? item.galleryImages.slice(0, MAX_GALLERY_IMAGES)
-                : [],
-            })),
+              galleryImages:
+                item?.galleryImages ??
+                defaultSiteContent.oeuvres.items[index]?.galleryImages ??
+                ["", "", "", ""],
+            })
+          ),
         },
 
         portfolio: (parsed.portfolio ?? defaultSiteContent.portfolio).map(
@@ -106,23 +107,51 @@ export default function DashboardPage() {
           })
         ),
       });
-    } catch {
+    } catch (error) {
+      console.error(error);
       setContent(defaultSiteContent);
     }
-  }, []);
-
-  const saveContent = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(content));
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1800);
   };
 
-  const resetContent = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultSiteContent));
+  loadContent();
+}, []);
+
+  const saveContent = async () => {
+  try {
+    await fetch("/api/site-content", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(content),
+    });
+
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1800);
+  } catch (error) {
+    console.error(error);
+    alert("Erreur lors de la sauvegarde dans Aiven.");
+  }
+};
+
+const resetContent = async () => {
+  try {
+    await fetch("/api/site-content", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(defaultSiteContent),
+    });
+
     setContent(defaultSiteContent);
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Erreur lors de la réinitialisation.");
+  }
+};
 
   return (
     <main className="min-h-screen bg-[#f6f1eb] px-4 py-8 sm:px-6 lg:px-8">
