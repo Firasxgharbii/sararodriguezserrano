@@ -75,6 +75,7 @@ export default function Navbar() {
   useEffect(() => {
     const syncLang = () => {
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+
       if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
         setLang(savedLang);
       } else {
@@ -108,6 +109,7 @@ export default function Navbar() {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
@@ -121,14 +123,14 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-neutral-200/80 bg-white/95 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full border-b border-neutral-300 bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
           <div className="flex items-center justify-between py-4 md:hidden">
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-900 transition duration-300 hover:bg-neutral-50 active:scale-95"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-300 bg-[#f7f7f7] text-neutral-900 shadow-sm transition duration-300 hover:bg-white active:scale-95"
             >
               <Menu size={19} />
             </button>
@@ -143,7 +145,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setLangOpen((prev) => !prev)}
-                className="flex h-11 items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 text-sm text-neutral-900 transition duration-300 hover:bg-neutral-50 active:scale-95"
+                className="flex h-11 items-center gap-1 rounded-full border border-neutral-300 bg-[#f7f7f7] px-3 text-sm font-medium text-neutral-900 shadow-sm transition duration-300 hover:bg-white active:scale-95"
               >
                 {t.current}
                 <ChevronDown
@@ -155,7 +157,7 @@ export default function Navbar() {
               </button>
 
               <div
-                className={`absolute right-0 top-12 z-[999] w-40 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl transition-all duration-300 ${
+                className={`absolute right-0 top-12 z-[999] w-40 overflow-hidden rounded-2xl border border-neutral-300 bg-white shadow-[0_12px_35px_rgba(0,0,0,0.16)] transition-all duration-300 ${
                   langOpen
                     ? "pointer-events-auto translate-y-0 opacity-100"
                     : "pointer-events-none -translate-y-2 opacity-0"
@@ -164,7 +166,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => handleChangeLang("fr")}
-                  className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
+                  className="w-full px-4 py-3 text-left text-sm font-medium text-neutral-800 transition hover:bg-neutral-100"
                 >
                   Français
                 </button>
@@ -172,7 +174,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => handleChangeLang("en")}
-                  className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
+                  className="w-full px-4 py-3 text-left text-sm font-medium text-neutral-800 transition hover:bg-neutral-100"
                 >
                   English
                 </button>
@@ -180,7 +182,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => handleChangeLang("es")}
-                  className="w-full px-4 py-3 text-left text-sm transition hover:bg-neutral-50"
+                  className="w-full px-4 py-3 text-left text-sm font-medium text-neutral-800 transition hover:bg-neutral-100"
                 >
                   Español
                 </button>
@@ -284,6 +286,7 @@ export default function Navbar() {
                     }`}
                   >
                     {item.label}
+
                     <span
                       className={`absolute bottom-0 left-0 h-[1px] bg-neutral-900 transition-all duration-300 ${
                         active ? "w-full" : "w-0 group-hover:w-full"
@@ -328,7 +331,7 @@ export default function Navbar() {
                 type="button"
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close menu"
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-900 transition hover:bg-neutral-50 active:scale-95"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-[#f7f7f7] text-neutral-900 shadow-sm transition hover:bg-white active:scale-95"
               >
                 <X size={18} />
               </button>
@@ -356,6 +359,7 @@ export default function Navbar() {
                     >
                       <span className="relative inline-block">
                         {item.label}
+
                         <span
                           className={`absolute -bottom-1 left-0 h-[1px] bg-neutral-900 transition-all duration-300 ${
                             active ? "w-full" : "w-0 group-hover:w-full"
@@ -381,7 +385,7 @@ export default function Navbar() {
                       className={`rounded-full border px-4 py-2.5 text-sm transition duration-300 ${
                         lang === item
                           ? "border-neutral-900 bg-neutral-900 text-white"
-                          : "border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50"
+                          : "border-neutral-300 bg-[#f7f7f7] text-neutral-900 hover:bg-white"
                       }`}
                     >
                       {item.toUpperCase()}
@@ -450,6 +454,7 @@ export default function Navbar() {
             opacity: 0;
             transform: translateY(8px);
           }
+
           to {
             opacity: 1;
             transform: translateY(0);
