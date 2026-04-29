@@ -25,14 +25,19 @@ function getSafeSlug(value?: string) {
 
 function isValidImageUrl(url?: string) {
   if (!url) return false;
+
   const clean = url.trim();
-  if (!clean || clean === "undefined" || clean === "null") return false;
+
+  if (!clean) return false;
+  if (clean === "undefined" || clean === "null") return false;
   if (clean.startsWith("blob:")) return false;
+
   return clean.startsWith("http") || clean.startsWith("/");
 }
 
 function getOptimizedImageUrl(url: string) {
   if (!url) return "";
+
   const clean = url.trim();
 
   if (clean.includes("res.cloudinary.com") && clean.includes("/upload/")) {
@@ -42,30 +47,84 @@ function getOptimizedImageUrl(url: string) {
   return clean;
 }
 
-function getArtworkAspectRatio(dimensions?: string) {
-  if (!dimensions) return "1 / 1";
+function getArtworkFrameStyle(dimensions?: string): React.CSSProperties {
+  const fallback: React.CSSProperties = {
+    aspectRatio: "1 / 1",
+    width: "55%",
+  };
 
-  const cleaned = dimensions
-    .toLowerCase()
+  if (!dimensions) return fallback;
+
+  const raw = dimensions.toLowerCase().trim();
+
+  const isMeter = /\d\s*m/.test(raw) && !raw.includes("cm") && !raw.includes("mm");
+  const isCm = raw.includes("cm");
+
+  const cleaned = raw
     .replaceAll(",", ".")
     .replaceAll("×", "x")
     .replaceAll("*", "x")
     .replaceAll(" by ", "x")
     .replaceAll("par", "x")
+    .replaceAll("centimetres", "")
+    .replaceAll("centimètres", "")
+    .replaceAll("cm", "")
+    .replaceAll("meters", "")
+    .replaceAll("metres", "")
+    .replaceAll("mètres", "")
+    .replaceAll("metros", "")
+    .replaceAll("m", "")
+    .replaceAll("pouces", "")
+    .replaceAll("po", "")
+    .replaceAll("inches", "")
+    .replaceAll("inch", "")
     .replaceAll('"', "")
     .replaceAll("”", "")
-    .replaceAll("“", "");
+    .replaceAll("“", "")
+    .trim();
 
-  const match = cleaned.match(/(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/);
+  const numbers = cleaned.match(/\d+(?:\.\d+)?/g);
 
-  if (!match) return "1 / 1";
+  if (!numbers || numbers.length === 0) return fallback;
 
-  const width = Number(match[1]);
-  const height = Number(match[2]);
+  let width = Number(numbers[0]);
+  let height = Number(numbers[1] ?? numbers[0]);
 
-  if (!width || !height) return "1 / 1";
+  if (!width || !height) return fallback;
 
-  return `${width} / ${height}`;
+  if (isMeter) {
+    width = width * 100;
+    height = height * 100;
+  } else if (isCm) {
+    width = width;
+    height = height;
+  } else {
+    width = width * 2.54;
+    height = height * 2.54;
+  }
+
+  const maxCm = 200;
+  const longestSide = Math.min(Math.max(width, height), maxCm);
+  const visualWidth = 32 + (longestSide / maxCm) * 68;
+
+  return {
+    aspectRatio: `${width} / ${height}`,
+    width: `${Math.min(100, Math.max(32, visualWidth))}%`,
+  };
+}
+
+function getTitleSizeClass(size?: string) {
+  switch (size) {
+    case "small":
+      return "max-w-3xl text-[34px] sm:text-[42px] md:text-[48px] lg:text-[54px]";
+    case "medium":
+      return "max-w-4xl text-[40px] sm:text-[50px] md:text-[58px] lg:text-[62px]";
+    case "xlarge":
+      return "max-w-6xl text-[52px] sm:text-[66px] md:text-[78px] lg:text-[88px]";
+    case "large":
+    default:
+      return "max-w-5xl text-[46px] sm:text-[58px] md:text-[64px] lg:text-[68px]";
+  }
 }
 
 function getArtworkImageClass(size?: string) {
@@ -86,10 +145,22 @@ function mergeSiteContent(data: Partial<SiteContent> | null): SiteContent {
   return {
     ...defaultSiteContent,
     ...data,
+
     oeuvres: {
       ...defaultSiteContent.oeuvres,
       ...(data.oeuvres ?? {}),
-      items: data.oeuvres?.items ?? defaultSiteContent.oeuvres.items,
+      items: (data.oeuvres?.items ?? defaultSiteContent.oeuvres.items).map(
+        (item: any, index: number) => ({
+          ...(defaultSiteContent.oeuvres.items[index] ?? {}),
+          ...item,
+          imageSize: item?.imageSize ?? "medium",
+          titleSize: item?.titleSize ?? "large",
+          galleryImages:
+            item?.galleryImages ??
+            defaultSiteContent.oeuvres.items[index]?.galleryImages ??
+            [],
+        })
+      ),
     },
   };
 }
@@ -137,7 +208,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
   const oeuvre = useMemo(() => {
     const currentSlug = getSafeSlug(slug);
 
-    return content.oeuvres.items.find((item) => {
+    return content.oeuvres.items.find((item: any) => {
       return (
         getSafeSlug(item.slug) === currentSlug ||
         getSafeSlug(item.title?.fr) === currentSlug ||
@@ -220,7 +291,11 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
         <section className="mx-auto max-w-[1280px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-[0.95fr_0.7fr] md:items-start">
             <div>
-              <h1 className="font-light leading-[1.15] tracking-[0.08em] text-[#8b7771] text-[32px] sm:text-[36px] md:text-[40px] lg:text-[44px]">
+              <h1
+                className={`font-light leading-[1.15] tracking-[0.08em] text-[#8b7771] ${getTitleSizeClass(
+                  (oeuvre as any).titleSize
+                )}`}
+              >
                 {pageTitle}
               </h1>
             </div>
@@ -263,23 +338,23 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
 
                 return (
                   <article key={`${slug}-${index}`} className="group">
-                    <div
-                      className={`mx-auto overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)] ${getArtworkImageClass(
-                        (oeuvre as any).imageSize
-                      )}`}
-                      style={{
-                        aspectRatio: getArtworkAspectRatio(imageDimensions),
-                      }}
-                    >
-                      <Image
-                        src={getOptimizedImageUrl(image.src)}
-                        alt={`${imageTitle} ${index + 1}`}
-                        width={1400}
-                        height={1800}
-                        unoptimized
-                        loading={index < 2 ? "eager" : "lazy"}
-                        className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.015]"
-                      />
+                    <div className="flex min-h-[420px] items-center justify-center">
+                      <div
+                        className={`relative overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)] ${getArtworkImageClass(
+                          (oeuvre as any).imageSize
+                        )}`}
+                        style={getArtworkFrameStyle(imageDimensions)}
+                      >
+                        <Image
+                          src={getOptimizedImageUrl(image.src)}
+                          alt={`${imageTitle} ${index + 1}`}
+                          fill
+                          unoptimized
+                          loading={index < 2 ? "eager" : "lazy"}
+                          sizes="(max-width: 768px) 100vw, 560px"
+                          className="object-cover transition duration-700 group-hover:scale-[1.015]"
+                        />
+                      </div>
                     </div>
 
                     <div className="mt-6 border-t border-[#d6ccc7] pt-5">
