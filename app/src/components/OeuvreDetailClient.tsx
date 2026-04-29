@@ -214,21 +214,10 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                             </p>
                           </div>
                         </div>
-
-                        <div
-                          className={`futura-text inline-flex w-fit items-center rounded-full border px-4 py-2 text-[10px] uppercase tracking-[0.2em] ${
-                            available
-                              ? "border-green-600/25 bg-green-50 text-green-700"
-                              : "border-red-600/25 bg-red-50 text-red-700"
-                          }`}
-                        >
-                          <span
-                            className={`mr-2 h-2 w-2 rounded-full ${
-                              available ? "bg-green-600" : "bg-red-600"
-                            }`}
-                          />
-                          {availabilityText}
-                        </div>
+<div className="futura-text inline-flex w-fit items-center rounded-full border border-[#cfc4bf] bg-[#e6e2df] px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#7f6e67]">
+  <span className="mr-2 h-2 w-2 rounded-full bg-[#8b7771]" />
+  {availabilityText}
+</div>
                       </div>
                     </div>
                   </article>
