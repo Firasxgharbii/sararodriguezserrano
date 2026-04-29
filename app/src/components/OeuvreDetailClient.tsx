@@ -14,6 +14,26 @@ import {
 } from "../../lib/siteContent";
 import { t } from "../../lib/i18n";
 
+function getSafeSlug(slug?: string) {
+  return (slug || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getOptimizedImageUrl(url: string) {
+  if (!url) return "";
+
+  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
+    return url.replace("/upload/", "/upload/f_auto,q_auto,w_1200,c_limit/");
+  }
+
+  return url;
+}
+
 function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
   if (!parsed) return defaultSiteContent;
 
@@ -37,16 +57,6 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
       ),
     },
   };
-}
-
-function getOptimizedImageUrl(url: string) {
-  if (!url) return "";
-
-  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
-    return url.replace("/upload/", "/upload/f_auto,q_auto,w_1200,c_limit/");
-  }
-
-  return url;
 }
 
 function getArtworkImageClass(size?: string) {
@@ -139,7 +149,9 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
   }, []);
 
   const oeuvre = useMemo(() => {
-    return content.oeuvres.items.find((item) => item.slug === slug);
+    return content.oeuvres.items.find(
+      (item) => getSafeSlug(item.slug) === getSafeSlug(slug)
+    );
   }, [content, slug]);
 
   if (!ready) return null;
@@ -167,7 +179,20 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
         dimensions: img?.dimensions || oeuvre.dimensions || "",
       };
     })
-    .filter((img: any) => img.src.trim() !== "");
+    .filter((img: any) => img.src?.trim() !== "");
+
+  const imagesToShow =
+    galleryImages.length > 0
+      ? galleryImages
+      : oeuvre.image
+      ? [
+          {
+            src: oeuvre.image,
+            isAvailable: false,
+            dimensions: oeuvre.dimensions || "",
+          },
+        ]
+      : [];
 
   return (
     <>
@@ -207,9 +232,9 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
             </div>
           </div>
 
-          {galleryImages.length > 0 && (
+          {imagesToShow.length > 0 && (
             <div className="mt-20 grid grid-cols-1 gap-x-20 gap-y-28 sm:grid-cols-2">
-              {galleryImages.map((galleryImage: any, index: number) => {
+              {imagesToShow.map((galleryImage: any, index: number) => {
                 const available = galleryImage.isAvailable === true;
 
                 const availabilityText = available
@@ -240,6 +265,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                         alt={`${title} ${index + 1}`}
                         width={1400}
                         height={1800}
+                        unoptimized
                         loading={index < 2 ? "eager" : "lazy"}
                         className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.015]"
                       />
