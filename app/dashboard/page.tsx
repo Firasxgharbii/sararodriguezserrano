@@ -1384,6 +1384,16 @@ function ImageStyleEditor({
   );
 }
 
+function getOptimizedImageUrl(url: string) {
+  if (!url) return "";
+
+  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
+    return url.replace("/upload/", "/upload/f_auto,q_auto,w_500/");
+  }
+
+  return url;
+}
+
 function ImageUploadField({
   label,
   value,
@@ -1448,14 +1458,16 @@ function ImageUploadField({
           <div className="mt-5">
             <div className="overflow-hidden rounded-[24px] border border-[#eadfd8] bg-white shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
               <img
-                src={value}
+                src={getOptimizedImageUrl(value)}
                 alt="Prévisualisation"
-                className="h-[240px] w-full object-cover sm:h-[300px]"
+                loading="lazy"
+                decoding="async"
+                className="h-[170px] w-full object-cover sm:h-[210px]"
               />
             </div>
           </div>
         ) : (
-          <div className="mt-5 flex h-[220px] items-center justify-center rounded-[24px] border border-dashed border-[#ddd1ca] bg-white text-center">
+          <div className="mt-5 flex h-[180px] items-center justify-center rounded-[24px] border border-dashed border-[#ddd1ca] bg-white text-center">
             <div className="px-6">
               <p className="text-[15px] font-medium text-[#5f534d]">
                 Aucune image sélectionnée
@@ -1469,14 +1481,12 @@ function ImageUploadField({
         )}
 
         <p className="mt-4 text-xs leading-6 text-[#8a7971]">
-          Formats acceptés : JPG, PNG, WEBP. L’image est envoyée vers
-          Cloudinary.
+          Formats acceptés : JPG, PNG, WEBP. L’image est envoyée vers Cloudinary.
         </p>
       </div>
     </div>
   );
 }
-
 async function uploadToCloudinary(file: File): Promise<string> {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
