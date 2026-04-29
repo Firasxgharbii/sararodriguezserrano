@@ -18,16 +18,19 @@ const MAX_GALLERY_IMAGES = 20;
 type GalleryImageItem = {
   src: string;
   isAvailable: boolean;
+  dimensions: string;
   availability: LocalizedText;
 };
 
 function makeGalleryImage(
   src = "",
-  isAvailable = false
+  isAvailable = false,
+  dimensions = ""
 ): GalleryImageItem {
   return {
     src,
     isAvailable,
+    dimensions,
     availability: isAvailable
       ? { fr: "Disponible", en: "Available", es: "Disponible" }
       : { fr: "Indisponible", en: "Not available", es: "No disponible" },
@@ -138,10 +141,18 @@ export default function DashboardPage() {
           []
         ).map((galleryImage: any) =>
           typeof galleryImage === "string"
-            ? makeGalleryImage(galleryImage, false)
+            ? makeGalleryImage(
+                galleryImage,
+                false,
+                item?.dimensions ?? defaultItem?.dimensions ?? ""
+              )
             : makeGalleryImage(
                 galleryImage?.src ?? "",
-                galleryImage?.isAvailable === true
+                galleryImage?.isAvailable === true,
+                galleryImage?.dimensions ??
+                  item?.dimensions ??
+                  defaultItem?.dimensions ??
+                  ""
               )
         ),
       };
@@ -909,6 +920,7 @@ const resetContent = async () => {
                         {
                           src: "",
                           isAvailable: false,
+                          dimensions: (updated[index] as any).dimensions ?? "",
                           availability: {
                             fr: "Indisponible",
                             en: "Not available",
@@ -971,6 +983,46 @@ const resetContent = async () => {
                             </button>
                           </div>
 
+                          <Field
+                            label="Dimensions de cette image"
+                            value={
+                              typeof galleryImage === "string"
+                                ? item.dimensions ?? ""
+                                : galleryImage?.dimensions ?? item.dimensions ?? ""
+                            }
+                            onChange={(value) => {
+                              const updated = [...content.oeuvres.items];
+                              const nextImages = [
+                                ...((updated[index] as any).galleryImages ?? []),
+                              ];
+                              const current = nextImages[imageIndex];
+
+                              nextImages[imageIndex] =
+                                typeof current === "string"
+                                  ? {
+                                      src: current,
+                                      isAvailable: false,
+                                      dimensions: value,
+                                      availability: {
+                                        fr: "Indisponible",
+                                        en: "Not available",
+                                        es: "No disponible",
+                                      },
+                                    }
+                                  : {
+                                      ...current,
+                                      dimensions: value,
+                                    };
+
+                              (updated[index] as any).galleryImages = nextImages;
+
+                              setContent({
+                                ...content,
+                                oeuvres: { ...content.oeuvres, items: updated },
+                              });
+                            }}
+                          />
+
                           <button
                             type="button"
                             onClick={() => {
@@ -989,6 +1041,10 @@ const resetContent = async () => {
                               nextImages[imageIndex] = {
                                 src: currentSrc,
                                 isAvailable: nextAvailable,
+                                dimensions:
+                                  typeof current === "string"
+                                    ? item.dimensions ?? ""
+                                    : current?.dimensions ?? item.dimensions ?? "",
                                 availability: nextAvailable
                                   ? {
                                       fr: "Disponible",
@@ -1034,6 +1090,10 @@ const resetContent = async () => {
                               nextImages[imageIndex] = {
                                 src: value,
                                 isAvailable: currentAvailable,
+                                dimensions:
+                                  typeof current === "string"
+                                    ? item.dimensions ?? ""
+                                    : current?.dimensions ?? item.dimensions ?? "",
                                 availability: currentAvailable
                                   ? {
                                       fr: "Disponible",

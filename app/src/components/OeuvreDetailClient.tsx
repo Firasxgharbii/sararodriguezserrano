@@ -50,6 +50,29 @@ function getArtworkImageClass(size?: string) {
   }
 }
 
+function getArtworkAspectRatio(dimensions?: string) {
+  if (!dimensions) return "1 / 1";
+
+  const cleaned = dimensions
+    .toLowerCase()
+    .replaceAll(",", ".")
+    .replaceAll("×", "x")
+    .replaceAll("*", "x")
+    .replaceAll(" by ", "x")
+    .replaceAll("par", "x");
+
+  const match = cleaned.match(/(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/);
+
+  if (!match) return "1 / 1";
+
+  const width = Number(match[1]);
+  const height = Number(match[2]);
+
+  if (!width || !height) return "1 / 1";
+
+  return `${width} / ${height}`;
+}
+
 export default function OeuvreDetailClient({ slug }: { slug: string }) {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [ready, setReady] = useState(false);
@@ -109,12 +132,14 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
         return {
           src: img,
           isAvailable: false,
+          dimensions: oeuvre.dimensions || "",
         };
       }
 
       return {
         src: img?.src ?? "",
         isAvailable: img?.isAvailable === true,
+        dimensions: img?.dimensions || oeuvre.dimensions || "",
       };
     })
     .filter((img: any) => img.src.trim() !== "");
@@ -127,9 +152,9 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
         <section className="mx-auto max-w-[1280px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-[0.95fr_0.7fr] md:items-start">
             <div>
-    <h1 className="futura-text max-w-5xl text-[46px] font-light leading-[1.18] tracking-[0.14em] text-[#8b7771] sm:text-[58px] md:text-[64px] lg:text-[68px]">
-  {title}
-</h1>
+              <h1 className="futura-text max-w-5xl text-[46px] font-light leading-[1.18] tracking-[0.14em] text-[#8b7771] sm:text-[58px] md:text-[64px] lg:text-[68px]">
+                {title}
+              </h1>
             </div>
 
             <div className="ml-auto flex w-full max-w-[430px] flex-col items-end text-right md:pt-6">
@@ -168,19 +193,25 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                   ? "No disponible"
                   : "Indisponible";
 
+                const imageDimensions =
+                  galleryImage.dimensions || oeuvre.dimensions || "Non précisé";
+
                 return (
                   <article key={`${oeuvre.slug}-${index}`} className="group">
                     <div
                       className={`mx-auto overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)] ${getArtworkImageClass(
                         (oeuvre as any).imageSize
                       )}`}
+                      style={{
+                        aspectRatio: getArtworkAspectRatio(imageDimensions),
+                      }}
                     >
                       <Image
                         src={galleryImage.src}
                         alt={`${title} ${index + 1}`}
                         width={1400}
                         height={1800}
-                        className="h-auto w-full object-cover transition duration-700 group-hover:scale-[1.015]"
+                        className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.015]"
                       />
                     </div>
 
@@ -196,7 +227,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                               <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
                                 Dimensions :
                               </span>{" "}
-                              {oeuvre.dimensions || "Non précisé"}
+                              {imageDimensions}
                             </p>
 
                             <p>
