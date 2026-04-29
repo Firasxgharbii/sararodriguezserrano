@@ -1143,6 +1143,52 @@ export default function DashboardPage() {
                   }
                 />
 
+                <ImageUploadField
+                  label="Image citation / grande image"
+                  value={(content.oeuvres as any).quoteImage ?? ""}
+                  onChange={(value) =>
+                    setContent({
+                      ...content,
+                      oeuvres: { ...(content.oeuvres as any), quoteImage: value },
+                    })
+                  }
+                />
+
+                <LocalizedTextareaField
+                  label="Texte citation"
+                  value={
+                    (content.oeuvres as any).quoteText ?? {
+                      fr: "",
+                      en: "",
+                      es: "",
+                    }
+                  }
+                  onChange={(value) =>
+                    setContent({
+                      ...content,
+                      oeuvres: { ...(content.oeuvres as any), quoteText: value },
+                    })
+                  }
+                />
+
+                <LocalizedField
+                  label="Auteur citation"
+                  value={
+                    (content.oeuvres as any).quoteAuthor ?? {
+                      fr: "",
+                      en: "",
+                      es: "",
+                    }
+                  }
+                  onChange={(value) =>
+                    setContent({
+                      ...content,
+                      oeuvres: { ...(content.oeuvres as any), quoteAuthor: value },
+                    })
+                  }
+                />
+
+
                 <div className="mt-8">
                   <div className="mb-6 flex flex-col gap-4 rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                     <div>
@@ -1781,10 +1827,135 @@ export default function DashboardPage() {
             )}
 
             {activeTab === "portfolio" && (
-              <EditorBlock title="Portfolio" subtitle="Modifier le portfolio">
-                <div className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 text-sm text-[#6f5d57]">
-                  Cette section est prête. Ajoutez ici vos champs portfolio si
-                  nécessaire.
+              <EditorBlock
+                title="Portfolio"
+                subtitle="Modifier le portfolio"
+              >
+                <div className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6">
+                  <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h3 className="text-xl font-medium text-[#201c19]">
+                        Images portfolio / À propos
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-[#8a7971]">
+                        Ces images sont utilisées dans le carrousel portfolio de la page À propos.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = [
+                          ...((content.portfolio ?? []) as any[]),
+                          {
+                            image: "",
+                            title: { fr: "", en: "", es: "" },
+                            description: { fr: "", en: "", es: "" },
+                          },
+                        ];
+
+                        setContent({
+                          ...content,
+                          portfolio: updated as any,
+                        });
+                      }}
+                      className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px]"
+                    >
+                      Ajouter une image
+                    </button>
+                  </div>
+
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    {((content.portfolio ?? []) as any[]).map((item, index) => (
+                      <div
+                        key={`portfolio-${index}`}
+                        className="rounded-[22px] border border-[#eadfd8] bg-white p-5"
+                      >
+                        <div className="mb-4 flex items-center justify-between gap-3">
+                          <p className="text-sm font-medium text-[#5f534d]">
+                            Image portfolio {index + 1}
+                          </p>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...((content.portfolio ?? []) as any[])];
+                              updated.splice(index, 1);
+
+                              setContent({
+                                ...content,
+                                portfolio: updated as any,
+                              });
+                            }}
+                            className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+
+                        <ImageUploadField
+                          label="Image"
+                          value={item?.image ?? ""}
+                          onChange={(value) => {
+                            const updated = [...((content.portfolio ?? []) as any[])];
+                            updated[index] = {
+                              ...(updated[index] ?? {}),
+                              image: value,
+                            };
+
+                            setContent({
+                              ...content,
+                              portfolio: updated as any,
+                            });
+                          }}
+                        />
+
+                        <div className="mt-5">
+                          <LocalizedField
+                            label="Titre"
+                            value={item?.title ?? { fr: "", en: "", es: "" }}
+                            onChange={(value) => {
+                              const updated = [...((content.portfolio ?? []) as any[])];
+                              updated[index] = {
+                                ...(updated[index] ?? {}),
+                                title: value,
+                              };
+
+                              setContent({
+                                ...content,
+                                portfolio: updated as any,
+                              });
+                            }}
+                          />
+                        </div>
+
+                        <div className="mt-5">
+                          <LocalizedTextareaField
+                            label="Description"
+                            value={
+                              item?.description ?? {
+                                fr: "",
+                                en: "",
+                                es: "",
+                              }
+                            }
+                            onChange={(value) => {
+                              const updated = [...((content.portfolio ?? []) as any[])];
+                              updated[index] = {
+                                ...(updated[index] ?? {}),
+                                description: value,
+                              };
+
+                              setContent({
+                                ...content,
+                                portfolio: updated as any,
+                              });
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </EditorBlock>
             )}

@@ -40,7 +40,7 @@ function getOptimizedImageUrl(url: string) {
   const clean = url.trim();
 
   if (clean.includes("res.cloudinary.com") && clean.includes("/upload/")) {
-    return clean.replace("/upload/", "/upload/f_auto,q_auto,w_1400,c_limit/");
+    return clean.replace("/upload/", "/upload/f_auto,q_auto,w_1600,c_limit/");
   }
 
   return clean;
@@ -52,19 +52,9 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
   return {
     ...defaultSiteContent,
     ...parsed,
-
     portfolio: Array.isArray(parsed.portfolio)
       ? parsed.portfolio
       : defaultSiteContent.portfolio,
-
-    about: {
-      ...defaultSiteContent.about,
-      ...(parsed.about ?? {}),
-      profileImage: {
-        ...defaultSiteContent.about.profileImage,
-        ...(parsed.about?.profileImage ?? {}),
-      },
-    },
   };
 }
 
@@ -104,9 +94,7 @@ export default function PortfolioSection() {
     loadContent();
     window.addEventListener("focus", loadContent);
 
-    return () => {
-      window.removeEventListener("focus", loadContent);
-    };
+    return () => window.removeEventListener("focus", loadContent);
   }, []);
 
   const portfolioItems = useMemo(() => {
@@ -128,16 +116,6 @@ export default function PortfolioSection() {
     }
   }, [activeIndex, total]);
 
-  const goPrev = () => {
-    if (total <= 0) return;
-    setActiveIndex((prev) => (prev === 0 ? total - 1 : prev - 1));
-  };
-
-  const goNext = () => {
-    if (total <= 0) return;
-    setActiveIndex((prev) => (prev === total - 1 ? 0 : prev + 1));
-  };
-
   useEffect(() => {
     if (isPaused || total <= 1) return;
 
@@ -147,6 +125,16 @@ export default function PortfolioSection() {
 
     return () => clearInterval(timer);
   }, [isPaused, total]);
+
+  const goPrev = () => {
+    if (total <= 0) return;
+    setActiveIndex((prev) => (prev === 0 ? total - 1 : prev - 1));
+  };
+
+  const goNext = () => {
+    if (total <= 0) return;
+    setActiveIndex((prev) => (prev === total - 1 ? 0 : prev + 1));
+  };
 
   const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     touchStartX.current = e.targetTouches[0].clientX;
@@ -176,9 +164,7 @@ export default function PortfolioSection() {
     );
   }
 
-  if (!activeItem) {
-    return null;
-  }
+  if (!activeItem) return null;
 
   return (
     <section id="portfolio" className="w-full">
@@ -194,7 +180,7 @@ export default function PortfolioSection() {
           <img
             key={activeItem.image}
             src={getOptimizedImageUrl(activeItem.image)}
-            alt=""
+            alt="Portfolio"
             className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.015]"
           />
 
