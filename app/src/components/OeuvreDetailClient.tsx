@@ -14,8 +14,10 @@ import {
 } from "../../lib/siteContent";
 import { t } from "../../lib/i18n";
 
-function getSafeSlug(slug?: string) {
-  return (slug || "")
+/* ---------------- UTIL ---------------- */
+
+function getSafeSlug(value?: string) {
+  return (value || "")
     .trim()
     .toLowerCase()
     .normalize("NFD")
@@ -26,163 +28,47 @@ function getSafeSlug(slug?: string) {
 
 function isValidImageUrl(url?: string) {
   if (!url) return false;
-
-  const cleanUrl = url.trim();
-
-  if (!cleanUrl) return false;
-  if (cleanUrl === "undefined") return false;
-  if (cleanUrl === "null") return false;
-  if (cleanUrl.startsWith("blob:")) return false;
-
-  return cleanUrl.startsWith("http") || cleanUrl.startsWith("/");
+  const clean = url.trim();
+  if (!clean || clean === "undefined" || clean === "null") return false;
+  return clean.startsWith("http") || clean.startsWith("/");
 }
 
 function getOptimizedImageUrl(url: string) {
   if (!url) return "";
+  const clean = url.trim();
 
-  const cleanUrl = url.trim();
-
-  if (cleanUrl.includes("res.cloudinary.com") && cleanUrl.includes("/upload/")) {
-    return cleanUrl.replace("/upload/", "/upload/f_auto,q_auto,w_1200,c_limit/");
+  if (clean.includes("res.cloudinary.com") && clean.includes("/upload/")) {
+    return clean.replace("/upload/", "/upload/f_auto,q_auto,w_1200/");
   }
 
-  return cleanUrl;
+  return clean;
 }
 
-function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
-  if (!parsed) return defaultSiteContent;
-
-  return {
-    ...defaultSiteContent,
-    ...parsed,
-
-    oeuvres: {
-      ...defaultSiteContent.oeuvres,
-      ...(parsed.oeuvres ?? {}),
-      items: (parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items).map(
-        (item: any, index: number) => {
-          const defaultItem = defaultSiteContent.oeuvres.items[index] ?? {};
-
-          return {
-            ...defaultItem,
-            ...item,
-            image: item?.image ?? defaultItem?.image ?? "",
-            imageSize: (item as any)?.imageSize ?? (defaultItem as any)?.imageSize ?? "medium",
-            titleSize: (item as any)?.titleSize ?? (defaultItem as any)?.titleSize ?? "large",
-            year: item?.year ?? defaultItem?.year ?? "",
-            dimensions: item?.dimensions ?? defaultItem?.dimensions ?? "",
-            technique:
-              item?.technique ??
-              defaultItem?.technique ?? { fr: "", en: "", es: "" },
-            galleryImages: (
-              item?.galleryImages ??
-              defaultItem?.galleryImages ??
-              []
-            )
-              .map((galleryImage: any) => {
-                if (typeof galleryImage === "string") {
-                  return {
-                    src: galleryImage.trim(),
-                    isAvailable: false,
-                    dimensions: item?.dimensions ?? defaultItem?.dimensions ?? "",
-                  };
-                }
-
-                return {
-                  src: galleryImage?.src?.trim() ?? "",
-                  isAvailable: galleryImage?.isAvailable === true,
-                  dimensions:
-                    galleryImage?.dimensions ??
-                    item?.dimensions ??
-                    defaultItem?.dimensions ??
-                    "",
-                };
-              })
-              .filter((img: any) => isValidImageUrl(img.src)),
-          };
-        }
-      ),
-    },
-  };
-}
-
-function getArtworkImageClass(size?: string) {
-  switch (size) {
-    case "small":
-      return "max-w-[420px]";
-    case "large":
-      return "max-w-[760px]";
-    case "medium":
-    default:
-      return "max-w-[560px]";
-  }
-}
-
-function getTitleSizeClass(size?: string) {
-  switch (size) {
-    case "small":
-      return "max-w-3xl text-[34px] sm:text-[42px] md:text-[48px] lg:text-[54px]";
-    case "medium":
-      return "max-w-4xl text-[40px] sm:text-[50px] md:text-[58px] lg:text-[62px]";
-    case "xlarge":
-      return "max-w-6xl text-[52px] sm:text-[66px] md:text-[78px] lg:text-[88px]";
-    case "large":
-    default:
-      return "max-w-5xl text-[46px] sm:text-[58px] md:text-[64px] lg:text-[68px]";
-  }
-}
-
-function getArtworkAspectRatio(dimensions?: string) {
-  if (!dimensions) return "1 / 1";
-
-  const cleaned = dimensions
-    .toLowerCase()
-    .replaceAll(",", ".")
-    .replaceAll("×", "x")
-    .replaceAll("*", "x")
-    .replaceAll(" by ", "x")
-    .replaceAll("par", "x");
-
-  const match = cleaned.match(/(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/);
-
-  if (!match) return "1 / 1";
-
-  const width = Number(match[1]);
-  const height = Number(match[2]);
-
-  if (!width || !height) return "1 / 1";
-
-  return `${width} / ${height}`;
-}
+/* ---------------- COMPONENT ---------------- */
 
 export default function OeuvreDetailClient({ slug }: { slug: string }) {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [ready, setReady] = useState(false);
   const [lang, setLang] = useState<Lang>("fr");
 
+  /* ---------- LOAD DATA ---------- */
+
   useEffect(() => {
-    const loadData = async () => {
+    const load = async () => {
       try {
         const res = await fetch("/api/site-content", {
           cache: "no-store",
-          next: { revalidate: 0 },
         });
 
-        if (!res.ok) {
-          setContent(defaultSiteContent);
-        } else {
+        if (res.ok) {
           const data = await res.json();
-          setContent(mergeSiteContent(data));
+          setContent(data);
         }
-      } catch (err) {
-        console.error("Erreur chargement site-content:", err);
-        setContent(defaultSiteContent);
+      } catch (e) {
+        console.error("Erreur API:", e);
       }
 
-      const savedLang =
-        typeof window !== "undefined"
-          ? (localStorage.getItem(LANG_STORAGE_KEY) as Lang | null)
-          : null;
+      const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
 
       setLang(
         savedLang === "fr" || savedLang === "en" || savedLang === "es"
@@ -193,212 +79,85 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
       setReady(true);
     };
 
-    loadData();
-
-    window.addEventListener("focus", loadData);
-    window.addEventListener("visibilitychange", loadData);
-
-    return () => {
-      window.removeEventListener("focus", loadData);
-      window.removeEventListener("visibilitychange", loadData);
-    };
+    load();
   }, []);
 
+  /* ---------- FIND OEUVRE ---------- */
+
   const oeuvre = useMemo(() => {
-    return content.oeuvres.items.find(
-      (item) => getSafeSlug(item.slug) === getSafeSlug(slug)
-    );
+    const current = getSafeSlug(slug);
+
+    return content.oeuvres.items.find((item: any) => {
+      return (
+        getSafeSlug(item.slug) === current ||
+        getSafeSlug(item.title?.fr) === current ||
+        getSafeSlug(item.title?.en) === current ||
+        getSafeSlug(item.title?.es) === current
+      );
+    });
   }, [content, slug]);
 
   if (!ready) return null;
   if (!oeuvre) notFound();
 
-  const title = t(oeuvre.galleryTitle, lang) || t(oeuvre.title, lang);
-  const subtitle =
-    t(oeuvre.gallerySubtitle, lang) || t(oeuvre.description, lang);
+  /* ---------- DATA ---------- */
 
-  const technique = t(oeuvre.technique, lang) || "Non précisé";
+  const title = t(oeuvre.title, lang);
 
-  const galleryImages = ((oeuvre as any).galleryImages ?? [])
-    .map((img: any) => {
-      if (typeof img === "string") {
-        return {
-          src: img.trim(),
-          isAvailable: false,
-          dimensions: oeuvre.dimensions || "",
-        };
-      }
+  const images =
+    oeuvre.galleryImages?.filter((img: any) =>
+      isValidImageUrl(img?.src || img)
+    ) || [];
 
-      return {
-        src: img?.src?.trim() ?? "",
-        isAvailable: img?.isAvailable === true,
-        dimensions: img?.dimensions || oeuvre.dimensions || "",
-      };
-    })
-    .filter((img: any) => isValidImageUrl(img.src));
-
-  const mainImageIsValid = isValidImageUrl(oeuvre.image);
-
-  const imagesToShow =
-    galleryImages.length > 0
-      ? galleryImages
-      : mainImageIsValid
-      ? [
-          {
-            src: oeuvre.image.trim(),
-            isAvailable: (oeuvre as any).isAvailable === true,
-            dimensions: oeuvre.dimensions || "",
-          },
-        ]
-      : [];
+  /* ---------- UI ---------- */
 
   return (
     <>
       <Navbar />
 
-      <main className="min-h-screen bg-[#ecebea] text-[#7f6e67]">
-        <section className="mx-auto max-w-[1280px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-20">
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-[0.95fr_0.7fr] md:items-start">
-            <div>
-              <h1
-                className={`futura-text font-light leading-[1.18] tracking-[0.14em] text-[#8b7771] ${getTitleSizeClass(
-                  (oeuvre as any).titleSize
-                )}`}
-              >
-                {title}
-              </h1>
-            </div>
+      <main className="min-h-screen bg-[#ecebea] px-6 pt-16 pb-24">
+        <div className="mx-auto max-w-[1100px]">
 
-            <div className="ml-auto flex w-full max-w-[430px] flex-col items-end text-right md:pt-6">
-              {subtitle && (
-                <div className="border-r border-[#c9b9b2] pr-6">
-                  <p className="futura-text text-[14px] font-light leading-[1.9] tracking-[0.08em] text-[#8f766d] md:text-[15px]">
-                    {subtitle}
-                  </p>
-                </div>
-              )}
+          {/* TITLE */}
+          <h1 className="mb-12 text-[48px] tracking-[0.12em] text-[#8b7771]">
+            {title}
+          </h1>
 
-              <div className="mt-9">
-                <Link
-                  href="/oeuvres"
-                  className="futura-text inline-flex items-center justify-end gap-3 text-[11px] uppercase tracking-[0.28em] text-[#9b847b] transition-opacity duration-300 hover:opacity-70"
-                >
-                  <span>←</span>
-                  Retour aux œuvres
-                </Link>
-              </div>
-            </div>
-          </div>
+          {/* BACK */}
+          <Link
+            href="/oeuvres"
+            className="mb-10 inline-block text-[12px] uppercase tracking-[0.2em] text-[#8b7771]"
+          >
+            ← Retour aux œuvres
+          </Link>
 
-          {imagesToShow.length > 0 ? (
-            <div className="mt-20 grid grid-cols-1 gap-x-20 gap-y-28 sm:grid-cols-2">
-              {imagesToShow.map((galleryImage: any, index: number) => {
-                if (!isValidImageUrl(galleryImage.src)) return null;
+          {/* IMAGES */}
+          <div className="grid gap-16 sm:grid-cols-2">
+            {(images.length > 0 ? images : [oeuvre]).map(
+              (img: any, i: number) => {
+                const src = img?.src || oeuvre.image;
 
-                const available = galleryImage.isAvailable === true;
-
-                const availabilityText = available
-                  ? lang === "en"
-                    ? "Available"
-                    : "Disponible"
-                  : lang === "en"
-                  ? "Not available"
-                  : lang === "es"
-                  ? "No disponible"
-                  : "Indisponible";
-
-                const imageDimensions =
-                  galleryImage.dimensions || oeuvre.dimensions || "Non précisé";
+                if (!isValidImageUrl(src)) return null;
 
                 return (
-                  <article key={`${oeuvre.slug}-${index}`} className="group">
-                    <div
-                      className={`mx-auto overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)] ${getArtworkImageClass(
-                        (oeuvre as any).imageSize
-                      )}`}
-                      style={{
-                        aspectRatio: getArtworkAspectRatio(imageDimensions),
-                      }}
-                    >
-                      <Image
-                        src={getOptimizedImageUrl(galleryImage.src)}
-                        alt={`${title} ${index + 1}`}
-                        width={1400}
-                        height={1800}
-                        unoptimized
-                        loading={index < 2 ? "eager" : "lazy"}
-                        className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.015]"
-                      />
-                    </div>
-
-                    <div className="mt-6 border-t border-[#d6ccc7] pt-5">
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                          <h2 className="futura-text text-[11px] uppercase tracking-[0.24em] text-[#6f625d]">
-                            {title}
-                          </h2>
-
-                          <div className="mt-4 grid gap-2 text-[13px] leading-7 text-[#8d7d76]">
-                            <p>
-                              <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
-                                Dimensions :
-                              </span>{" "}
-                              {imageDimensions}
-                            </p>
-
-                            <p>
-                              <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
-                                Année :
-                              </span>{" "}
-                              {oeuvre.year || "Non précisé"}
-                            </p>
-
-                            <p>
-                              <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
-                                Technique :
-                              </span>{" "}
-                              {technique}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="futura-text inline-flex w-fit items-center rounded-full border border-[#cfc4bf] bg-[#e6e2df] px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#7f6e67]">
-                          <span className="mr-2 h-2 w-2 rounded-full bg-[#8b7771]" />
-                          {availabilityText}
-                        </div>
-                      </div>
-                    </div>
-                  </article>
+                  <div key={i}>
+                    <Image
+                      src={getOptimizedImageUrl(src)}
+                      alt={title}
+                      width={1000}
+                      height={1200}
+                      className="w-full object-cover"
+                      unoptimized
+                    />
+                  </div>
                 );
-              })}
-            </div>
-          ) : (
-            <div className="mt-20 rounded-[28px] border border-dashed border-[#d8ccc7] bg-white/40 px-6 py-16 text-center">
-              <p className="futura-text text-[13px] uppercase tracking-[0.24em] text-[#8b7771]">
-                Aucune image disponible pour cette œuvre.
-              </p>
-            </div>
-          )}
-        </section>
+              }
+            )}
+          </div>
+        </div>
       </main>
 
       <Footer />
-
-      <style jsx>{`
-        @font-face {
-          font-family: "FuturaLightCustom";
-          src: url("/fonts/Futura-Light.woff2") format("woff2");
-          font-weight: 300;
-          font-style: normal;
-          font-display: swap;
-        }
-
-        .futura-text {
-          font-family: "FuturaLightCustom", "Futura W02 Light", "Futura PT",
-            "Futura", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
-          font-weight: 300;
-        }
-      `}</style>
     </>
   );
 }
