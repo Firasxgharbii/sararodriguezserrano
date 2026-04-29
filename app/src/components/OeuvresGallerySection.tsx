@@ -14,11 +14,13 @@ import { t } from "../../lib/i18n";
 function getOptimizedImageUrl(url: string) {
   if (!url) return "";
 
-  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
-    return url.replace("/upload/", "/upload/f_auto,q_auto,w_900,c_limit/");
+  const cleanUrl = url.trim();
+
+  if (cleanUrl.includes("res.cloudinary.com") && cleanUrl.includes("/upload/")) {
+    return cleanUrl.replace("/upload/", "/upload/f_auto,q_auto,w_900,c_limit/");
   }
 
-  return url;
+  return cleanUrl;
 }
 
 function getSafeSlug(slug?: string) {
@@ -29,6 +31,19 @@ function getSafeSlug(slug?: string) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function isValidImageUrl(url?: string) {
+  if (!url) return false;
+
+  const cleanUrl = url.trim();
+
+  if (!cleanUrl) return false;
+  if (cleanUrl === "undefined") return false;
+  if (cleanUrl === "null") return false;
+  if (cleanUrl.startsWith("blob:")) return false;
+
+  return cleanUrl.startsWith("http") || cleanUrl.startsWith("/");
 }
 
 function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
@@ -46,12 +61,15 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
 }
 
 export default function OeuvresGallerySection() {
-  const [content, setContent] = useState<SiteContent>(defaultSiteContent);
+  const [content, setContent] = useState<SiteContent | null>(null);
   const [lang, setLang] = useState<Lang>("fr");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
+        setLoading(true);
+
         const res = await fetch("/api/site-content", {
           cache: "no-store",
         });
@@ -65,26 +83,47 @@ export default function OeuvresGallerySection() {
       } catch (error) {
         console.error("Erreur chargement Aiven:", error);
         setContent(defaultSiteContent);
+      } finally {
+        const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+
+        setLang(
+          savedLang === "fr" || savedLang === "en" || savedLang === "es"
+            ? savedLang
+            : "fr"
+        );
+
+        setLoading(false);
       }
-
-      const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
-
-      setLang(
-        savedLang === "fr" || savedLang === "en" || savedLang === "es"
-          ? savedLang
-          : "fr"
-      );
     };
 
     loadData();
+
     window.addEventListener("focus", loadData);
 
     return () => window.removeEventListener("focus", loadData);
   }, []);
 
-  const items = content.oeuvres.items.filter(
-    (item) => t(item.title, lang)?.trim() || item.image?.trim()
-  );
+  if (loading || !content) {
+    return (
+      <section className="mx-auto max-w-[1550px] px-8 pb-20 pt-24 md:px-12 md:pb-28 md:pt-28 lg:px-16 lg:pt-32">
+        <div className="grid grid-cols-1 gap-x-24 gap-y-24 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-28">
+          {[1, 2, 3].map((item) => (
+            <div key={item} className="mx-auto w-full max-w-[460px]">
+              <div className="aspect-[1/1] w-full animate-pulse bg-[#e8e4df]" />
+              <div className="mt-5 h-5 w-48 animate-pulse bg-[#e8e4df]" />
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  const items = content.oeuvres.items.filter((item) => {
+    const hasTitle = t(item.title, lang)?.trim();
+    const hasImage = isValidImageUrl(item.image);
+
+    return hasTitle || hasImage;
+  });
 
   return (
     <section
@@ -94,16 +133,20 @@ export default function OeuvresGallerySection() {
       <div className="grid grid-cols-1 gap-x-24 gap-y-24 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-28">
         {items.map((oeuvre, index) => {
           const safeSlug = getSafeSlug(oeuvre.slug);
+          const imageSrc = isValidImageUrl(oeuvre.image)
+            ? getOptimizedImageUrl(oeuvre.image)
+            : "/5312.jpg";
 
           return (
             <Link
               key={oeuvre.id}
               href={`/oeuvres/${safeSlug}`}
               className="group mx-auto block w-full max-w-[460px]"
+              prefetch={false}
             >
               <div className="relative aspect-[1/1] w-full overflow-hidden bg-[#e8e4df]">
                 <Image
-                  src={getOptimizedImageUrl(oeuvre.image || "/5312.jpg")}
+                  src={imageSrc}
                   alt={t(oeuvre.title, lang) || "Œuvre"}
                   fill
                   unoptimized
