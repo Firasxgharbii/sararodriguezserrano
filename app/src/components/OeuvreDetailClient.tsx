@@ -127,9 +127,9 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
         <section className="mx-auto max-w-[1280px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-[0.95fr_0.7fr] md:items-start">
             <div>
-              <h1 className="futura-text max-w-[520px] text-[24px] font-light leading-[1.18] tracking-[0.18em] text-[#8b7771] sm:text-[28px] md:text-[32px] lg:text-[36px]">
-                {title}
-              </h1>
+             <h1 className="futura-text max-w-[520px] text-[24px] font-light leading-[1.18] tracking-[0.18em] text-[#8b7771] sm:text-[28px] md:text-[32px] lg:text-[36px]">
+  {title}
+</h1>
             </div>
 
             <div className="ml-auto flex w-full max-w-[430px] flex-col items-end text-right md:pt-6">
