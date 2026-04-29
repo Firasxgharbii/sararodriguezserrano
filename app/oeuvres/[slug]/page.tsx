@@ -1,13 +1,11 @@
 import OeuvreDetailClient from "../../src/components/OeuvreDetailClient";
 
 type PageProps = {
-  params: Promise<{
+  params: {
     slug: string;
-  }>;
+  };
 };
 
-export default async function OeuvreDetailPage({ params }: PageProps) {
-  const { slug } = await params;
-
-  return <OeuvreDetailClient slug={slug} />;
+export default function OeuvreDetailPage({ params }: PageProps) {
+  return <OeuvreDetailClient slug={params.slug} />;
 }
