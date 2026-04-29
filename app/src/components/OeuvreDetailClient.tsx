@@ -170,7 +170,21 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
 
                 return (
                   <article key={`${oeuvre.slug}-${index}`} className="group">
-                    <div className="mb-6 border-t border-[#d6ccc7] pt-5">
+                    <div
+                      className={`mx-auto overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)] ${getArtworkImageClass(
+                        (oeuvre as any).imageSize
+                      )}`}
+                    >
+                      <Image
+                        src={galleryImage.src}
+                        alt={`${title} ${index + 1}`}
+                        width={1400}
+                        height={1800}
+                        className="h-auto w-full object-cover transition duration-700 group-hover:scale-[1.015]"
+                      />
+                    </div>
+
+                    <div className="mt-6 border-t border-[#d6ccc7] pt-5">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <h2 className="futura-text text-[15px] uppercase tracking-[0.22em] text-[#6f625d]">
@@ -216,20 +230,6 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                           {availabilityText}
                         </div>
                       </div>
-                    </div>
-
-                    <div
-                      className={`mx-auto overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)] ${getArtworkImageClass(
-                        (oeuvre as any).imageSize
-                      )}`}
-                    >
-                      <Image
-                        src={galleryImage.src}
-                        alt={`${title} ${index + 1}`}
-                        width={1400}
-                        height={1800}
-                        className="h-auto w-full object-cover transition duration-700 group-hover:scale-[1.015]"
-                      />
                     </div>
                   </article>
                 );
