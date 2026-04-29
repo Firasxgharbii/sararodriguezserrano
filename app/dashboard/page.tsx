@@ -7,13 +7,32 @@ import {
   
   ImageStyle,
   LocalizedText,
-} from "../lib/siteContent"
+} from "../lib/siteContent";
 import DatabaseSection from "./DatabaseSection";
 
 type Tab = "home" | "about" | "contact" | "oeuvres" | "portfolio" | "database";
 
 const MAX_OEUVRES = 20;
 const MAX_GALLERY_IMAGES = 20;
+
+type GalleryImageItem = {
+  src: string;
+  isAvailable: boolean;
+  availability: LocalizedText;
+};
+
+function makeGalleryImage(
+  src = "",
+  isAvailable = false
+): GalleryImageItem {
+  return {
+    src,
+    isAvailable,
+    availability: isAvailable
+      ? { fr: "Disponible", en: "Available", es: "Disponible" }
+      : { fr: "Indisponible", en: "Not available", es: "No disponible" },
+  };
+}
 
 export default function DashboardPage() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
@@ -113,10 +132,18 @@ export default function DashboardPage() {
             es: "Disponible",
           },
 
-        galleryImages:
+        galleryImages: (
           item?.galleryImages ??
           defaultItem?.galleryImages ??
-          [],
+          []
+        ).map((galleryImage: any) =>
+          typeof galleryImage === "string"
+            ? makeGalleryImage(galleryImage, false)
+            : makeGalleryImage(
+                galleryImage?.src ?? "",
+                galleryImage?.isAvailable === true
+              )
+        ),
       };
     }
   ),
@@ -617,7 +644,8 @@ const resetContent = async () => {
               </EditorBlock>
             )}
 
-          {activeTab === "oeuvres" && (
+        
+        {activeTab === "oeuvres" && (
   <EditorBlock title="Page œuvres" subtitle="Gestion complète des œuvres">
     <LocalizedField
       label="Titre hero"
@@ -645,7 +673,6 @@ const resetContent = async () => {
       <div className="mb-6 flex flex-col gap-4 rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div>
           <h3 className="text-xl font-medium text-[#201c19]">Œuvres</h3>
-
           <p className="mt-2 text-sm leading-6 text-[#8a7971]">
             {content.oeuvres.items.length} / {MAX_OEUVRES} œuvres ajoutées.
           </p>
@@ -657,16 +684,14 @@ const resetContent = async () => {
           onClick={() => {
             if (content.oeuvres.items.length >= MAX_OEUVRES) return;
 
-         const newItem = {
+           const newItem = {
   id: Date.now(),
   slug: `nouvelle-oeuvre-${Date.now()}`,
-
   title: { fr: "", en: "", es: "" },
   year: "2026",
   description: { fr: "", en: "", es: "" },
   technique: { fr: "", en: "", es: "" },
   dimensions: '24 x 24"',
-
   imageSize: "medium",
 
   isAvailable: false,
@@ -677,7 +702,6 @@ const resetContent = async () => {
   },
 
   image: "",
-
   galleryTitle: { fr: "", en: "", es: "" },
   gallerySubtitle: { fr: "", en: "", es: "" },
   galleryImages: [],
@@ -691,7 +715,7 @@ const resetContent = async () => {
               },
             });
           }}
-          className="inline-flex h-[52px] items-center justify-center rounded-full bg-[#191614] px-6 text-[13px] font-medium uppercase tracking-[0.16em] text-white shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+          className="inline-flex h-[52px] items-center justify-center rounded-full bg-[#191614] px-6 text-[13px] font-medium uppercase tracking-[0.16em] text-white shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40"
         >
           Ajouter une œuvre
         </button>
@@ -716,10 +740,7 @@ const resetContent = async () => {
 
                   setContent({
                     ...content,
-                    oeuvres: {
-                      ...content.oeuvres,
-                      items: updated,
-                    },
+                    oeuvres: { ...content.oeuvres, items: updated },
                   });
                 }}
                 className="rounded-full border border-[#e4d8d1] px-4 py-2 text-sm text-[#7c6760] transition hover:bg-white"
@@ -805,24 +826,6 @@ const resetContent = async () => {
                   { label: "Grande", value: "large" },
                 ]}
               />
-<SelectField
-  label="Taille de la photo dans le site"
-  value={(item as any).imageSize ?? "medium"}
-  onChange={(value) => {
-    const updated = [...content.oeuvres.items];
-    (updated[index] as any).imageSize = value;
-
-    setContent({
-      ...content,
-      oeuvres: { ...content.oeuvres, items: updated },
-    });
-  }}
-  options={[
-    { label: "Petite", value: "small" },
-    { label: "Moyenne", value: "medium" },
-    { label: "Grande", value: "large" },
-  ]}
-/>
 
               <LocalizedField
                 label="Technique"
@@ -837,38 +840,6 @@ const resetContent = async () => {
                   });
                 }}
               />
-
-              <div className="rounded-[22px] border border-[#eadfd8] bg-[#faf8f6] p-5">
-  <p className="mb-4 text-[15px] font-medium text-[#5f534d]">
-    Disponibilité de l’œuvre
-  </p>
-
-  <button
-    type="button"
-    onClick={() => {
-      const updated = [...content.oeuvres.items];
-      const nextAvailable = (updated[index] as any).isAvailable !== true;
-
-      (updated[index] as any).isAvailable = nextAvailable;
-
-      updated[index].availability = nextAvailable
-        ? { fr: "Disponible", en: "Available", es: "Disponible" }
-        : { fr: "Indisponible", en: "Not available", es: "No disponible" };
-
-      setContent({
-        ...content,
-        oeuvres: { ...content.oeuvres, items: updated },
-      });
-    }}
-    className={`inline-flex h-[48px] items-center justify-center rounded-full px-6 text-[13px] font-medium uppercase tracking-[0.16em] text-white transition ${
-      (item as any).isAvailable === true
-        ? "bg-green-600 hover:bg-green-700"
-        : "bg-red-600 hover:bg-red-700"
-    }`}
-  >
-    {(item as any).isAvailable === true ? "Disponible" : "Indisponible"}
-  </button>
-</div>
 
               <ImageUploadField
                 label="Image carte"
@@ -920,40 +891,57 @@ const resetContent = async () => {
                     </h4>
 
                     <p className="mt-2 text-sm text-[#8a7971]">
-                      {(item.galleryImages ?? []).length} /{" "}
-                      {MAX_GALLERY_IMAGES} images.
+                      {(((item as any).galleryImages ?? []) as any[]).length} / {MAX_GALLERY_IMAGES} images.
                     </p>
                   </div>
 
                   <button
                     type="button"
-                    disabled={
-                      (item.galleryImages ?? []).length >= MAX_GALLERY_IMAGES
-                    }
+                    disabled={(((item as any).galleryImages ?? []) as any[]).length >= MAX_GALLERY_IMAGES}
                     onClick={() => {
                       const updated = [...content.oeuvres.items];
-                      const currentImages =
-                        updated[index].galleryImages ?? [];
+                      const currentImages = (updated[index] as any).galleryImages ?? [];
 
                       if (currentImages.length >= MAX_GALLERY_IMAGES) return;
 
-                      updated[index].galleryImages = [...currentImages, ""];
+                      (updated[index] as any).galleryImages = [
+                        ...currentImages,
+                        {
+                          src: "",
+                          isAvailable: false,
+                          availability: {
+                            fr: "Indisponible",
+                            en: "Not available",
+                            es: "No disponible",
+                          },
+                        },
+                      ];
 
                       setContent({
                         ...content,
                         oeuvres: { ...content.oeuvres, items: updated },
                       });
                     }}
-                    className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+                    className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Ajouter une image
                   </button>
                 </div>
 
-                {(item.galleryImages ?? []).length > 0 ? (
+                {(((item as any).galleryImages ?? []) as any[]).length > 0 ? (
                   <div className="grid gap-5 sm:grid-cols-2">
-                    {(item.galleryImages ?? []).map(
-                      (galleryImage, imageIndex) => (
+                    {(((item as any).galleryImages ?? []) as any[]).map((galleryImage: any, imageIndex: number) => {
+                      const imageSrc =
+                        typeof galleryImage === "string"
+                          ? galleryImage
+                          : galleryImage?.src ?? "";
+
+                      const imageAvailable =
+                        typeof galleryImage === "string"
+                          ? false
+                          : galleryImage?.isAvailable === true;
+
+                      return (
                         <div
                           key={`${item.id}-gallery-${imageIndex}`}
                           className="rounded-[22px] border border-[#eadfd8] bg-[#fcfaf8] p-4"
@@ -967,19 +955,14 @@ const resetContent = async () => {
                               type="button"
                               onClick={() => {
                                 const updated = [...content.oeuvres.items];
-                                const nextImages = [
-                                  ...(updated[index].galleryImages ?? []),
-                                ];
+                                const nextImages = [...((updated[index] as any).galleryImages ?? [])];
 
                                 nextImages.splice(imageIndex, 1);
-                                updated[index].galleryImages = nextImages;
+                                (updated[index] as any).galleryImages = nextImages;
 
                                 setContent({
                                   ...content,
-                                  oeuvres: {
-                                    ...content.oeuvres,
-                                    items: updated,
-                                  },
+                                  oeuvres: { ...content.oeuvres, items: updated },
                                 });
                               }}
                               className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]"
@@ -988,30 +971,93 @@ const resetContent = async () => {
                             </button>
                           </div>
 
-                          <ImageUploadField
-                            label=""
-                            value={galleryImage}
-                            onChange={(value) => {
+                          <button
+                            type="button"
+                            onClick={() => {
                               const updated = [...content.oeuvres.items];
-                              const nextImages = [
-                                ...(updated[index].galleryImages ?? []),
-                              ];
+                              const nextImages = [...((updated[index] as any).galleryImages ?? [])];
 
-                              nextImages[imageIndex] = value;
-                              updated[index].galleryImages = nextImages;
+                              const current = nextImages[imageIndex];
+                              const currentSrc =
+                                typeof current === "string" ? current : current?.src ?? "";
+
+                              const nextAvailable =
+                                typeof current === "string"
+                                  ? true
+                                  : current?.isAvailable !== true;
+
+                              nextImages[imageIndex] = {
+                                src: currentSrc,
+                                isAvailable: nextAvailable,
+                                availability: nextAvailable
+                                  ? {
+                                      fr: "Disponible",
+                                      en: "Available",
+                                      es: "Disponible",
+                                    }
+                                  : {
+                                      fr: "Indisponible",
+                                      en: "Not available",
+                                      es: "No disponible",
+                                    },
+                              };
+
+                              (updated[index] as any).galleryImages = nextImages;
 
                               setContent({
                                 ...content,
-                                oeuvres: {
-                                  ...content.oeuvres,
-                                  items: updated,
-                                },
+                                oeuvres: { ...content.oeuvres, items: updated },
+                              });
+                            }}
+                            className={`mb-4 inline-flex h-[44px] items-center justify-center rounded-full px-5 text-[12px] font-medium uppercase tracking-[0.14em] text-white transition ${
+                              imageAvailable
+                                ? "bg-green-600 hover:bg-green-700"
+                                : "bg-red-600 hover:bg-red-700"
+                            }`}
+                          >
+                            {imageAvailable ? "Disponible" : "Indisponible"}
+                          </button>
+
+                          <ImageUploadField
+                            label=""
+                            value={imageSrc}
+                            onChange={(value) => {
+                              const updated = [...content.oeuvres.items];
+                              const nextImages = [...((updated[index] as any).galleryImages ?? [])];
+
+                              const current = nextImages[imageIndex];
+                              const currentAvailable =
+                                typeof current === "string"
+                                  ? false
+                                  : current?.isAvailable === true;
+
+                              nextImages[imageIndex] = {
+                                src: value,
+                                isAvailable: currentAvailable,
+                                availability: currentAvailable
+                                  ? {
+                                      fr: "Disponible",
+                                      en: "Available",
+                                      es: "Disponible",
+                                    }
+                                  : {
+                                      fr: "Indisponible",
+                                      en: "Not available",
+                                      es: "No disponible",
+                                    },
+                              };
+
+                              (updated[index] as any).galleryImages = nextImages;
+
+                              setContent({
+                                ...content,
+                                oeuvres: { ...content.oeuvres, items: updated },
                               });
                             }}
                           />
                         </div>
-                      )
-                    )}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="rounded-[20px] border border-dashed border-[#ddd1ca] bg-[#fcfaf8] px-5 py-10 text-center">
@@ -1030,8 +1076,8 @@ const resetContent = async () => {
       </div>
     </div>
   </EditorBlock>
-)}
-            {activeTab === "database" && <DatabaseSection />}
+)}   
+ {activeTab === "database" && <DatabaseSection />}
           </section>
         </div>
       </div>

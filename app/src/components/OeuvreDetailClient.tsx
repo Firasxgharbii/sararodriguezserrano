@@ -23,18 +23,17 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
     oeuvres: {
       ...defaultSiteContent.oeuvres,
       ...(parsed.oeuvres ?? {}),
-      items: (
-        parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items
-      ).map((item: any, index: number) => ({
-        ...(defaultSiteContent.oeuvres.items[index] ?? {}),
-        ...item,
-        imageSize: item?.imageSize ?? "medium",
-        isAvailable: item?.isAvailable ?? false,
-        galleryImages:
-          item?.galleryImages ??
-          defaultSiteContent.oeuvres.items[index]?.galleryImages ??
-          [],
-      })),
+      items: (parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items).map(
+        (item: any, index: number) => ({
+          ...(defaultSiteContent.oeuvres.items[index] ?? {}),
+          ...item,
+          imageSize: item?.imageSize ?? "medium",
+          galleryImages:
+            item?.galleryImages ??
+            defaultSiteContent.oeuvres.items[index]?.galleryImages ??
+            [],
+        })
+      ),
     },
   };
 }
@@ -103,21 +102,22 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
     t(oeuvre.gallerySubtitle, lang) || t(oeuvre.description, lang);
 
   const technique = t(oeuvre.technique, lang) || "Non précisé";
-  const available = (oeuvre as any).isAvailable === true;
 
-  const availabilityText = available
-    ? lang === "en"
-      ? "Available"
-      : "Disponible"
-    : lang === "en"
-    ? "Not available"
-    : lang === "es"
-    ? "No disponible"
-    : "Non disponible";
+  const galleryImages = (oeuvre.galleryImages ?? [])
+    .map((img: any) => {
+      if (typeof img === "string") {
+        return {
+          src: img,
+          isAvailable: false,
+        };
+      }
 
-  const galleryImages = (oeuvre.galleryImages ?? []).filter(
-    (img) => typeof img === "string" && img.trim() !== ""
-  );
+      return {
+        src: img?.src ?? "",
+        isAvailable: img?.isAvailable === true,
+      };
+    })
+    .filter((img: any) => img.src.trim() !== "");
 
   return (
     <>
@@ -155,71 +155,85 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
 
           {galleryImages.length > 0 && (
             <div className="mt-24 grid grid-cols-1 gap-x-20 gap-y-28 sm:grid-cols-2">
-              {galleryImages.map((image, index) => (
-                <article key={`${oeuvre.slug}-${index}`} className="group">
-                  <div className="mb-6 border-t border-[#d6ccc7] pt-5">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <h2 className="futura-text text-[15px] uppercase tracking-[0.22em] text-[#6f625d]">
-                          {title}
-                        </h2>
+              {galleryImages.map((galleryImage: any, index: number) => {
+                const available = galleryImage.isAvailable === true;
 
-                        <div className="mt-4 grid gap-2 text-[14px] leading-7 text-[#8d7d76]">
-                          <p>
-                            <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
-                              Dimensions :
-                            </span>{" "}
-                            {oeuvre.dimensions || "Non précisé"}
-                          </p>
+                const availabilityText = available
+                  ? lang === "en"
+                    ? "Available"
+                    : "Disponible"
+                  : lang === "en"
+                  ? "Not available"
+                  : lang === "es"
+                  ? "No disponible"
+                  : "Indisponible";
 
-                          <p>
-                            <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
-                              Année :
-                            </span>{" "}
-                            {oeuvre.year || "Non précisé"}
-                          </p>
+                return (
+                  <article key={`${oeuvre.slug}-${index}`} className="group">
+                    <div className="mb-6 border-t border-[#d6ccc7] pt-5">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <h2 className="futura-text text-[15px] uppercase tracking-[0.22em] text-[#6f625d]">
+                            {title}
+                          </h2>
 
-                          <p>
-                            <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
-                              Technique :
-                            </span>{" "}
-                            {technique}
-                          </p>
+                          <div className="mt-4 grid gap-2 text-[14px] leading-7 text-[#8d7d76]">
+                            <p>
+                              <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
+                                Dimensions :
+                              </span>{" "}
+                              {oeuvre.dimensions || "Non précisé"}
+                            </p>
+
+                            <p>
+                              <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
+                                Année :
+                              </span>{" "}
+                              {oeuvre.year || "Non précisé"}
+                            </p>
+
+                            <p>
+                              <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
+                                Technique :
+                              </span>{" "}
+                              {technique}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div
+                          className={`futura-text inline-flex w-fit items-center rounded-full border px-4 py-2 text-[10px] uppercase tracking-[0.2em] ${
+                            available
+                              ? "border-green-600/25 bg-green-50 text-green-700"
+                              : "border-red-600/25 bg-red-50 text-red-700"
+                          }`}
+                        >
+                          <span
+                            className={`mr-2 h-2 w-2 rounded-full ${
+                              available ? "bg-green-600" : "bg-red-600"
+                            }`}
+                          />
+                          {availabilityText}
                         </div>
                       </div>
-
-                      <div
-                        className={`futura-text inline-flex w-fit items-center rounded-full border px-4 py-2 text-[10px] uppercase tracking-[0.2em] ${
-                          available
-                            ? "border-green-600/25 bg-green-50 text-green-700"
-                            : "border-red-600/25 bg-red-50 text-red-700"
-                        }`}
-                      >
-                        <span
-                          className={`mr-2 h-2 w-2 rounded-full ${
-                            available ? "bg-green-600" : "bg-red-600"
-                          }`}
-                        />
-                        {availabilityText}
-                      </div>
                     </div>
-                  </div>
 
-                  <div
-                    className={`mx-auto overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)] ${getArtworkImageClass(
-                      (oeuvre as any).imageSize
-                    )}`}
-                  >
-                    <Image
-                      src={image}
-                      alt={`${title} ${index + 1}`}
-                      width={1400}
-                      height={1800}
-                      className="h-auto w-full object-cover transition duration-700 group-hover:scale-[1.015]"
-                    />
-                  </div>
-                </article>
-              ))}
+                    <div
+                      className={`mx-auto overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)] ${getArtworkImageClass(
+                        (oeuvre as any).imageSize
+                      )}`}
+                    >
+                      <Image
+                        src={galleryImage.src}
+                        alt={`${title} ${index + 1}`}
+                        width={1400}
+                        height={1800}
+                        className="h-auto w-full object-cover transition duration-700 group-hover:scale-[1.015]"
+                      />
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>
