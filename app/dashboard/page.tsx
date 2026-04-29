@@ -85,20 +85,42 @@ export default function DashboardPage() {
           },
         },
 
-        oeuvres: {
-          ...defaultSiteContent.oeuvres,
-          ...(parsed.oeuvres ?? {}),
-          items: (parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items).map(
-            (item: any, index: number) => ({
-              ...(defaultSiteContent.oeuvres.items[index] ?? {}),
-              ...item,
-              galleryImages:
-                item?.galleryImages ??
-                defaultSiteContent.oeuvres.items[index]?.galleryImages ??
-                ["", "", "", ""],
-            })
-          ),
-        },
+  oeuvres: {
+  ...defaultSiteContent.oeuvres,
+  ...(parsed.oeuvres ?? {}),
+  items: (parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items).map(
+    (item: any, index: number) => {
+      const defaultItem = defaultSiteContent.oeuvres.items[index] ?? {};
+
+      return {
+        ...defaultItem,
+        ...item,
+
+        year: item?.year ?? defaultItem?.year ?? "",
+        dimensions: item?.dimensions ?? defaultItem?.dimensions ?? "",
+
+        technique:
+          item?.technique ??
+          defaultItem?.technique ??
+          { fr: "", en: "", es: "" },
+
+        availability:
+          item?.availability ??
+          defaultItem?.availability ??
+          {
+            fr: "Disponible",
+            en: "Available",
+            es: "Disponible",
+          },
+
+        galleryImages:
+          item?.galleryImages ??
+          defaultItem?.galleryImages ??
+          [],
+      };
+    }
+  ),
+},
 
         portfolio: (parsed.portfolio ?? defaultSiteContent.portfolio).map(
           (item: any, index: number) => ({
@@ -595,154 +617,351 @@ const resetContent = async () => {
               </EditorBlock>
             )}
 
-            {activeTab === "oeuvres" && (
-              <EditorBlock title="Page œuvres" subtitle="Gestion complète des œuvres">
-                <LocalizedField
-                  label="Titre hero"
-                  value={content.oeuvres.heroTitle}
-                  onChange={(value) =>
+          {activeTab === "oeuvres" && (
+  <EditorBlock title="Page œuvres" subtitle="Gestion complète des œuvres">
+    <LocalizedField
+      label="Titre hero"
+      value={content.oeuvres.heroTitle}
+      onChange={(value) =>
+        setContent({
+          ...content,
+          oeuvres: { ...content.oeuvres, heroTitle: value },
+        })
+      }
+    />
+
+    <ImageUploadField
+      label="Image hero"
+      value={content.oeuvres.heroImage}
+      onChange={(value) =>
+        setContent({
+          ...content,
+          oeuvres: { ...content.oeuvres, heroImage: value },
+        })
+      }
+    />
+
+    <div className="mt-8">
+      <div className="mb-6 flex flex-col gap-4 rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div>
+          <h3 className="text-xl font-medium text-[#201c19]">Œuvres</h3>
+
+          <p className="mt-2 text-sm leading-6 text-[#8a7971]">
+            {content.oeuvres.items.length} / {MAX_OEUVRES} œuvres ajoutées.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          disabled={content.oeuvres.items.length >= MAX_OEUVRES}
+          onClick={() => {
+            if (content.oeuvres.items.length >= MAX_OEUVRES) return;
+
+            const newItem = {
+              id: Date.now(),
+              slug: `nouvelle-oeuvre-${Date.now()}`,
+              title: { fr: "", en: "", es: "" },
+              year: "2026",
+              description: { fr: "", en: "", es: "" },
+              technique: { fr: "", en: "", es: "" },
+              dimensions: '24 x 24"',
+              imageSize: "medium",
+              isAvailable: false,
+              availability: {
+                fr: "Non disponible",
+                en: "Not available",
+                es: "No disponible",
+              },
+              image: "",
+              galleryTitle: { fr: "", en: "", es: "" },
+              gallerySubtitle: { fr: "", en: "", es: "" },
+              galleryImages: [],
+             
+
+            };
+
+            setContent({
+              ...content,
+              oeuvres: {
+                ...content.oeuvres,
+                items: [...content.oeuvres.items, newItem],
+              },
+            });
+          }}
+          className="inline-flex h-[52px] items-center justify-center rounded-full bg-[#191614] px-6 text-[13px] font-medium uppercase tracking-[0.16em] text-white shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+        >
+          Ajouter une œuvre
+        </button>
+      </div>
+
+      <div className="space-y-8">
+        {content.oeuvres.items.map((item, index) => (
+          <div
+            key={item.id}
+            className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6"
+          >
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <h3 className="text-xl font-medium text-[#201c19]">
+                Œuvre {index + 1}
+              </h3>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const updated = [...content.oeuvres.items];
+                  updated.splice(index, 1);
+
+                  setContent({
+                    ...content,
+                    oeuvres: {
+                      ...content.oeuvres,
+                      items: updated,
+                    },
+                  });
+                }}
+                className="rounded-full border border-[#e4d8d1] px-4 py-2 text-sm text-[#7c6760] transition hover:bg-white"
+              >
+                Supprimer
+              </button>
+            </div>
+
+            <div className="grid gap-5">
+              <Field
+                label="Slug"
+                value={item.slug}
+                onChange={(value) => {
+                  const updated = [...content.oeuvres.items];
+                  updated[index].slug = value;
+
+                  setContent({
+                    ...content,
+                    oeuvres: { ...content.oeuvres, items: updated },
+                  });
+                }}
+              />
+
+              <LocalizedField
+                label="Titre"
+                value={item.title}
+                onChange={(value) => {
+                  const updated = [...content.oeuvres.items];
+                  updated[index].title = value;
+
+                  setContent({
+                    ...content,
+                    oeuvres: { ...content.oeuvres, items: updated },
+                  });
+                }}
+              />
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field
+                  label="Année"
+                  value={item.year}
+                  onChange={(value) => {
+                    const updated = [...content.oeuvres.items];
+                    updated[index].year = value;
+
                     setContent({
                       ...content,
-                      oeuvres: { ...content.oeuvres, heroTitle: value },
-                    })
-                  }
+                      oeuvres: { ...content.oeuvres, items: updated },
+                    });
+                  }}
                 />
 
-                <ImageUploadField
-                  label="Image hero"
-                  value={content.oeuvres.heroImage}
-                  onChange={(value) =>
+                <Field
+                  label="Dimensions du cadre"
+                  value={item.dimensions}
+                  onChange={(value) => {
+                    const updated = [...content.oeuvres.items];
+                    updated[index].dimensions = value;
+
                     setContent({
                       ...content,
-                      oeuvres: { ...content.oeuvres, heroImage: value },
-                    })
-                  }
+                      oeuvres: { ...content.oeuvres, items: updated },
+                    });
+                  }}
                 />
+              </div>
 
-                <div className="mt-8">
-                  <div className="mb-6 flex flex-col gap-4 rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                    <div>
-                      <h3 className="text-xl font-medium text-[#201c19]">
-                        Œuvres
-                      </h3>
+              <SelectField
+                label="Taille de la photo dans le site"
+                value={(item as any).imageSize ?? "medium"}
+                onChange={(value) => {
+                  const updated = [...content.oeuvres.items];
+                  (updated[index] as any).imageSize = value;
 
-                      <p className="mt-2 text-sm leading-6 text-[#8a7971]">
-                        {content.oeuvres.items.length} / {MAX_OEUVRES} œuvres ajoutées.
-                      </p>
-                    </div>
+                  setContent({
+                    ...content,
+                    oeuvres: { ...content.oeuvres, items: updated },
+                  });
+                }}
+                options={[
+                  { label: "Petite", value: "small" },
+                  { label: "Moyenne", value: "medium" },
+                  { label: "Grande", value: "large" },
+                ]}
+              />
+<SelectField
+  label="Taille de la photo dans le site"
+  value={(item as any).imageSize ?? "medium"}
+  onChange={(value) => {
+    const updated = [...content.oeuvres.items];
+    (updated[index] as any).imageSize = value;
 
-                    <button
-                      type="button"
-                      disabled={content.oeuvres.items.length >= MAX_OEUVRES}
-                      onClick={() => {
-                        if (content.oeuvres.items.length >= MAX_OEUVRES) return;
+    setContent({
+      ...content,
+      oeuvres: { ...content.oeuvres, items: updated },
+    });
+  }}
+  options={[
+    { label: "Petite", value: "small" },
+    { label: "Moyenne", value: "medium" },
+    { label: "Grande", value: "large" },
+  ]}
+/>
 
-                        const newItem = {
-                          id: Date.now(),
-                          slug: `nouvelle-oeuvre-${Date.now()}`,
-                          title: { fr: "", en: "", es: "" },
-                          year: "2026",
-                          description: { fr: "", en: "", es: "" },
-                          technique: { fr: "", en: "", es: "" },
-                          dimensions: '24 x 24"',
-                          availability: {
-                            fr: "Disponible",
-                            en: "Available",
-                            es: "Disponible",
-                          },
-                          image: "",
-                          galleryTitle: { fr: "", en: "", es: "" },
-                          gallerySubtitle: { fr: "", en: "", es: "" },
-                          galleryImages: [],
-                        };
+              <LocalizedField
+                label="Technique"
+                value={item.technique}
+                onChange={(value) => {
+                  const updated = [...content.oeuvres.items];
+                  updated[index].technique = value;
 
-                        setContent({
-                          ...content,
-                          oeuvres: {
-                            ...content.oeuvres,
-                            items: [...content.oeuvres.items, newItem],
-                          },
-                        });
-                      }}
-                      className="inline-flex h-[52px] items-center justify-center rounded-full bg-[#191614] px-6 text-[13px] font-medium uppercase tracking-[0.16em] text-white shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
-                    >
-                      Ajouter une œuvre
-                    </button>
+                  setContent({
+                    ...content,
+                    oeuvres: { ...content.oeuvres, items: updated },
+                  });
+                }}
+              />
+
+              <label className="flex items-center gap-3 rounded-[18px] border border-[#eadfd8] bg-[#faf8f6] px-5 py-4 text-[15px] font-medium text-[#5f534d]">
+  <input
+    type="checkbox"
+    checked={(item as any).isAvailable === true}
+    onChange={(e) => {
+      const updated = [...content.oeuvres.items];
+
+      (updated[index] as any).isAvailable = e.target.checked;
+
+      updated[index].availability = e.target.checked
+        ? { fr: "Disponible", en: "Available", es: "Disponible" }
+        : { fr: "Non disponible", en: "Not available", es: "No disponible" };
+
+      setContent({
+        ...content,
+        oeuvres: { ...content.oeuvres, items: updated },
+      });
+    }}
+    className="h-5 w-5"
+  />
+
+  Disponible
+</label>
+
+              <ImageUploadField
+                label="Image carte"
+                value={item.image}
+                onChange={(value) => {
+                  const updated = [...content.oeuvres.items];
+                  updated[index].image = value;
+
+                  setContent({
+                    ...content,
+                    oeuvres: { ...content.oeuvres, items: updated },
+                  });
+                }}
+              />
+
+              <LocalizedField
+                label="Titre page détail"
+                value={item.galleryTitle}
+                onChange={(value) => {
+                  const updated = [...content.oeuvres.items];
+                  updated[index].galleryTitle = value;
+
+                  setContent({
+                    ...content,
+                    oeuvres: { ...content.oeuvres, items: updated },
+                  });
+                }}
+              />
+
+              <LocalizedTextareaField
+                label="Sous-titre page détail"
+                value={item.gallerySubtitle}
+                onChange={(value) => {
+                  const updated = [...content.oeuvres.items];
+                  updated[index].gallerySubtitle = value;
+
+                  setContent({
+                    ...content,
+                    oeuvres: { ...content.oeuvres, items: updated },
+                  });
+                }}
+              />
+
+              <div className="rounded-[24px] border border-[#ece3dc] bg-white p-5 sm:p-6">
+                <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h4 className="text-lg font-medium text-[#201c19]">
+                      Images galerie page détail
+                    </h4>
+
+                    <p className="mt-2 text-sm text-[#8a7971]">
+                      {(item.galleryImages ?? []).length} /{" "}
+                      {MAX_GALLERY_IMAGES} images.
+                    </p>
                   </div>
 
-                  <div className="space-y-8">
-                    {content.oeuvres.items.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6"
-                      >
-                        <div className="mb-5 flex items-center justify-between gap-4">
-                          <h3 className="text-xl font-medium text-[#201c19]">
-                            Œuvre {index + 1}
-                          </h3>
+                  <button
+                    type="button"
+                    disabled={
+                      (item.galleryImages ?? []).length >= MAX_GALLERY_IMAGES
+                    }
+                    onClick={() => {
+                      const updated = [...content.oeuvres.items];
+                      const currentImages =
+                        updated[index].galleryImages ?? [];
 
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const updated = [...content.oeuvres.items];
-                              updated.splice(index, 1);
+                      if (currentImages.length >= MAX_GALLERY_IMAGES) return;
 
-                              setContent({
-                                ...content,
-                                oeuvres: {
-                                  ...content.oeuvres,
-                                  items: updated,
-                                },
-                              });
-                            }}
-                            className="rounded-full border border-[#e4d8d1] px-4 py-2 text-sm text-[#7c6760] transition hover:bg-white"
-                          >
-                            Supprimer
-                          </button>
-                        </div>
+                      updated[index].galleryImages = [...currentImages, ""];
 
-                        <div className="grid gap-5">
-                          <Field
-                            label="Slug"
-                            value={item.slug}
-                            onChange={(value) => {
-                              const updated = [...content.oeuvres.items];
-                              updated[index].slug = value;
+                      setContent({
+                        ...content,
+                        oeuvres: { ...content.oeuvres, items: updated },
+                      });
+                    }}
+                    className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+                  >
+                    Ajouter une image
+                  </button>
+                </div>
 
-                              setContent({
-                                ...content,
-                                oeuvres: {
-                                  ...content.oeuvres,
-                                  items: updated,
-                                },
-                              });
-                            }}
-                          />
+                {(item.galleryImages ?? []).length > 0 ? (
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    {(item.galleryImages ?? []).map(
+                      (galleryImage, imageIndex) => (
+                        <div
+                          key={`${item.id}-gallery-${imageIndex}`}
+                          className="rounded-[22px] border border-[#eadfd8] bg-[#fcfaf8] p-4"
+                        >
+                          <div className="mb-4 flex items-center justify-between gap-3">
+                            <p className="text-sm font-medium text-[#5f534d]">
+                              Image galerie {imageIndex + 1}
+                            </p>
 
-                          <LocalizedField
-                            label="Titre"
-                            value={item.title}
-                            onChange={(value) => {
-                              const updated = [...content.oeuvres.items];
-                              updated[index].title = value;
-
-                              setContent({
-                                ...content,
-                                oeuvres: {
-                                  ...content.oeuvres,
-                                  items: updated,
-                                },
-                              });
-                            }}
-                          />
-
-                          <div className="grid gap-5 sm:grid-cols-2">
-                            <Field
-                              label="Année"
-                              value={item.year}
-                              onChange={(value) => {
+                            <button
+                              type="button"
+                              onClick={() => {
                                 const updated = [...content.oeuvres.items];
-                                updated[index].year = value;
+                                const nextImages = [
+                                  ...(updated[index].galleryImages ?? []),
+                                ];
+
+                                nextImages.splice(imageIndex, 1);
+                                updated[index].galleryImages = nextImages;
 
                                 setContent({
                                   ...content,
@@ -752,66 +971,23 @@ const resetContent = async () => {
                                   },
                                 });
                               }}
-                            />
-
-                            <Field
-                              label="Dimensions du cadre"
-                              value={item.dimensions}
-                              onChange={(value) => {
-                                const updated = [...content.oeuvres.items];
-                                updated[index].dimensions = value;
-
-                                setContent({
-                                  ...content,
-                                  oeuvres: {
-                                    ...content.oeuvres,
-                                    items: updated,
-                                  },
-                                });
-                              }}
-                            />
+                              className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]"
+                            >
+                              Supprimer
+                            </button>
                           </div>
-
-                          <LocalizedField
-                            label="Technique"
-                            value={item.technique}
-                            onChange={(value) => {
-                              const updated = [...content.oeuvres.items];
-                              updated[index].technique = value;
-
-                              setContent({
-                                ...content,
-                                oeuvres: {
-                                  ...content.oeuvres,
-                                  items: updated,
-                                },
-                              });
-                            }}
-                          />
-
-                          <LocalizedField
-                            label="Disponibilité"
-                            value={item.availability}
-                            onChange={(value) => {
-                              const updated = [...content.oeuvres.items];
-                              updated[index].availability = value;
-
-                              setContent({
-                                ...content,
-                                oeuvres: {
-                                  ...content.oeuvres,
-                                  items: updated,
-                                },
-                              });
-                            }}
-                          />
 
                           <ImageUploadField
-                            label="Image carte"
-                            value={item.image}
+                            label=""
+                            value={galleryImage}
                             onChange={(value) => {
                               const updated = [...content.oeuvres.items];
-                              updated[index].image = value;
+                              const nextImages = [
+                                ...(updated[index].galleryImages ?? []),
+                              ];
+
+                              nextImages[imageIndex] = value;
+                              updated[index].galleryImages = nextImages;
 
                               setContent({
                                 ...content,
@@ -822,186 +998,28 @@ const resetContent = async () => {
                               });
                             }}
                           />
-
-                          <LocalizedField
-                            label="Titre page détail"
-                            value={item.galleryTitle}
-                            onChange={(value) => {
-                              const updated = [...content.oeuvres.items];
-                              updated[index].galleryTitle = value;
-
-                              setContent({
-                                ...content,
-                                oeuvres: {
-                                  ...content.oeuvres,
-                                  items: updated,
-                                },
-                              });
-                            }}
-                          />
-
-                          <LocalizedTextareaField
-                            label="Sous-titre page détail"
-                            value={item.gallerySubtitle}
-                            onChange={(value) => {
-                              const updated = [...content.oeuvres.items];
-                              updated[index].gallerySubtitle = value;
-
-                              setContent({
-                                ...content,
-                                oeuvres: {
-                                  ...content.oeuvres,
-                                  items: updated,
-                                },
-                              });
-                            }}
-                          />
-
-                          <div className="rounded-[24px] border border-[#ece3dc] bg-white p-5 sm:p-6">
-                            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                              <div>
-                                <h4 className="text-lg font-medium text-[#201c19]">
-                                  Images galerie page détail
-                                </h4>
-
-                                <p className="mt-2 text-sm text-[#8a7971]">
-                                  {(item.galleryImages ?? []).length} / {MAX_GALLERY_IMAGES} images.
-                                </p>
-                              </div>
-
-                              <button
-                                type="button"
-                                disabled={(item.galleryImages ?? []).length >= MAX_GALLERY_IMAGES}
-                                onClick={() => {
-                                  const updated = [...content.oeuvres.items];
-                                  const currentImages = updated[index].galleryImages ?? [];
-
-                                  if (currentImages.length >= MAX_GALLERY_IMAGES) return;
-
-                                  updated[index].galleryImages = [...currentImages, ""];
-
-                                  setContent({
-                                    ...content,
-                                    oeuvres: {
-                                      ...content.oeuvres,
-                                      items: updated,
-                                    },
-                                  });
-                                }}
-                                className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
-                              >
-                                Ajouter une image
-                              </button>
-                            </div>
-
-                            {(item.galleryImages ?? []).length > 0 ? (
-                              <div className="grid gap-5 sm:grid-cols-2">
-                                {(item.galleryImages ?? []).map((galleryImage, imageIndex) => (
-                                  <div
-                                    key={`${item.id}-gallery-${imageIndex}`}
-                                    className="rounded-[22px] border border-[#eadfd8] bg-[#fcfaf8] p-4"
-                                  >
-                                    <div className="mb-4 flex items-center justify-between gap-3">
-                                      <p className="text-sm font-medium text-[#5f534d]">
-                                        Image galerie {imageIndex + 1}
-                                      </p>
-
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const updated = [...content.oeuvres.items];
-                                          const nextImages = [...(updated[index].galleryImages ?? [])];
-
-                                          nextImages.splice(imageIndex, 1);
-                                          updated[index].galleryImages = nextImages;
-
-                                          setContent({
-                                            ...content,
-                                            oeuvres: {
-                                              ...content.oeuvres,
-                                              items: updated,
-                                            },
-                                          });
-                                        }}
-                                        className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]"
-                                      >
-                                        Supprimer
-                                      </button>
-                                    </div>
-
-                                    <ImageUploadField
-                                      label=""
-                                      value={galleryImage}
-                                      onChange={(value) => {
-                                        const updated = [...content.oeuvres.items];
-                                        const nextImages = [...(updated[index].galleryImages ?? [])];
-
-                                        nextImages[imageIndex] = value;
-                                        updated[index].galleryImages = nextImages;
-
-                                        setContent({
-                                          ...content,
-                                          oeuvres: {
-                                            ...content.oeuvres,
-                                            items: updated,
-                                          },
-                                        });
-                                      }}
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="rounded-[20px] border border-dashed border-[#ddd1ca] bg-[#fcfaf8] px-5 py-10 text-center">
-                                <p className="text-sm font-medium text-[#5f534d]">
-                                  Aucune image galerie ajoutée.
-                                </p>
-                                <p className="mt-2 text-sm text-[#8a7971]">
-                                  Cliquez sur “Ajouter une image” pour commencer.
-                                </p>
-                              </div>
-                            )}
-                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
-                </div>
-              </EditorBlock>
-            )}
-
-            {activeTab === "portfolio" && (
-              <EditorBlock title="Portfolio" subtitle="Modifier seulement les images du portfolio">
-                <div className="space-y-8">
-                  {content.portfolio.map((item, index) => (
-                    <div key={index} className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6">
-                      <h3 className="mb-5 text-xl font-medium text-[#201c19]">
-                        Image portfolio {index + 1}
-                      </h3>
-
-                      <ImageUploadField
-                        label="Image"
-                        value={item.image}
-                        onChange={(value) => {
-                          const updated = [...content.portfolio];
-
-                          updated[index] = {
-                            ...updated[index],
-                            image: value,
-                          };
-
-                          setContent({
-                            ...content,
-                            portfolio: updated,
-                          });
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </EditorBlock>
-            )}
-
+                ) : (
+                  <div className="rounded-[20px] border border-dashed border-[#ddd1ca] bg-[#fcfaf8] px-5 py-10 text-center">
+                    <p className="text-sm font-medium text-[#5f534d]">
+                      Aucune image galerie ajoutée.
+                    </p>
+                    <p className="mt-2 text-sm text-[#8a7971]">
+                      Cliquez sur “Ajouter une image” pour commencer.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </EditorBlock>
+)}
             {activeTab === "database" && <DatabaseSection />}
           </section>
         </div>

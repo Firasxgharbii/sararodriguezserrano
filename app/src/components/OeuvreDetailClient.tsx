@@ -28,6 +28,8 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
       ).map((item: any, index: number) => ({
         ...(defaultSiteContent.oeuvres.items[index] ?? {}),
         ...item,
+        imageSize: item?.imageSize ?? "medium",
+        isAvailable: item?.isAvailable ?? false,
         galleryImages:
           item?.galleryImages ??
           defaultSiteContent.oeuvres.items[index]?.galleryImages ??
@@ -37,14 +39,16 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
   };
 }
 
-function isAvailable(value: string) {
-  const text = value.toLowerCase().trim();
-
-  return (
-    text.includes("disponible") ||
-    text.includes("available") ||
-    text.includes("disponibilidad")
-  );
+function getArtworkImageClass(size?: string) {
+  switch (size) {
+    case "small":
+      return "max-w-[420px]";
+    case "large":
+      return "max-w-[760px]";
+    case "medium":
+    default:
+      return "max-w-[560px]";
+  }
 }
 
 export default function OeuvreDetailClient({ slug }: { slug: string }) {
@@ -71,6 +75,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
       }
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+
       setLang(
         savedLang === "fr" || savedLang === "en" || savedLang === "es"
           ? savedLang
@@ -97,9 +102,18 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
   const subtitle =
     t(oeuvre.gallerySubtitle, lang) || t(oeuvre.description, lang);
 
-  const technique = t(oeuvre.technique, lang);
-  const availabilityText = t(oeuvre.availability, lang);
-  const available = availabilityText ? isAvailable(availabilityText) : false;
+  const technique = t(oeuvre.technique, lang) || "Non précisé";
+  const available = (oeuvre as any).isAvailable === true;
+
+  const availabilityText = available
+    ? lang === "en"
+      ? "Available"
+      : "Disponible"
+    : lang === "en"
+    ? "Not available"
+    : lang === "es"
+    ? "No disponible"
+    : "Non disponible";
 
   const galleryImages = (oeuvre.galleryImages ?? []).filter(
     (img) => typeof img === "string" && img.trim() !== ""
@@ -151,55 +165,51 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                         </h2>
 
                         <div className="mt-4 grid gap-2 text-[14px] leading-7 text-[#8d7d76]">
-                          {oeuvre.dimensions && (
-                       <p>
-  <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
-    Dimensions :
-  </span>{" "}
-  {oeuvre.dimensions || "Non précisé"}
-</p>
-                          )}
+                          <p>
+                            <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
+                              Dimensions :
+                            </span>{" "}
+                            {oeuvre.dimensions || "Non précisé"}
+                          </p>
 
-                          {oeuvre.year && (
-                           <p>
-  <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
-    Année :
-  </span>{" "}
-  {oeuvre.year || "Non précisé"}
-</p>
-                          )}
+                          <p>
+                            <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
+                              Année :
+                            </span>{" "}
+                            {oeuvre.year || "Non précisé"}
+                          </p>
 
-                          {technique && (
-                            <p>
-                              <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
-                                Technique :
-                              </span>{" "}
-                              {technique}
-                            </p>
-                          )}
+                          <p>
+                            <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
+                              Technique :
+                            </span>{" "}
+                            {technique}
+                          </p>
                         </div>
                       </div>
 
-                      {availabilityText && (
-                        <div
-                          className={`futura-text inline-flex w-fit items-center rounded-full border px-4 py-2 text-[10px] uppercase tracking-[0.2em] ${
-                            available
-                              ? "border-green-600/25 bg-green-50 text-green-700"
-                              : "border-red-600/25 bg-red-50 text-red-700"
+                      <div
+                        className={`futura-text inline-flex w-fit items-center rounded-full border px-4 py-2 text-[10px] uppercase tracking-[0.2em] ${
+                          available
+                            ? "border-green-600/25 bg-green-50 text-green-700"
+                            : "border-red-600/25 bg-red-50 text-red-700"
+                        }`}
+                      >
+                        <span
+                          className={`mr-2 h-2 w-2 rounded-full ${
+                            available ? "bg-green-600" : "bg-red-600"
                           }`}
-                        >
-                          <span
-                            className={`mr-2 h-2 w-2 rounded-full ${
-                              available ? "bg-green-600" : "bg-red-600"
-                            }`}
-                          />
-                          {availabilityText}
-                        </div>
-                      )}
+                        />
+                        {availabilityText}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)]">
+                  <div
+                    className={`mx-auto overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)] ${getArtworkImageClass(
+                      (oeuvre as any).imageSize
+                    )}`}
+                  >
                     <Image
                       src={image}
                       alt={`${title} ${index + 1}`}
