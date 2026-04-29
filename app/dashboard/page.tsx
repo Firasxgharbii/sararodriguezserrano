@@ -657,28 +657,31 @@ const resetContent = async () => {
           onClick={() => {
             if (content.oeuvres.items.length >= MAX_OEUVRES) return;
 
-            const newItem = {
-              id: Date.now(),
-              slug: `nouvelle-oeuvre-${Date.now()}`,
-              title: { fr: "", en: "", es: "" },
-              year: "2026",
-              description: { fr: "", en: "", es: "" },
-              technique: { fr: "", en: "", es: "" },
-              dimensions: '24 x 24"',
-              imageSize: "medium",
-              isAvailable: false,
-              availability: {
-                fr: "Non disponible",
-                en: "Not available",
-                es: "No disponible",
-              },
-              image: "",
-              galleryTitle: { fr: "", en: "", es: "" },
-              gallerySubtitle: { fr: "", en: "", es: "" },
-              galleryImages: [],
-             
+         const newItem = {
+  id: Date.now(),
+  slug: `nouvelle-oeuvre-${Date.now()}`,
 
-            };
+  title: { fr: "", en: "", es: "" },
+  year: "2026",
+  description: { fr: "", en: "", es: "" },
+  technique: { fr: "", en: "", es: "" },
+  dimensions: '24 x 24"',
+
+  imageSize: "medium",
+
+  isAvailable: false,
+  availability: {
+    fr: "Indisponible",
+    en: "Not available",
+    es: "No disponible",
+  },
+
+  image: "",
+
+  galleryTitle: { fr: "", en: "", es: "" },
+  gallerySubtitle: { fr: "", en: "", es: "" },
+  galleryImages: [],
+};
 
             setContent({
               ...content,
@@ -835,29 +838,37 @@ const resetContent = async () => {
                 }}
               />
 
-              <label className="flex items-center gap-3 rounded-[18px] border border-[#eadfd8] bg-[#faf8f6] px-5 py-4 text-[15px] font-medium text-[#5f534d]">
-  <input
-    type="checkbox"
-    checked={(item as any).isAvailable === true}
-    onChange={(e) => {
+              <div className="rounded-[22px] border border-[#eadfd8] bg-[#faf8f6] p-5">
+  <p className="mb-4 text-[15px] font-medium text-[#5f534d]">
+    Disponibilité de l’œuvre
+  </p>
+
+  <button
+    type="button"
+    onClick={() => {
       const updated = [...content.oeuvres.items];
+      const nextAvailable = (updated[index] as any).isAvailable !== true;
 
-      (updated[index] as any).isAvailable = e.target.checked;
+      (updated[index] as any).isAvailable = nextAvailable;
 
-      updated[index].availability = e.target.checked
+      updated[index].availability = nextAvailable
         ? { fr: "Disponible", en: "Available", es: "Disponible" }
-        : { fr: "Non disponible", en: "Not available", es: "No disponible" };
+        : { fr: "Indisponible", en: "Not available", es: "No disponible" };
 
       setContent({
         ...content,
         oeuvres: { ...content.oeuvres, items: updated },
       });
     }}
-    className="h-5 w-5"
-  />
-
-  Disponible
-</label>
+    className={`inline-flex h-[48px] items-center justify-center rounded-full px-6 text-[13px] font-medium uppercase tracking-[0.16em] text-white transition ${
+      (item as any).isAvailable === true
+        ? "bg-green-600 hover:bg-green-700"
+        : "bg-red-600 hover:bg-red-700"
+    }`}
+  >
+    {(item as any).isAvailable === true ? "Disponible" : "Indisponible"}
+  </button>
+</div>
 
               <ImageUploadField
                 label="Image carte"
