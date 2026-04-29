@@ -24,14 +24,29 @@ function getSafeSlug(slug?: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+function isValidImageUrl(url?: string) {
+  if (!url) return false;
+
+  const cleanUrl = url.trim();
+
+  if (!cleanUrl) return false;
+  if (cleanUrl === "undefined") return false;
+  if (cleanUrl === "null") return false;
+  if (cleanUrl.startsWith("blob:")) return false;
+
+  return cleanUrl.startsWith("http") || cleanUrl.startsWith("/");
+}
+
 function getOptimizedImageUrl(url: string) {
   if (!url) return "";
 
-  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
-    return url.replace("/upload/", "/upload/f_auto,q_auto,w_1200,c_limit/");
+  const cleanUrl = url.trim();
+
+  if (cleanUrl.includes("res.cloudinary.com") && cleanUrl.includes("/upload/")) {
+    return cleanUrl.replace("/upload/", "/upload/f_auto,q_auto,w_1200,c_limit/");
   }
 
-  return url;
+  return cleanUrl;
 }
 
 function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
@@ -40,20 +55,52 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
   return {
     ...defaultSiteContent,
     ...parsed,
+
     oeuvres: {
       ...defaultSiteContent.oeuvres,
       ...(parsed.oeuvres ?? {}),
       items: (parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items).map(
-        (item: any, index: number) => ({
-          ...(defaultSiteContent.oeuvres.items[index] ?? {}),
-          ...item,
-          imageSize: item?.imageSize ?? "medium",
-          titleSize: item?.titleSize ?? "large",
-          galleryImages:
-            item?.galleryImages ??
-            defaultSiteContent.oeuvres.items[index]?.galleryImages ??
-            [],
-        })
+        (item: any, index: number) => {
+          const defaultItem = defaultSiteContent.oeuvres.items[index] ?? {};
+
+          return {
+            ...defaultItem,
+            ...item,
+            image: item?.image ?? defaultItem?.image ?? "",
+            imageSize: item?.imageSize ?? defaultItem?.imageSize ?? "medium",
+            titleSize: item?.titleSize ?? defaultItem?.titleSize ?? "large",
+            year: item?.year ?? defaultItem?.year ?? "",
+            dimensions: item?.dimensions ?? defaultItem?.dimensions ?? "",
+            technique:
+              item?.technique ??
+              defaultItem?.technique ?? { fr: "", en: "", es: "" },
+            galleryImages: (
+              item?.galleryImages ??
+              defaultItem?.galleryImages ??
+              []
+            )
+              .map((galleryImage: any) => {
+                if (typeof galleryImage === "string") {
+                  return {
+                    src: galleryImage.trim(),
+                    isAvailable: false,
+                    dimensions: item?.dimensions ?? defaultItem?.dimensions ?? "",
+                  };
+                }
+
+                return {
+                  src: galleryImage?.src?.trim() ?? "",
+                  isAvailable: galleryImage?.isAvailable === true,
+                  dimensions:
+                    galleryImage?.dimensions ??
+                    item?.dimensions ??
+                    defaultItem?.dimensions ??
+                    "",
+                };
+              })
+              .filter((img: any) => isValidImageUrl(img.src)),
+          };
+        }
       ),
     },
   };
@@ -118,6 +165,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
       try {
         const res = await fetch("/api/site-content", {
           cache: "no-store",
+          next: { revalidate: 0 },
         });
 
         if (!res.ok) {
@@ -127,11 +175,14 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
           setContent(mergeSiteContent(data));
         }
       } catch (err) {
-        console.error("Erreur Aiven:", err);
+        console.error("Erreur chargement site-content:", err);
         setContent(defaultSiteContent);
       }
 
-      const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+      const savedLang =
+        typeof window !== "undefined"
+          ? (localStorage.getItem(LANG_STORAGE_KEY) as Lang | null)
+          : null;
 
       setLang(
         savedLang === "fr" || savedLang === "en" || savedLang === "es"
@@ -143,9 +194,14 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
     };
 
     loadData();
-    window.addEventListener("focus", loadData);
 
-    return () => window.removeEventListener("focus", loadData);
+    window.addEventListener("focus", loadData);
+    window.addEventListener("visibilitychange", loadData);
+
+    return () => {
+      window.removeEventListener("focus", loadData);
+      window.removeEventListener("visibilitychange", loadData);
+    };
   }, []);
 
   const oeuvre = useMemo(() => {
@@ -163,32 +219,34 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
 
   const technique = t(oeuvre.technique, lang) || "Non précisé";
 
-  const galleryImages = (oeuvre.galleryImages ?? [])
+  const galleryImages = ((oeuvre as any).galleryImages ?? [])
     .map((img: any) => {
       if (typeof img === "string") {
         return {
-          src: img,
+          src: img.trim(),
           isAvailable: false,
           dimensions: oeuvre.dimensions || "",
         };
       }
 
       return {
-        src: img?.src ?? "",
+        src: img?.src?.trim() ?? "",
         isAvailable: img?.isAvailable === true,
         dimensions: img?.dimensions || oeuvre.dimensions || "",
       };
     })
-    .filter((img: any) => img.src?.trim() !== "");
+    .filter((img: any) => isValidImageUrl(img.src));
+
+  const mainImageIsValid = isValidImageUrl(oeuvre.image);
 
   const imagesToShow =
     galleryImages.length > 0
       ? galleryImages
-      : oeuvre.image
+      : mainImageIsValid
       ? [
           {
-            src: oeuvre.image,
-            isAvailable: false,
+            src: oeuvre.image.trim(),
+            isAvailable: (oeuvre as any).isAvailable === true,
             dimensions: oeuvre.dimensions || "",
           },
         ]
@@ -232,9 +290,11 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
             </div>
           </div>
 
-          {imagesToShow.length > 0 && (
+          {imagesToShow.length > 0 ? (
             <div className="mt-20 grid grid-cols-1 gap-x-20 gap-y-28 sm:grid-cols-2">
               {imagesToShow.map((galleryImage: any, index: number) => {
+                if (!isValidImageUrl(galleryImage.src)) return null;
+
                 const available = galleryImage.isAvailable === true;
 
                 const availabilityText = available
@@ -311,6 +371,12 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                   </article>
                 );
               })}
+            </div>
+          ) : (
+            <div className="mt-20 rounded-[28px] border border-dashed border-[#d8ccc7] bg-white/40 px-6 py-16 text-center">
+              <p className="futura-text text-[13px] uppercase tracking-[0.24em] text-[#8b7771]">
+                Aucune image disponible pour cette œuvre.
+              </p>
             </div>
           )}
         </section>
