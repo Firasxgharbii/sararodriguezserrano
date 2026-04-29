@@ -67,8 +67,8 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
             ...defaultItem,
             ...item,
             image: item?.image ?? defaultItem?.image ?? "",
-            imageSize: item?.imageSize ?? defaultItem?.imageSize ?? "medium",
-            titleSize: item?.titleSize ?? defaultItem?.titleSize ?? "large",
+            imageSize: (item as any)?.imageSize ?? (defaultItem as any)?.imageSize ?? "medium",
+            titleSize: (item as any)?.titleSize ?? (defaultItem as any)?.titleSize ?? "large",
             year: item?.year ?? defaultItem?.year ?? "",
             dimensions: item?.dimensions ?? defaultItem?.dimensions ?? "",
             technique:

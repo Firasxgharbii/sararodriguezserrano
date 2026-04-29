@@ -103,16 +103,15 @@ export type OeuvreItem = {
   technique: LocalizedText;
   dimensions: string;
 
-  titleSize?: "small" | "medium" | "large" | "xlarge"; // ✅ AJOUT IMPORTANT
+  imageSize?: "small" | "medium" | "large";
+  titleSize?: "small" | "medium" | "large" | "xlarge";
 
   availability: LocalizedText;
   image: string;
   galleryTitle: LocalizedText;
   gallerySubtitle: LocalizedText;
-
-  galleryImages: any[]; // 🔥 important car tu utilises des objets maintenant
+  galleryImages: any[];
 };
-
 export type OeuvresContent = {
   heroBadge: LocalizedText;
   heroTitle: LocalizedText;
