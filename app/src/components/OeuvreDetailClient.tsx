@@ -9,14 +9,9 @@ import {
   defaultSiteContent,
   type SiteContent,
   type Lang,
-  type LocalizedText,
   LANG_STORAGE_KEY,
 } from "../../lib/siteContent";
 import { t } from "../../lib/i18n";
-
-function emptyLocalizedText(): LocalizedText {
-  return { fr: "", en: "", es: "" };
-}
 
 function getSafeSlug(value?: string) {
   return (value || "")
@@ -30,20 +25,14 @@ function getSafeSlug(value?: string) {
 
 function isValidImageUrl(url?: string) {
   if (!url) return false;
-
   const clean = url.trim();
-
-  if (!clean) return false;
-  if (clean === "undefined") return false;
-  if (clean === "null") return false;
+  if (!clean || clean === "undefined" || clean === "null") return false;
   if (clean.startsWith("blob:")) return false;
-
   return clean.startsWith("http") || clean.startsWith("/");
 }
 
 function getOptimizedImageUrl(url: string) {
   if (!url) return "";
-
   const clean = url.trim();
 
   if (clean.includes("res.cloudinary.com") && clean.includes("/upload/")) {
@@ -51,6 +40,44 @@ function getOptimizedImageUrl(url: string) {
   }
 
   return clean;
+}
+
+function getArtworkAspectRatio(dimensions?: string) {
+  if (!dimensions) return "1 / 1";
+
+  const cleaned = dimensions
+    .toLowerCase()
+    .replaceAll(",", ".")
+    .replaceAll("×", "x")
+    .replaceAll("*", "x")
+    .replaceAll(" by ", "x")
+    .replaceAll("par", "x")
+    .replaceAll('"', "")
+    .replaceAll("”", "")
+    .replaceAll("“", "");
+
+  const match = cleaned.match(/(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/);
+
+  if (!match) return "1 / 1";
+
+  const width = Number(match[1]);
+  const height = Number(match[2]);
+
+  if (!width || !height) return "1 / 1";
+
+  return `${width} / ${height}`;
+}
+
+function getArtworkImageClass(size?: string) {
+  switch (size) {
+    case "small":
+      return "max-w-[420px]";
+    case "large":
+      return "max-w-[760px]";
+    case "medium":
+    default:
+      return "max-w-[560px]";
+  }
 }
 
 function mergeSiteContent(data: Partial<SiteContent> | null): SiteContent {
@@ -111,22 +138,14 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
     const currentSlug = getSafeSlug(slug);
 
     return content.oeuvres.items.find((item) => {
-      const slugFromDb = getSafeSlug(item.slug);
-      const titleFr = getSafeSlug(item.title?.fr);
-      const titleEn = getSafeSlug(item.title?.en);
-      const titleEs = getSafeSlug(item.title?.es);
-      const galleryTitleFr = getSafeSlug(item.galleryTitle?.fr);
-      const galleryTitleEn = getSafeSlug(item.galleryTitle?.en);
-      const galleryTitleEs = getSafeSlug(item.galleryTitle?.es);
-
       return (
-        slugFromDb === currentSlug ||
-        titleFr === currentSlug ||
-        titleEn === currentSlug ||
-        titleEs === currentSlug ||
-        galleryTitleFr === currentSlug ||
-        galleryTitleEn === currentSlug ||
-        galleryTitleEs === currentSlug
+        getSafeSlug(item.slug) === currentSlug ||
+        getSafeSlug(item.title?.fr) === currentSlug ||
+        getSafeSlug(item.title?.en) === currentSlug ||
+        getSafeSlug(item.title?.es) === currentSlug ||
+        getSafeSlug(item.galleryTitle?.fr) === currentSlug ||
+        getSafeSlug(item.galleryTitle?.en) === currentSlug ||
+        getSafeSlug(item.galleryTitle?.es) === currentSlug
       );
     });
   }, [content, slug]);
@@ -137,7 +156,6 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
     return (
       <>
         <Navbar />
-
         <main className="min-h-screen bg-[#ecebea] px-6 py-24 text-center text-[#8b7771]">
           <p className="text-sm uppercase tracking-[0.24em]">
             Cette œuvre n’est pas encore configurée.
@@ -150,16 +168,14 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
             ← Retour aux œuvres
           </Link>
         </main>
-
         <Footer />
       </>
     );
   }
 
-  const title = t(oeuvre.galleryTitle, lang) || t(oeuvre.title, lang);
+  const pageTitle = t(oeuvre.galleryTitle, lang) || t(oeuvre.title, lang);
   const subtitle =
     t(oeuvre.gallerySubtitle, lang) || t(oeuvre.description, lang);
-
   const technique = t(oeuvre.technique, lang) || "Non précisé";
 
   const galleryImages = ((oeuvre.galleryImages ?? []) as any[])
@@ -175,7 +191,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
 
       return {
         src: img?.src ?? "",
-        title: img?.title ?? oeuvre.title ?? emptyLocalizedText(),
+        title: img?.title ?? oeuvre.title,
         isAvailable: img?.isAvailable === true,
         dimensions: img?.dimensions || oeuvre.dimensions || "",
       };
@@ -205,7 +221,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
           <div className="grid grid-cols-1 gap-12 md:grid-cols-[0.95fr_0.7fr] md:items-start">
             <div>
               <h1 className="font-light leading-[1.15] tracking-[0.08em] text-[#8b7771] text-[32px] sm:text-[36px] md:text-[40px] lg:text-[44px]">
-                {title}
+                {pageTitle}
               </h1>
             </div>
 
@@ -231,7 +247,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
           {imagesToShow.length > 0 ? (
             <div className="mt-20 grid grid-cols-1 gap-x-20 gap-y-28 sm:grid-cols-2">
               {imagesToShow.map((image, index) => {
-                const imageTitle = t(image.title, lang) || title;
+                const imageTitle = t(image.title, lang) || pageTitle;
                 const imageDimensions =
                   image.dimensions || oeuvre.dimensions || "Non précisé";
 
@@ -247,7 +263,14 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
 
                 return (
                   <article key={`${slug}-${index}`} className="group">
-                    <div className="mx-auto max-w-[560px] overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)]">
+                    <div
+                      className={`mx-auto overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)] ${getArtworkImageClass(
+                        (oeuvre as any).imageSize
+                      )}`}
+                      style={{
+                        aspectRatio: getArtworkAspectRatio(imageDimensions),
+                      }}
+                    >
                       <Image
                         src={getOptimizedImageUrl(image.src)}
                         alt={`${imageTitle} ${index + 1}`}
