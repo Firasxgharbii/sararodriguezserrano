@@ -8,5 +8,6 @@ type PageProps = {
 
 export default async function OeuvreDetailPage({ params }: PageProps) {
   const { slug } = await params;
+
   return <OeuvreDetailClient slug={slug} />;
 }

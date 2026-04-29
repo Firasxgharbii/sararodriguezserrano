@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import {
@@ -14,91 +13,38 @@ import {
 } from "../../lib/siteContent";
 import { t } from "../../lib/i18n";
 
-type ParsedSiteContent = Partial<SiteContent> & {
-  home?: Partial<SiteContent["home"]>;
-  about?: Partial<SiteContent["about"]>;
-  contact?: Partial<SiteContent["contact"]>;
-  oeuvres?: Partial<SiteContent["oeuvres"]> & {
-    items?: any[];
-  };
-  portfolio?: SiteContent["portfolio"];
-};
+function getOptimizedImageUrl(url: string) {
+  if (!url) return "";
 
-function mergeSiteContent(parsed: ParsedSiteContent | null): SiteContent {
+  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
+    return url.replace("/upload/", "/upload/f_auto,q_auto,w_1400,c_limit/");
+  }
+
+  return url;
+}
+
+function getSafeSlug(slug?: string) {
+  return (slug || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
   if (!parsed) return defaultSiteContent;
 
   return {
     ...defaultSiteContent,
     ...parsed,
-
-    home: {
-      ...defaultSiteContent.home,
-      ...(parsed.home ?? {}),
-      heroImageStyle: {
-        ...defaultSiteContent.home.heroImageStyle,
-        ...(parsed.home?.heroImageStyle ?? {}),
-      },
-      gallery: {
-        ...defaultSiteContent.home.gallery,
-        ...(parsed.home?.gallery ?? {}),
-        works: (
-          parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works
-        ).map((item: any, index: number) => ({
-          ...(defaultSiteContent.home.gallery.works[index] ?? {}),
-          ...item,
-        })),
-      },
-    },
-
-    about: {
-      ...defaultSiteContent.about,
-      ...(parsed.about ?? {}),
-      profileImage: {
-        ...defaultSiteContent.about.profileImage,
-        ...(parsed.about?.profileImage ?? {}),
-      },
-      publications:
-        parsed.about?.publications ?? defaultSiteContent.about.publications,
-      collections:
-        parsed.about?.collections ?? defaultSiteContent.about.collections,
-      exhibitions:
-        parsed.about?.exhibitions ?? defaultSiteContent.about.exhibitions,
-      formations:
-        parsed.about?.formations ?? defaultSiteContent.about.formations,
-      distinctions:
-        parsed.about?.distinctions ?? defaultSiteContent.about.distinctions,
-    },
-
-    contact: {
-      ...defaultSiteContent.contact,
-      ...(parsed.contact ?? {}),
-      contactImage: {
-        ...defaultSiteContent.contact.contactImage,
-        ...(parsed.contact?.contactImage ?? {}),
-      },
-    },
-
     oeuvres: {
       ...defaultSiteContent.oeuvres,
       ...(parsed.oeuvres ?? {}),
-      items: (
-        parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items
-      ).map((item: any, index: number) => ({
-        ...(defaultSiteContent.oeuvres.items[index] ?? {}),
-        ...item,
-        galleryImages:
-          item?.galleryImages ??
-          defaultSiteContent.oeuvres.items[index]?.galleryImages ??
-          [],
-      })),
+      items: parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items,
     },
-
-    portfolio: (parsed.portfolio ?? defaultSiteContent.portfolio).map(
-      (item: any, index: number) => ({
-        ...(defaultSiteContent.portfolio[index] ?? {}),
-        ...item,
-      })
-    ),
+    portfolio: parsed.portfolio ?? defaultSiteContent.portfolio,
   };
 }
 
@@ -110,9 +56,7 @@ export default function OeuvresPageClient() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const res = await fetch("/api/site-content", {
-          cache: "no-store",
-        });
+        const res = await fetch("/api/site-content", { cache: "no-store" });
 
         if (!res.ok) {
           setContent(defaultSiteContent);
@@ -127,22 +71,19 @@ export default function OeuvresPageClient() {
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
 
-      if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
-        setLang(savedLang);
-      } else {
-        setLang("fr");
-      }
+      setLang(
+        savedLang === "fr" || savedLang === "en" || savedLang === "es"
+          ? savedLang
+          : "fr"
+      );
 
       setReady(true);
     };
 
     loadData();
-
     window.addEventListener("focus", loadData);
 
-    return () => {
-      window.removeEventListener("focus", loadData);
-    };
+    return () => window.removeEventListener("focus", loadData);
   }, []);
 
   if (!ready) return null;
@@ -151,7 +92,7 @@ export default function OeuvresPageClient() {
 
   const visibleItems = oeuvres.items.filter((item) => {
     const title = t(item.title, lang);
-    return title || item.image;
+    return title?.trim() || item.image?.trim();
   });
 
   return (
@@ -162,9 +103,10 @@ export default function OeuvresPageClient() {
         <section className="relative w-full overflow-hidden bg-[#f7f4f3]">
           <div className="absolute inset-0">
             <Image
-              src={oeuvres.heroImage || "/5312.jpg"}
-              alt="Œuvres"
+              src={getOptimizedImageUrl(oeuvres.heroImage || "/5312.jpg")}
+              alt={t(oeuvres.heroTitle, lang) || "Œuvres"}
               fill
+              unoptimized
               priority
               sizes="100vw"
               className="object-cover"
@@ -200,25 +142,32 @@ export default function OeuvresPageClient() {
           className="mx-auto max-w-[1550px] px-8 pb-20 pt-24"
         >
           <div className="grid grid-cols-1 gap-24 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleItems.map((item) => (
-              <Link key={item.id} href={`/oeuvres/${item.slug}`}>
-                <div className="group">
-                  <div className="relative aspect-square overflow-hidden bg-[#e8e4df]">
-                    <Image
-                      src={item.image || "/5312.jpg"}
-                      alt={t(item.title, lang) || "Œuvre"}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover transition group-hover:scale-[1.03]"
-                    />
-                  </div>
+            {visibleItems.map((item, index) => {
+              const safeSlug = getSafeSlug(item.slug);
 
-                  <h2 className="pt-5 text-[17px] tracking-[0.20em] text-[#8a7d76] group-hover:text-[#5d524b]">
-                    {t(item.title, lang)}
-                  </h2>
-                </div>
-              </Link>
-            ))}
+              return (
+                <Link key={item.id} href={`/oeuvres/${safeSlug}`}>
+                  <div className="group">
+                    <div className="relative aspect-square overflow-hidden bg-[#e8e4df]">
+                      <Image
+                        src={getOptimizedImageUrl(item.image || "/5312.jpg")}
+                        alt={t(item.title, lang) || "Œuvre"}
+                        fill
+                        unoptimized
+                        priority={index < 3}
+                        loading={index < 3 ? "eager" : "lazy"}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover transition group-hover:scale-[1.03]"
+                      />
+                    </div>
+
+                    <h2 className="pt-5 text-[17px] tracking-[0.20em] text-[#8a7d76] group-hover:text-[#5d524b]">
+                      {t(item.title, lang)}
+                    </h2>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
 
@@ -226,9 +175,13 @@ export default function OeuvresPageClient() {
           <div className="grid min-h-[720px] lg:grid-cols-2">
             <div className="relative min-h-[420px]">
               <Image
-                src={oeuvres.quoteImage || "/IMAGE Grande.jpg"}
+                src={getOptimizedImageUrl(
+                  oeuvres.quoteImage || "/IMAGE Grande.jpg"
+                )}
                 alt={t(oeuvres.quoteAuthor, lang) || "Citation"}
                 fill
+                unoptimized
+                loading="lazy"
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />

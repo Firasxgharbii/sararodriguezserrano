@@ -10,6 +10,16 @@ import {
 } from "../../lib/siteContent";
 import { t } from "../../lib/i18n";
 
+function getOptimizedImageUrl(url: string) {
+  if (!url) return "";
+
+  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
+    return url.replace("/upload/", "/upload/f_auto,q_auto,w_1400,c_limit/");
+  }
+
+  return url;
+}
+
 function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
   if (!parsed) return defaultSiteContent;
 
@@ -49,15 +59,14 @@ export default function OeuvresQuoteSection() {
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
 
-      if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
-        setLang(savedLang);
-      } else {
-        setLang("fr");
-      }
+      setLang(
+        savedLang === "fr" || savedLang === "en" || savedLang === "es"
+          ? savedLang
+          : "fr"
+      );
     };
 
     loadData();
-
     window.addEventListener("focus", loadData);
 
     return () => {
@@ -66,15 +75,20 @@ export default function OeuvresQuoteSection() {
   }, []);
 
   const oeuvres = content.oeuvres;
+  const quoteImage = getOptimizedImageUrl(
+    oeuvres.quoteImage || "/IMAGE Grande.jpg"
+  );
 
   return (
     <section className="w-full bg-[#f7f4f3]">
       <div className="grid min-h-[720px] grid-cols-1 lg:grid-cols-2">
         <div className="relative min-h-[420px] lg:min-h-[720px]">
           <Image
-            src={oeuvres.quoteImage || "/IMAGE Grande.jpg"}
+            src={quoteImage}
             alt={t(oeuvres.quoteAuthor, lang) || "Artiste en train de peindre"}
             fill
+            unoptimized
+            loading="lazy"
             sizes="(max-width: 1024px) 100vw, 50vw"
             className="object-cover"
           />
