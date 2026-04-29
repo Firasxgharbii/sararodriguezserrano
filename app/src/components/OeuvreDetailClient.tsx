@@ -9,9 +9,14 @@ import {
   defaultSiteContent,
   type SiteContent,
   type Lang,
+  type LocalizedText,
   LANG_STORAGE_KEY,
 } from "../../lib/siteContent";
 import { t } from "../../lib/i18n";
+
+function emptyLocalizedText(): LocalizedText {
+  return { fr: "", en: "", es: "" };
+}
 
 function getSafeSlug(value?: string) {
   return (value || "")
@@ -162,6 +167,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
       if (typeof img === "string") {
         return {
           src: img,
+          title: oeuvre.title,
           isAvailable: false,
           dimensions: oeuvre.dimensions || "",
         };
@@ -169,6 +175,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
 
       return {
         src: img?.src ?? "",
+        title: img?.title ?? oeuvre.title ?? emptyLocalizedText(),
         isAvailable: img?.isAvailable === true,
         dimensions: img?.dimensions || oeuvre.dimensions || "",
       };
@@ -182,6 +189,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
       ? [
           {
             src: oeuvre.image,
+            title: oeuvre.title,
             isAvailable: false,
             dimensions: oeuvre.dimensions || "",
           },
@@ -196,10 +204,9 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
         <section className="mx-auto max-w-[1280px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-[0.95fr_0.7fr] md:items-start">
             <div>
-<h1 className="font-light leading-[1.15] tracking-[0.08em] text-[#8b7771] text-[32px] sm:text-[36px] md:text-[40px] lg:text-[44px]">
-  {title}
-</h1>                {title}
-              
+              <h1 className="font-light leading-[1.15] tracking-[0.08em] text-[#8b7771] text-[32px] sm:text-[36px] md:text-[40px] lg:text-[44px]">
+                {title}
+              </h1>
             </div>
 
             <div className="ml-auto flex w-full max-w-[430px] flex-col items-end text-right md:pt-6">
@@ -224,6 +231,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
           {imagesToShow.length > 0 ? (
             <div className="mt-20 grid grid-cols-1 gap-x-20 gap-y-28 sm:grid-cols-2">
               {imagesToShow.map((image, index) => {
+                const imageTitle = t(image.title, lang) || title;
                 const imageDimensions =
                   image.dimensions || oeuvre.dimensions || "Non précisé";
 
@@ -242,7 +250,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                     <div className="mx-auto max-w-[560px] overflow-hidden bg-white shadow-[0_16px_45px_rgba(0,0,0,0.06)]">
                       <Image
                         src={getOptimizedImageUrl(image.src)}
-                        alt={`${title} ${index + 1}`}
+                        alt={`${imageTitle} ${index + 1}`}
                         width={1400}
                         height={1800}
                         unoptimized
@@ -255,7 +263,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <h2 className="text-[11px] uppercase tracking-[0.24em] text-[#6f625d]">
-                            {title}
+                            {imageTitle}
                           </h2>
 
                           <div className="mt-4 grid gap-2 text-[13px] leading-7 text-[#8d7d76]">

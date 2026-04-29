@@ -20,18 +20,25 @@ const MAX_GALLERY_IMAGES = 20;
 
 type GalleryImageItem = {
   src: string;
+  title: LocalizedText;
   isAvailable: boolean;
   dimensions: string;
   availability: LocalizedText;
 };
 
+function emptyLocalizedText(): LocalizedText {
+  return { fr: "", en: "", es: "" };
+}
+
 function makeGalleryImage(
   src = "",
   isAvailable = false,
-  dimensions = ""
+  dimensions = "",
+  title: LocalizedText = emptyLocalizedText()
 ): GalleryImageItem {
   return {
     src,
+    title,
     isAvailable,
     dimensions,
     availability: isAvailable
@@ -44,13 +51,19 @@ function cleanGalleryImages(images: unknown[]): GalleryImageItem[] {
   return images
     .map((galleryImage: any) => {
       if (typeof galleryImage === "string") {
-        return makeGalleryImage(galleryImage.trim(), false, "");
+        return makeGalleryImage(
+          galleryImage.trim(),
+          false,
+          "",
+          emptyLocalizedText()
+        );
       }
 
       return makeGalleryImage(
         galleryImage?.src?.trim() ?? "",
         galleryImage?.isAvailable === true,
-        galleryImage?.dimensions ?? ""
+        galleryImage?.dimensions ?? "",
+        galleryImage?.title ?? emptyLocalizedText()
       );
     })
     .filter((img) => img.src.trim() !== "");
@@ -167,7 +180,8 @@ function normalizeContent(parsed: any): SiteContent {
               ? makeGalleryImage(
                   galleryImage,
                   false,
-                  item?.dimensions ?? defaultItem?.dimensions ?? ""
+                  item?.dimensions ?? defaultItem?.dimensions ?? "",
+                  emptyLocalizedText()
                 )
               : makeGalleryImage(
                   galleryImage?.src ?? "",
@@ -175,7 +189,8 @@ function normalizeContent(parsed: any): SiteContent {
                   galleryImage?.dimensions ??
                     item?.dimensions ??
                     defaultItem?.dimensions ??
-                    ""
+                    "",
+                  galleryImage?.title ?? emptyLocalizedText()
                 )
           ),
         };
@@ -1430,6 +1445,7 @@ export default function DashboardPage() {
                                     ...currentImages,
                                     {
                                       src: "",
+                                      title: emptyLocalizedText(),
                                       isAvailable: false,
                                       dimensions:
                                         updated[index].dimensions ?? "",
@@ -1508,6 +1524,56 @@ export default function DashboardPage() {
                                           </button>
                                         </div>
 
+                                        <LocalizedField
+                                          label="Titre de cette image"
+                                          value={
+                                            typeof galleryImage === "string"
+                                              ? emptyLocalizedText()
+                                              : galleryImage?.title ?? emptyLocalizedText()
+                                          }
+                                          onChange={(value) => {
+                                            const updated = [
+                                              ...content.oeuvres.items,
+                                            ];
+                                            const nextImages = [
+                                              ...(updated[index]
+                                                .galleryImages ?? []),
+                                            ];
+                                            const current =
+                                              nextImages[imageIndex];
+
+                                            nextImages[imageIndex] =
+                                              typeof current === "string"
+                                                ? {
+                                                    src: current,
+                                                    title: value,
+                                                    isAvailable: false,
+                                                    dimensions:
+                                                      item.dimensions ?? "",
+                                                    availability: {
+                                                      fr: "Indisponible",
+                                                      en: "Not available",
+                                                      es: "No disponible",
+                                                    },
+                                                  }
+                                                : {
+                                                    ...current,
+                                                    title: value,
+                                                  };
+
+                                            updated[index].galleryImages =
+                                              nextImages;
+
+                                            setContent({
+                                              ...content,
+                                              oeuvres: {
+                                                ...content.oeuvres,
+                                                items: updated,
+                                              },
+                                            });
+                                          }}
+                                        />
+
                                         <Field
                                           label="Dimensions de cette image"
                                           value={
@@ -1532,6 +1598,7 @@ export default function DashboardPage() {
                                               typeof current === "string"
                                                 ? {
                                                     src: current,
+                                                    title: emptyLocalizedText(),
                                                     isAvailable: false,
                                                     dimensions: value,
                                                     availability: {
@@ -1583,6 +1650,11 @@ export default function DashboardPage() {
 
                                             nextImages[imageIndex] = {
                                               src: currentSrc,
+                                              title:
+                                                typeof current === "string"
+                                                  ? emptyLocalizedText()
+                                                  : current?.title ??
+                                                    emptyLocalizedText(),
                                               isAvailable: nextAvailable,
                                               dimensions:
                                                 typeof current === "string"
@@ -1646,6 +1718,11 @@ export default function DashboardPage() {
 
                                             nextImages[imageIndex] = {
                                               src: value,
+                                              title:
+                                                typeof current === "string"
+                                                  ? emptyLocalizedText()
+                                                  : current?.title ??
+                                                    emptyLocalizedText(),
                                               isAvailable: currentAvailable,
                                               dimensions:
                                                 typeof current === "string"
