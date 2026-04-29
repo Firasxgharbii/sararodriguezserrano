@@ -16,6 +16,16 @@ const futuraLight = {
   fontWeight: 300,
 };
 
+function getOptimizedImageUrl(url: string) {
+  if (!url) return "";
+
+  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
+    return url.replace("/upload/", "/upload/f_auto,q_auto,w_1600,c_limit/");
+  }
+
+  return url;
+}
+
 function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
   if (!parsed) return defaultSiteContent;
 
@@ -54,29 +64,27 @@ export default function OeuvresIntroSection() {
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
 
-      if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
-        setLang(savedLang);
-      } else {
-        setLang("fr");
-      }
+      setLang(
+        savedLang === "fr" || savedLang === "en" || savedLang === "es"
+          ? savedLang
+          : "fr"
+      );
     };
 
     loadData();
-
     window.addEventListener("focus", loadData);
 
-    return () => {
-      window.removeEventListener("focus", loadData);
-    };
+    return () => window.removeEventListener("focus", loadData);
   }, []);
 
   const oeuvres = content.oeuvres;
+  const heroImage = getOptimizedImageUrl(oeuvres.heroImage || "/5312.jpg");
 
   return (
     <section className="relative w-full overflow-hidden bg-[#f7f4f3]">
       <div className="absolute inset-0">
         <Image
-          src={oeuvres.heroImage || "/5312.jpg"}
+          src={heroImage}
           alt={t(oeuvres.heroTitle, lang) || "Collections de peinture à l’huile"}
           fill
           priority

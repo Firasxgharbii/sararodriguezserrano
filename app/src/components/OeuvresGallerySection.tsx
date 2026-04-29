@@ -11,6 +11,16 @@ import {
 } from "../../lib/siteContent";
 import { t } from "../../lib/i18n";
 
+function getOptimizedImageUrl(url: string) {
+  if (!url) return "";
+
+  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
+    return url.replace("/upload/", "/upload/f_auto,q_auto,w_900,c_limit/");
+  }
+
+  return url;
+}
+
 function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
   if (!parsed) return defaultSiteContent;
 
@@ -49,20 +59,17 @@ export default function OeuvresGallerySection() {
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
 
-      if (savedLang === "fr" || savedLang === "en" || savedLang === "es") {
-        setLang(savedLang);
-      } else {
-        setLang("fr");
-      }
+      setLang(
+        savedLang === "fr" || savedLang === "en" || savedLang === "es"
+          ? savedLang
+          : "fr"
+      );
     };
 
     loadData();
-
     window.addEventListener("focus", loadData);
 
-    return () => {
-      window.removeEventListener("focus", loadData);
-    };
+    return () => window.removeEventListener("focus", loadData);
   }, []);
 
   const items = content.oeuvres.items.filter(
@@ -75,7 +82,7 @@ export default function OeuvresGallerySection() {
       className="mx-auto max-w-[1550px] px-8 pb-20 pt-24 md:px-12 md:pb-28 md:pt-28 lg:px-16 lg:pt-32"
     >
       <div className="grid grid-cols-1 gap-x-24 gap-y-24 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-28">
-        {items.map((oeuvre) => (
+        {items.map((oeuvre, index) => (
           <Link
             key={oeuvre.id}
             href={`/oeuvres/${oeuvre.slug}`}
@@ -83,9 +90,11 @@ export default function OeuvresGallerySection() {
           >
             <div className="relative aspect-[1/1] w-full overflow-hidden bg-[#e8e4df]">
               <Image
-                src={oeuvre.image || "/5312.jpg"}
+                src={getOptimizedImageUrl(oeuvre.image || "/5312.jpg")}
                 alt={t(oeuvre.title, lang) || "Œuvre"}
                 fill
+                priority={index < 3}
+                loading={index < 3 ? "eager" : "lazy"}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
               />
