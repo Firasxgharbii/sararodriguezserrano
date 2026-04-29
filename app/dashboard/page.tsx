@@ -1137,6 +1137,41 @@ const resetContent = async () => {
     </div>
   </EditorBlock>
 )}   
+
+{activeTab === "portfolio" && (
+  <EditorBlock title="Portfolio" subtitle="Modifier les images du portfolio">
+    <div className="grid gap-6">
+      {content.portfolio.map((item, index) => (
+        <div
+          key={index}
+          className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6"
+        >
+          <h3 className="mb-5 text-lg font-medium text-[#201c19]">
+            Image portfolio {index + 1}
+          </h3>
+
+          <ImageUploadField
+            label="Image"
+            value={item.image}
+            onChange={(value) => {
+              const updated = [...content.portfolio];
+
+              updated[index] = {
+                ...updated[index],
+                image: value,
+              };
+
+              setContent({
+                ...content,
+                portfolio: updated,
+              });
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  </EditorBlock>
+)}
  {activeTab === "database" && <DatabaseSection />}
           </section>
         </div>
