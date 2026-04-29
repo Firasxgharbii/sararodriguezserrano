@@ -60,6 +60,14 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
   };
 }
 
+function getOeuvreSlug(oeuvre: any, lang: Lang) {
+  return (
+    getSafeSlug(oeuvre.slug) ||
+    getSafeSlug(t(oeuvre.title, lang)) ||
+    `oeuvre-${oeuvre.id}`
+  );
+}
+
 export default function OeuvresGallerySection() {
   const [content, setContent] = useState<SiteContent | null>(null);
   const [lang, setLang] = useState<Lang>("fr");
@@ -97,7 +105,6 @@ export default function OeuvresGallerySection() {
     };
 
     loadData();
-
     window.addEventListener("focus", loadData);
 
     return () => window.removeEventListener("focus", loadData);
@@ -132,14 +139,15 @@ export default function OeuvresGallerySection() {
     >
       <div className="grid grid-cols-1 gap-x-24 gap-y-24 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-28">
         {items.map((oeuvre, index) => {
-          const safeSlug = getSafeSlug(oeuvre.slug);
+          const safeSlug = getOeuvreSlug(oeuvre, lang);
+
           const imageSrc = isValidImageUrl(oeuvre.image)
             ? getOptimizedImageUrl(oeuvre.image)
             : "/5312.jpg";
 
           return (
             <Link
-              key={oeuvre.id}
+              key={`${oeuvre.id}-${safeSlug}`}
               href={`/oeuvres/${safeSlug}`}
               className="group mx-auto block w-full max-w-[460px]"
               prefetch={false}
