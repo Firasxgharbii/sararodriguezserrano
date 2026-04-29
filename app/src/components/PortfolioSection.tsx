@@ -6,19 +6,8 @@ import { defaultSiteContent, type SiteContent } from "../../lib/siteContent";
 function ArrowLeftIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-      <path
-        d="M19 12H5"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-      />
-      <path
-        d="M11 6L5 12L11 18"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M19 12H5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M11 6L5 12L11 18" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -26,21 +15,35 @@ function ArrowLeftIcon() {
 function ArrowRightIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-      <path
-        d="M5 12H19"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-      />
-      <path
-        d="M13 6L19 12L13 18"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M5 12H19" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M13 6L19 12L13 18" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
+}
+
+function isValidImageUrl(url?: string) {
+  if (!url) return false;
+
+  const clean = url.trim();
+
+  if (!clean) return false;
+  if (clean === "undefined") return false;
+  if (clean === "null") return false;
+  if (clean.startsWith("blob:")) return false;
+
+  return clean.startsWith("http") || clean.startsWith("/");
+}
+
+function getOptimizedImageUrl(url: string) {
+  if (!url) return "";
+
+  const clean = url.trim();
+
+  if (clean.includes("res.cloudinary.com") && clean.includes("/upload/")) {
+    return clean.replace("/upload/", "/upload/f_auto,q_auto,w_1400,c_limit/");
+  }
+
+  return clean;
 }
 
 function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
@@ -50,24 +53,9 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
     ...defaultSiteContent,
     ...parsed,
 
-    home: {
-      ...defaultSiteContent.home,
-      ...(parsed.home ?? {}),
-      heroImageStyle: {
-        ...defaultSiteContent.home.heroImageStyle,
-        ...(parsed.home?.heroImageStyle ?? {}),
-      },
-      gallery: {
-        ...defaultSiteContent.home.gallery,
-        ...(parsed.home?.gallery ?? {}),
-        works: (
-          parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works
-        ).map((item: any, index: number) => ({
-          ...(defaultSiteContent.home.gallery.works[index] ?? {}),
-          ...item,
-        })),
-      },
-    },
+    portfolio: Array.isArray(parsed.portfolio)
+      ? parsed.portfolio
+      : defaultSiteContent.portfolio,
 
     about: {
       ...defaultSiteContent.about,
@@ -76,54 +64,15 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
         ...defaultSiteContent.about.profileImage,
         ...(parsed.about?.profileImage ?? {}),
       },
-      publications:
-        parsed.about?.publications ?? defaultSiteContent.about.publications,
-      collections:
-        parsed.about?.collections ?? defaultSiteContent.about.collections,
-      exhibitions:
-        parsed.about?.exhibitions ?? defaultSiteContent.about.exhibitions,
-      formations: parsed.about?.formations ?? defaultSiteContent.about.formations,
-      distinctions:
-        parsed.about?.distinctions ?? defaultSiteContent.about.distinctions,
     },
-
-    contact: {
-      ...defaultSiteContent.contact,
-      ...(parsed.contact ?? {}),
-      contactImage: {
-        ...defaultSiteContent.contact.contactImage,
-        ...(parsed.contact?.contactImage ?? {}),
-      },
-    },
-
-    oeuvres: {
-      ...defaultSiteContent.oeuvres,
-      ...(parsed.oeuvres ?? {}),
-      items: (
-        parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items
-      ).map((item: any, index: number) => ({
-        ...(defaultSiteContent.oeuvres.items[index] ?? {}),
-        ...item,
-        galleryImages:
-          item?.galleryImages ??
-          defaultSiteContent.oeuvres.items[index]?.galleryImages ??
-          [],
-      })),
-    },
-
-    portfolio: (parsed.portfolio ?? defaultSiteContent.portfolio).map(
-      (item: any, index: number) => ({
-        ...(defaultSiteContent.portfolio[index] ?? {}),
-        ...item,
-      })
-    ),
   };
 }
 
 export default function PortfolioSection() {
-  const [content, setContent] = useState<SiteContent>(defaultSiteContent);
+  const [content, setContent] = useState<SiteContent | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
@@ -131,6 +80,8 @@ export default function PortfolioSection() {
   useEffect(() => {
     const loadContent = async () => {
       try {
+        setLoading(true);
+
         const res = await fetch("/api/site-content", {
           cache: "no-store",
         });
@@ -145,11 +96,12 @@ export default function PortfolioSection() {
       } catch (error) {
         console.error("Erreur chargement portfolio:", error);
         setContent(defaultSiteContent);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadContent();
-
     window.addEventListener("focus", loadContent);
 
     return () => {
@@ -157,17 +109,18 @@ export default function PortfolioSection() {
     };
   }, []);
 
-  const portfolioItems =
-    content.portfolio?.length > 0
-      ? content.portfolio.filter((item) => item.image)
-      : defaultSiteContent.portfolio;
+  const portfolioItems = useMemo(() => {
+    const items = content?.portfolio ?? [];
+
+    return items.filter((item: any) => isValidImageUrl(item?.image));
+  }, [content]);
 
   const total = portfolioItems.length;
 
-  const activeItem = useMemo(
-    () => portfolioItems[activeIndex],
-    [portfolioItems, activeIndex]
-  );
+  const activeItem = useMemo(() => {
+    if (total === 0) return null;
+    return portfolioItems[activeIndex] ?? portfolioItems[0];
+  }, [portfolioItems, activeIndex, total]);
 
   useEffect(() => {
     if (activeIndex > total - 1) {
@@ -189,7 +142,7 @@ export default function PortfolioSection() {
     if (isPaused || total <= 1) return;
 
     const timer = setInterval(() => {
-      goNext();
+      setActiveIndex((prev) => (prev === total - 1 ? 0 : prev + 1));
     }, 5000);
 
     return () => clearInterval(timer);
@@ -215,11 +168,21 @@ export default function PortfolioSection() {
     touchEndX.current = null;
   };
 
-  if (!activeItem) return null;
+  if (loading) {
+    return (
+      <section id="portfolio" className="w-full">
+        <div className="aspect-[4/3] w-full animate-pulse bg-[#e8e4df] sm:aspect-[16/10] lg:aspect-[16/9]" />
+      </section>
+    );
+  }
+
+  if (!activeItem) {
+    return null;
+  }
 
   return (
     <section id="portfolio" className="w-full">
-      <div className="overflow-hidden rounded-none bg-white shadow-[0_18px_50px_rgba(0,0,0,0.08)]">
+      <div className="overflow-hidden bg-white shadow-[0_18px_50px_rgba(0,0,0,0.08)]">
         <div
           className="group relative aspect-[4/3] w-full sm:aspect-[16/10] lg:aspect-[16/9]"
           onMouseEnter={() => setIsPaused(true)}
@@ -230,7 +193,7 @@ export default function PortfolioSection() {
         >
           <img
             key={activeItem.image}
-            src={activeItem.image}
+            src={getOptimizedImageUrl(activeItem.image)}
             alt=""
             className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.015]"
           />
