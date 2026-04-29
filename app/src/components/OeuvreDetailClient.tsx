@@ -152,21 +152,21 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
 
                         <div className="mt-4 grid gap-2 text-[14px] leading-7 text-[#8d7d76]">
                           {oeuvre.dimensions && (
-                            <p>
-                              <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
-                                Dimensions :
-                              </span>{" "}
-                              {oeuvre.dimensions}
-                            </p>
+                       <p>
+  <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
+    Dimensions :
+  </span>{" "}
+  {oeuvre.dimensions || "Non précisé"}
+</p>
                           )}
 
                           {oeuvre.year && (
-                            <p>
-                              <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
-                                Année :
-                              </span>{" "}
-                              {oeuvre.year}
-                            </p>
+                           <p>
+  <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
+    Année :
+  </span>{" "}
+  {oeuvre.year || "Non précisé"}
+</p>
                           )}
 
                           {technique && (
