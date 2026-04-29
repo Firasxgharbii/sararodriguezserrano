@@ -16,13 +16,11 @@ import { t } from "../../lib/i18n";
 function getOptimizedImageUrl(url: string) {
   if (!url) return "";
 
-  const clean = url.trim();
-
-  if (clean.includes("res.cloudinary.com") && clean.includes("/upload/")) {
-    return clean.replace("/upload/", "/upload/f_auto,q_auto,w_1400,c_limit/");
+  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
+    return url.replace("/upload/", "/upload/f_auto,q_auto,w_1400,c_limit/");
   }
 
-  return clean;
+  return url;
 }
 
 function getSafeSlug(slug?: string) {
@@ -35,108 +33,17 @@ function getSafeSlug(slug?: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-function isValidImageUrl(url?: string) {
-  if (!url) return false;
-
-  const clean = url.trim();
-
-  if (!clean) return false;
-  if (clean === "undefined" || clean === "null") return false;
-  if (clean.startsWith("blob:")) return false;
-
-  return clean.startsWith("http") || clean.startsWith("/");
-}
-
-function getArtworkFrameStyle(dimensions?: string): React.CSSProperties {
-  const fallback: React.CSSProperties = {
-    aspectRatio: "1 / 1",
-    width: "55%",
-  };
-
-  if (!dimensions) return fallback;
-
-  const raw = dimensions.toLowerCase().trim();
-
-  const isMeter = /\d\s*m/.test(raw) && !raw.includes("cm") && !raw.includes("mm");
-  const isCm = raw.includes("cm");
-
-  const cleaned = raw
-    .replaceAll(",", ".")
-    .replaceAll("×", "x")
-    .replaceAll("*", "x")
-    .replaceAll(" by ", "x")
-    .replaceAll("par", "x")
-    .replaceAll("centimetres", "")
-    .replaceAll("centimètres", "")
-    .replaceAll("cm", "")
-    .replaceAll("meters", "")
-    .replaceAll("metres", "")
-    .replaceAll("mètres", "")
-    .replaceAll("metros", "")
-    .replaceAll("m", "")
-    .replaceAll("pouces", "")
-    .replaceAll("po", "")
-    .replaceAll("inches", "")
-    .replaceAll("inch", "")
-    .replaceAll('"', "")
-    .replaceAll("”", "")
-    .replaceAll("“", "")
-    .trim();
-
-  const numbers = cleaned.match(/\d+(?:\.\d+)?/g);
-
-  if (!numbers || numbers.length === 0) return fallback;
-
-  let width = Number(numbers[0]);
-  let height = Number(numbers[1] ?? numbers[0]);
-
-  if (!width || !height) return fallback;
-
-  if (isMeter) {
-    width = width * 100;
-    height = height * 100;
-  } else if (isCm) {
-    width = width;
-    height = height;
-  } else {
-    width = width * 2.54;
-    height = height * 2.54;
-  }
-
-  const maxCm = 200;
-  const longestSide = Math.min(Math.max(width, height), maxCm);
-  const visualWidth = 32 + (longestSide / maxCm) * 68;
-
-  return {
-    aspectRatio: `${width} / ${height}`,
-    width: `${Math.min(100, Math.max(32, visualWidth))}%`,
-  };
-}
-
 function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
   if (!parsed) return defaultSiteContent;
 
   return {
     ...defaultSiteContent,
     ...parsed,
-
     oeuvres: {
       ...defaultSiteContent.oeuvres,
       ...(parsed.oeuvres ?? {}),
-      items: (parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items).map(
-        (item: any, index: number) => ({
-          ...(defaultSiteContent.oeuvres.items[index] ?? {}),
-          ...item,
-          imageSize: item?.imageSize ?? "medium",
-          titleSize: item?.titleSize ?? "large",
-          galleryImages:
-            item?.galleryImages ??
-            defaultSiteContent.oeuvres.items[index]?.galleryImages ??
-            [],
-        })
-      ),
+      items: parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items,
     },
-
     portfolio: parsed.portfolio ?? defaultSiteContent.portfolio,
   };
 }
@@ -149,9 +56,7 @@ export default function OeuvresPageClient() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const res = await fetch("/api/site-content", {
-          cache: "no-store",
-        });
+        const res = await fetch("/api/site-content", { cache: "no-store" });
 
         if (!res.ok) {
           setContent(defaultSiteContent);
@@ -185,7 +90,7 @@ export default function OeuvresPageClient() {
 
   const oeuvres = content.oeuvres;
 
-  const visibleItems = oeuvres.items.filter((item: any) => {
+  const visibleItems = oeuvres.items.filter((item) => {
     const title = t(item.title, lang);
     return title?.trim() || item.image?.trim();
   });
@@ -236,32 +141,24 @@ export default function OeuvresPageClient() {
           id="gallery"
           className="mx-auto max-w-[1550px] px-8 pb-20 pt-24"
         >
-          <div className="grid grid-cols-1 gap-x-24 gap-y-28 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleItems.map((item: any, index: number) => {
+          <div className="grid grid-cols-1 gap-24 sm:grid-cols-2 lg:grid-cols-3">
+            {visibleItems.map((item, index) => {
               const safeSlug = getSafeSlug(item.slug);
-              const imageSrc = isValidImageUrl(item.image)
-                ? item.image
-                : "/5312.jpg";
 
               return (
-                <Link key={item.id ?? `${safeSlug}-${index}`} href={`/oeuvres/${safeSlug}`}>
+                <Link key={item.id} href={`/oeuvres/${safeSlug}`}>
                   <div className="group">
-                    <div className="flex min-h-[360px] items-center justify-center">
-                      <div
-                        className="relative overflow-hidden bg-[#e8e4df]"
-                        style={getArtworkFrameStyle(item.dimensions)}
-                      >
-                        <Image
-                          src={getOptimizedImageUrl(imageSrc)}
-                          alt={t(item.title, lang) || "Œuvre"}
-                          fill
-                          unoptimized
-                          priority={index < 3}
-                          loading={index < 3 ? "eager" : "lazy"}
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          className="object-cover transition group-hover:scale-[1.03]"
-                        />
-                      </div>
+                    <div className="relative aspect-square overflow-hidden bg-[#e8e4df]">
+                      <Image
+                        src={getOptimizedImageUrl(item.image || "/5312.jpg")}
+                        alt={t(item.title, lang) || "Œuvre"}
+                        fill
+                        unoptimized
+                        priority={index < 3}
+                        loading={index < 3 ? "eager" : "lazy"}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover transition group-hover:scale-[1.03]"
+                      />
                     </div>
 
                     <h2 className="pt-5 text-[17px] tracking-[0.20em] text-[#8a7d76] group-hover:text-[#5d524b]">
