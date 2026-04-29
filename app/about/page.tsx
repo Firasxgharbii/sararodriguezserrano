@@ -149,11 +149,8 @@ export default function AboutPage() {
             </p>
 
             <h1
-              className="text-4xl leading-tight text-[#8a8a8a] sm:text-5xl lg:text-6xl"
-              style={{
-                ...futuraLight,
-                letterSpacing: "0.06em",
-              }}
+              className="mb-6 text-[34px] leading-tight text-[#8a8a8a]"
+              style={futuraLight}
             >
               {t(about.title, lang)}
             </h1>
@@ -245,10 +242,7 @@ export default function AboutPage() {
                   {t(about.visionBadge, lang)}
                 </p>
 
-                <h3
-                  className="text-2xl text-[#8a8a8a]"
-                  style={futuraLight}
-                >
+                <h3 className="text-2xl text-[#8a8a8a]" style={futuraLight}>
                   {t(about.visionTitle, lang)}
                 </h3>
               </div>
@@ -273,10 +267,7 @@ export default function AboutPage() {
                   {t(about.publicationsBadge, lang)}
                 </p>
 
-                <h3
-                  className="text-2xl text-[#8a8a8a]"
-                  style={futuraLight}
-                >
+                <h3 className="text-2xl text-[#8a8a8a]" style={futuraLight}>
                   {t(about.publicationsTitle, lang)}
                 </h3>
               </div>
@@ -309,10 +300,7 @@ export default function AboutPage() {
                 {t(about.collectionsBadge, lang)}
               </p>
 
-              <h3
-                className="text-2xl text-[#8a8a8a]"
-                style={futuraLight}
-              >
+              <h3 className="text-2xl text-[#8a8a8a]" style={futuraLight}>
                 {t(about.collectionsTitle, lang)}
               </h3>
             </div>
