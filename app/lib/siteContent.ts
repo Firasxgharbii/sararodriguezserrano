@@ -102,11 +102,15 @@ export type OeuvreItem = {
   description: LocalizedText;
   technique: LocalizedText;
   dimensions: string;
+
+  titleSize?: "small" | "medium" | "large" | "xlarge"; // ✅ AJOUT IMPORTANT
+
   availability: LocalizedText;
   image: string;
   galleryTitle: LocalizedText;
   gallerySubtitle: LocalizedText;
-  galleryImages: string[];
+
+  galleryImages: any[]; // 🔥 important car tu utilises des objets maintenant
 };
 
 export type OeuvresContent = {

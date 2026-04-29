@@ -120,6 +120,7 @@ export default function DashboardPage() {
 
         year: item?.year ?? defaultItem?.year ?? "",
         dimensions: item?.dimensions ?? defaultItem?.dimensions ?? "",
+        titleSize: item?.titleSize ?? defaultItem?.titleSize ?? "large",
 
         technique:
           item?.technique ??
@@ -141,18 +142,11 @@ export default function DashboardPage() {
           []
         ).map((galleryImage: any) =>
           typeof galleryImage === "string"
-            ? makeGalleryImage(
-                galleryImage,
-                false,
-                item?.dimensions ?? defaultItem?.dimensions ?? ""
-              )
+            ? makeGalleryImage(galleryImage, false, item?.dimensions ?? defaultItem?.dimensions ?? "")
             : makeGalleryImage(
                 galleryImage?.src ?? "",
                 galleryImage?.isAvailable === true,
-                galleryImage?.dimensions ??
-                  item?.dimensions ??
-                  defaultItem?.dimensions ??
-                  ""
+                galleryImage?.dimensions ?? item?.dimensions ?? defaultItem?.dimensions ?? ""
               )
         ),
       };
@@ -704,6 +698,7 @@ const resetContent = async () => {
   technique: { fr: "", en: "", es: "" },
   dimensions: '24 x 24"',
   imageSize: "medium",
+  titleSize: "large" as const,
 
   isAvailable: false,
   availability: {
@@ -880,6 +875,26 @@ const resetContent = async () => {
                 }}
               />
 
+              <SelectField
+                label="Grandeur du titre page détail"
+                value={(item as any).titleSize ?? "large"}
+                onChange={(value) => {
+                  const updated = [...content.oeuvres.items];
+                  (updated[index] as any).titleSize = value;
+
+                  setContent({
+                    ...content,
+                    oeuvres: { ...content.oeuvres, items: updated },
+                  });
+                }}
+                options={[
+                  { label: "Petite", value: "small" },
+                  { label: "Moyenne", value: "medium" },
+                  { label: "Grande", value: "large" },
+                  { label: "Très grande", value: "xlarge" },
+                ]}
+              />
+
               <LocalizedTextareaField
                 label="Sous-titre page détail"
                 value={item.gallerySubtitle}
@@ -920,7 +935,7 @@ const resetContent = async () => {
                         {
                           src: "",
                           isAvailable: false,
-                          dimensions: (updated[index] as any).dimensions ?? "",
+                          dimensions: updated[index].dimensions ?? "",
                           availability: {
                             fr: "Indisponible",
                             en: "Not available",
@@ -992,9 +1007,7 @@ const resetContent = async () => {
                             }
                             onChange={(value) => {
                               const updated = [...content.oeuvres.items];
-                              const nextImages = [
-                                ...((updated[index] as any).galleryImages ?? []),
-                              ];
+                              const nextImages = [...((updated[index] as any).galleryImages ?? [])];
                               const current = nextImages[imageIndex];
 
                               nextImages[imageIndex] =
@@ -1137,41 +1150,6 @@ const resetContent = async () => {
     </div>
   </EditorBlock>
 )}   
-
-{activeTab === "portfolio" && (
-  <EditorBlock title="Portfolio" subtitle="Modifier les images du portfolio">
-    <div className="grid gap-6">
-      {content.portfolio.map((item, index) => (
-        <div
-          key={index}
-          className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6"
-        >
-          <h3 className="mb-5 text-lg font-medium text-[#201c19]">
-            Image portfolio {index + 1}
-          </h3>
-
-          <ImageUploadField
-            label="Image"
-            value={item.image}
-            onChange={(value) => {
-              const updated = [...content.portfolio];
-
-              updated[index] = {
-                ...updated[index],
-                image: value,
-              };
-
-              setContent({
-                ...content,
-                portfolio: updated,
-              });
-            }}
-          />
-        </div>
-      ))}
-    </div>
-  </EditorBlock>
-)}
  {activeTab === "database" && <DatabaseSection />}
           </section>
         </div>

@@ -28,6 +28,7 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
           ...(defaultSiteContent.oeuvres.items[index] ?? {}),
           ...item,
           imageSize: item?.imageSize ?? "medium",
+          titleSize: item?.titleSize ?? "large",
           galleryImages:
             item?.galleryImages ??
             defaultSiteContent.oeuvres.items[index]?.galleryImages ??
@@ -36,6 +37,16 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
       ),
     },
   };
+}
+
+function getOptimizedImageUrl(url: string) {
+  if (!url) return "";
+
+  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
+    return url.replace("/upload/", "/upload/f_auto,q_auto,w_1200,c_limit/");
+  }
+
+  return url;
 }
 
 function getArtworkImageClass(size?: string) {
@@ -47,6 +58,20 @@ function getArtworkImageClass(size?: string) {
     case "medium":
     default:
       return "max-w-[560px]";
+  }
+}
+
+function getTitleSizeClass(size?: string) {
+  switch (size) {
+    case "small":
+      return "max-w-3xl text-[34px] sm:text-[42px] md:text-[48px] lg:text-[54px]";
+    case "medium":
+      return "max-w-4xl text-[40px] sm:text-[50px] md:text-[58px] lg:text-[62px]";
+    case "xlarge":
+      return "max-w-6xl text-[52px] sm:text-[66px] md:text-[78px] lg:text-[88px]";
+    case "large":
+    default:
+      return "max-w-5xl text-[46px] sm:text-[58px] md:text-[64px] lg:text-[68px]";
   }
 }
 
@@ -152,7 +177,11 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
         <section className="mx-auto max-w-[1280px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-[0.95fr_0.7fr] md:items-start">
             <div>
-              <h1 className="futura-text max-w-5xl text-[46px] font-light leading-[1.18] tracking-[0.14em] text-[#8b7771] sm:text-[58px] md:text-[64px] lg:text-[68px]">
+              <h1
+                className={`futura-text font-light leading-[1.18] tracking-[0.14em] text-[#8b7771] ${getTitleSizeClass(
+                  (oeuvre as any).titleSize
+                )}`}
+              >
                 {title}
               </h1>
             </div>
@@ -207,10 +236,11 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                       }}
                     >
                       <Image
-                        src={galleryImage.src}
+                        src={getOptimizedImageUrl(galleryImage.src)}
                         alt={`${title} ${index + 1}`}
                         width={1400}
                         height={1800}
+                        loading={index < 2 ? "eager" : "lazy"}
                         className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.015]"
                       />
                     </div>
