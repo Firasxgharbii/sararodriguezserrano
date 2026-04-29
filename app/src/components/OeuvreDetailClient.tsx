@@ -127,15 +127,15 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
         <section className="mx-auto max-w-[1280px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-[0.95fr_0.7fr] md:items-start">
             <div>
-              <h1 className="futura-text max-w-[620px] text-[28px] font-light leading-[1.08] tracking-[0.14em] text-[#8b7771] sm:text-[36px] md:text-[44px] lg:text-[50px]">
+              <h1 className="futura-text max-w-[520px] text-[24px] font-light leading-[1.18] tracking-[0.18em] text-[#8b7771] sm:text-[28px] md:text-[32px] lg:text-[36px]">
                 {title}
               </h1>
             </div>
 
-            <div className="ml-auto flex w-full max-w-[430px] flex-col items-end text-right md:pt-8">
+            <div className="ml-auto flex w-full max-w-[430px] flex-col items-end text-right md:pt-6">
               {subtitle && (
                 <div className="border-r border-[#c9b9b2] pr-6">
-                  <p className="serif-text text-[20px] font-light italic leading-[1.7] tracking-[0.01em] text-[#8f766d] md:text-[23px]">
+                  <p className="futura-text text-[14px] font-light leading-[1.9] tracking-[0.08em] text-[#8f766d] md:text-[15px]">
                     {subtitle}
                   </p>
                 </div>
@@ -144,7 +144,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
               <div className="mt-9">
                 <Link
                   href="/oeuvres"
-                  className="futura-text inline-flex items-center justify-end gap-3 text-[12px] uppercase tracking-[0.28em] text-[#9b847b] transition-opacity duration-300 hover:opacity-70"
+                  className="futura-text inline-flex items-center justify-end gap-3 text-[11px] uppercase tracking-[0.28em] text-[#9b847b] transition-opacity duration-300 hover:opacity-70"
                 >
                   <span>←</span>
                   Retour aux œuvres
@@ -154,7 +154,7 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
           </div>
 
           {galleryImages.length > 0 && (
-            <div className="mt-24 grid grid-cols-1 gap-x-20 gap-y-28 sm:grid-cols-2">
+            <div className="mt-20 grid grid-cols-1 gap-x-20 gap-y-28 sm:grid-cols-2">
               {galleryImages.map((galleryImage: any, index: number) => {
                 const available = galleryImage.isAvailable === true;
 
@@ -187,11 +187,11 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                     <div className="mt-6 border-t border-[#d6ccc7] pt-5">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                          <h2 className="futura-text text-[15px] uppercase tracking-[0.22em] text-[#6f625d]">
+                          <h2 className="futura-text text-[11px] uppercase tracking-[0.24em] text-[#6f625d]">
                             {title}
                           </h2>
 
-                          <div className="mt-4 grid gap-2 text-[14px] leading-7 text-[#8d7d76]">
+                          <div className="mt-4 grid gap-2 text-[13px] leading-7 text-[#8d7d76]">
                             <p>
                               <span className="futura-text uppercase tracking-[0.18em] text-[#6f625d]">
                                 Dimensions :
@@ -214,10 +214,11 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
                             </p>
                           </div>
                         </div>
-<div className="futura-text inline-flex w-fit items-center rounded-full border border-[#cfc4bf] bg-[#e6e2df] px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#7f6e67]">
-  <span className="mr-2 h-2 w-2 rounded-full bg-[#8b7771]" />
-  {availabilityText}
-</div>
+
+                        <div className="futura-text inline-flex w-fit items-center rounded-full border border-[#cfc4bf] bg-[#e6e2df] px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#7f6e67]">
+                          <span className="mr-2 h-2 w-2 rounded-full bg-[#8b7771]" />
+                          {availabilityText}
+                        </div>
                       </div>
                     </div>
                   </article>
@@ -243,10 +244,6 @@ export default function OeuvreDetailClient({ slug }: { slug: string }) {
           font-family: "FuturaLightCustom", "Futura W02 Light", "Futura PT",
             "Futura", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
           font-weight: 300;
-        }
-
-        .serif-text {
-          font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
         }
       `}</style>
     </>
