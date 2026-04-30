@@ -11,7 +11,6 @@ import {
   type Lang,
   LANG_STORAGE_KEY,
 } from "../lib/siteContent";
-import { getSiteContent } from "../lib/getSiteContent";
 import { t } from "../lib/i18n";
 
 const futuraLight = {
@@ -22,8 +21,39 @@ const futuraLight = {
 
 const softCardShadow = "shadow-[0_18px_45px_rgba(120,120,120,0.10)]";
 
+function getOptimizedImageUrl(url: string) {
+  if (!url) return "";
+
+  const clean = url.trim();
+
+  if (clean.includes("res.cloudinary.com") && clean.includes("/upload/")) {
+    return clean.replace("/upload/", "/upload/f_auto,q_auto,w_1400,c_limit/");
+  }
+
+  return clean;
+}
+
+function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
+  if (!parsed) return defaultSiteContent;
+
+  return {
+    ...defaultSiteContent,
+    ...parsed,
+
+    contact: {
+      ...defaultSiteContent.contact,
+      ...(parsed.contact ?? {}),
+      contactImage: {
+        ...defaultSiteContent.contact.contactImage,
+        ...(parsed.contact?.contactImage ?? {}),
+      },
+    },
+  };
+}
+
 export default function ContactPage() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
+  const [ready, setReady] = useState(false);
   const [lang, setLang] = useState<Lang>("fr");
 
   const [form, setForm] = useState({
@@ -38,28 +68,32 @@ export default function ContactPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const loadContent = () => {
-      const stored = getSiteContent();
+    const loadContent = async () => {
+      try {
+        const res = await fetch("/api/site-content", {
+          cache: "no-store",
+        });
 
-      setContent({
-        ...defaultSiteContent,
-        ...stored,
-        contact: {
-          ...defaultSiteContent.contact,
-          ...(stored.contact ?? {}),
-          contactImage: {
-            ...defaultSiteContent.contact.contactImage,
-            ...(stored.contact?.contactImage ?? {}),
-          },
-        },
-      });
+        if (!res.ok) {
+          setContent(defaultSiteContent);
+        } else {
+          const data = await res.json();
+          setContent(mergeSiteContent(data));
+        }
+      } catch (err) {
+        console.error("Erreur chargement contact depuis Aiven:", err);
+        setContent(defaultSiteContent);
+      }
 
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+
       setLang(
         savedLang === "fr" || savedLang === "en" || savedLang === "es"
           ? savedLang
           : "fr"
       );
+
+      setReady(true);
     };
 
     loadContent();
@@ -74,8 +108,12 @@ export default function ContactPage() {
   }, []);
 
   const contact = content.contact;
-  const contactImageSrc =
-    contact.contactImage?.src || defaultSiteContent.contact.contactImage.src;
+
+  const contactImageSrc = getOptimizedImageUrl(
+    contact.contactImage?.src ||
+      defaultSiteContent.contact.contactImage.src ||
+      "/gallery/1.jpg"
+  );
 
   const uiText = {
     emailLabel: { fr: "Email", en: "Email", es: "Correo electrónico" },
@@ -147,6 +185,7 @@ export default function ContactPage() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify(form),
       });
 
@@ -166,6 +205,8 @@ export default function ContactPage() {
     }
   };
 
+  if (!ready) return null;
+
   return (
     <main className="min-h-screen bg-[#faf8f4]">
       <Navbar />
@@ -181,15 +222,15 @@ export default function ContactPage() {
                 {t(contact.badge, lang)}
               </p>
 
-        <h1
-  className="mb-6 text-[34px] leading-tight text-[#8a8a8a]"
-  style={{
-    ...futuraLight,
-    letterSpacing: "0.03em",
-  }}
->
-  {t(contact.title, lang)}
-</h1>
+              <h1
+                className="mb-6 text-[34px] leading-tight text-[#8a8a8a]"
+                style={{
+                  ...futuraLight,
+                  letterSpacing: "0.03em",
+                }}
+              >
+                {t(contact.title, lang)}
+              </h1>
 
               <div className="mb-8 h-[1px] w-16 bg-neutral-300" />
 
@@ -214,6 +255,7 @@ export default function ContactPage() {
                       >
                         {t(uiText.emailLabel, lang)}
                       </p>
+
                       <p className="break-all text-sm text-neutral-800">
                         {contact.email}
                       </p>
@@ -241,6 +283,7 @@ export default function ContactPage() {
                       >
                         {t(uiText.instagramLabel, lang)}
                       </p>
+
                       <p className="text-sm text-neutral-800">
                         {contact.instagram}
                       </p>
@@ -264,6 +307,7 @@ export default function ContactPage() {
                     >
                       {t(uiText.locationLabel, lang)}
                     </p>
+
                     <p className="text-sm text-neutral-800">
                       {t(uiText.locationValue, lang)}
                     </p>
@@ -333,6 +377,7 @@ export default function ContactPage() {
                     alt="Contact illustration"
                     width={800}
                     height={400}
+                    unoptimized
                     className="h-48 w-full object-cover"
                   />
                 </div>
