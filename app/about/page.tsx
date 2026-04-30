@@ -57,7 +57,7 @@ function getProfileWrapperSize(size: "small" | "medium" | "large") {
   }
 }
 
-function CvTimelineList({
+function CvLineList({
   title,
   items,
   lang,
@@ -69,13 +69,22 @@ function CvTimelineList({
   return (
     <div>
       <h4
-        className="mb-5 text-[13px] uppercase tracking-[0.28em] text-neutral-400"
-        style={futuraLight}
+        className="mb-2 text-[14px] font-semibold tracking-normal text-neutral-900"
+        style={{
+          fontFamily:
+            '"Times New Roman", Times, Georgia, serif',
+        }}
       >
         {title}
       </h4>
 
-      <div className="space-y-3 text-[15px] leading-7 text-neutral-700">
+      <div
+        className="space-y-[3px] text-[14px] leading-[1.45] text-neutral-900"
+        style={{
+          fontFamily:
+            '"Times New Roman", Times, Georgia, serif',
+        }}
+      >
         {items.map((item, index) => {
           const text = t(item.text, lang);
           if (!item.year && !text) return null;
@@ -83,7 +92,7 @@ function CvTimelineList({
           return (
             <p key={`${title}-${index}`}>
               {item.year && (
-                <span className="font-medium text-neutral-900">
+                <span className="font-semibold text-neutral-950">
                   {item.year}
                 </span>
               )}
@@ -97,27 +106,47 @@ function CvTimelineList({
   );
 }
 
-function CvCollectionList({
+function CvBulletCollectionList({
+  title,
   items,
   lang,
 }: {
+  title: string;
   items: CollectionItem[];
   lang: Lang;
 }) {
   return (
-    <ul className="space-y-3 text-[15px] leading-7 text-neutral-700">
-      {items.map((item, index) => {
-        const text = t(item.text, lang);
-        if (!text) return null;
+    <div>
+      <h4
+        className="mb-2 text-[14px] font-semibold tracking-normal text-neutral-900"
+        style={{
+          fontFamily:
+            '"Times New Roman", Times, Georgia, serif',
+        }}
+      >
+        {title}
+      </h4>
 
-        return (
-          <li key={`collection-${index}`} className="flex gap-3">
-            <span className="mt-[11px] h-[4px] w-[4px] flex-none rounded-full bg-neutral-400" />
-            <span>{text}</span>
-          </li>
-        );
-      })}
-    </ul>
+      <ul
+        className="space-y-[3px] text-[14px] leading-[1.45] text-neutral-900"
+        style={{
+          fontFamily:
+            '"Times New Roman", Times, Georgia, serif',
+        }}
+      >
+        {items.map((item, index) => {
+          const text = t(item.text, lang);
+          if (!text) return null;
+
+          return (
+            <li key={`collection-${index}`} className="flex gap-2">
+              <span className="mt-[8px] h-[4px] w-[4px] flex-none rounded-full bg-neutral-900" />
+              <span>{text}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -347,7 +376,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <CvTimelineList
+            <CvLineList
               title=""
               items={about.publications}
               lang={lang}
@@ -375,7 +404,11 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <CvCollectionList items={about.collections} lang={lang} />
+          <CvBulletCollectionList
+            title=""
+            items={about.collections}
+            lang={lang}
+          />
         </div>
 
         <div className="mb-20">
@@ -387,33 +420,39 @@ export default function AboutPage() {
           className={`border border-neutral-200 bg-white p-7 ${softShadow}`}
         >
           <p
-            className="mb-2 text-xs uppercase tracking-[0.28em] text-neutral-400"
-            style={futuraLight}
+            className="mb-3 text-[14px] font-semibold text-neutral-900"
+            style={{
+              fontFamily:
+                '"Times New Roman", Times, Georgia, serif',
+            }}
           >
-            {t(about.parcoursBadge, lang)}
+            CV ({lang.toUpperCase()})
           </p>
 
-          <h3
-            className="mb-10 text-[34px] leading-tight text-[#8a8a8a]"
-            style={futuraLight}
+          <p
+            className="mb-3 text-[14px] font-semibold text-neutral-900"
+            style={{
+              fontFamily:
+                '"Times New Roman", Times, Georgia, serif',
+            }}
           >
             {t(about.parcoursTitle, lang)}
-          </h3>
+          </p>
 
-          <div className="grid gap-10 lg:grid-cols-3">
-            <CvTimelineList
+          <div className="grid gap-5">
+            <CvLineList
               title={t(about.exhibitionsTitle, lang)}
               items={about.exhibitions}
               lang={lang}
             />
 
-            <CvTimelineList
+            <CvLineList
               title={t(about.formationTitle, lang)}
               items={about.formations}
               lang={lang}
             />
 
-            <CvTimelineList
+            <CvLineList
               title={t(about.distinctionsTitle, lang)}
               items={about.distinctions}
               lang={lang}
