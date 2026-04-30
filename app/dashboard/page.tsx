@@ -838,11 +838,20 @@ export default function DashboardPage() {
                   }
                 />
 
+                <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[#ece3dc] bg-white p-5">
+                  <div>
+                    <h3 className="text-lg font-medium text-[#201c19]">Publications</h3>
+                    <p className="mt-2 text-sm text-[#8a7971]">Ajoutez, modifiez ou supprimez les publications visibles sur la page À propos.</p>
+                  </div>
+                  <button type="button" onClick={() => setContent({ ...content, about: { ...content.about, publications: [...content.about.publications, { year: "2026", text: emptyLocalizedText() }] } })} className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px]">Ajouter une publication</button>
+                </div>
+
                 {content.about.publications.map((item, index) => (
                   <div
                     key={`publication-${index}`}
                     className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5"
                   >
+                    <div className="mb-5 flex items-center justify-between gap-3"><h3 className="text-lg font-medium text-[#201c19]">Publication {index + 1}</h3><button type="button" onClick={() => { const updated = [...content.about.publications]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, publications: updated } }); }} className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]">Supprimer</button></div>
                     <Field
                       label={`Publication ${index + 1} — année`}
                       value={item.year}
@@ -897,11 +906,17 @@ export default function DashboardPage() {
                   }
                 />
 
+                <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[#ece3dc] bg-white p-5">
+                  <div><h3 className="text-lg font-medium text-[#201c19]">Collections</h3><p className="mt-2 text-sm text-[#8a7971]">Ajoutez, modifiez ou supprimez les collections privées.</p></div>
+                  <button type="button" onClick={() => setContent({ ...content, about: { ...content.about, collections: [...content.about.collections, { text: emptyLocalizedText() }] } })} className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px]">Ajouter une collection</button>
+                </div>
+
                 {content.about.collections.map((item, index) => (
                   <div
                     key={`collection-${index}`}
                     className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5"
                   >
+                    <div className="mb-5 flex items-center justify-between gap-3"><h3 className="text-lg font-medium text-[#201c19]">Collection {index + 1}</h3><button type="button" onClick={() => { const updated = [...content.about.collections]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, collections: updated } }); }} className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]">Supprimer</button></div>
                     <LocalizedTextareaField
                       label={`Collection ${index + 1}`}
                       value={item.text}
@@ -951,21 +966,16 @@ export default function DashboardPage() {
                   }
                 />
 
-                {content.about.exhibitions.map((item, index) => (
-                  <TimelineLocalizedEditor
-                    key={`exhibition-${index}`}
-                    title={`Exposition ${index + 1}`}
-                    item={item}
-                    onChange={(nextItem) => {
-                      const updated = [...content.about.exhibitions];
-                      updated[index] = nextItem;
+                <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[#ece3dc] bg-white p-5">
+                  <div><h3 className="text-lg font-medium text-[#201c19]">Expositions</h3><p className="mt-2 text-sm text-[#8a7971]">Ajoutez, modifiez ou supprimez les expériences d’exposition.</p></div>
+                  <button type="button" onClick={() => setContent({ ...content, about: { ...content.about, exhibitions: [...content.about.exhibitions, { year: "2026", text: emptyLocalizedText() }] } })} className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px]">Ajouter une exposition</button>
+                </div>
 
-                      setContent({
-                        ...content,
-                        about: { ...content.about, exhibitions: updated },
-                      });
-                    }}
-                  />
+                {content.about.exhibitions.map((item, index) => (
+                  <div key={`exhibition-${index}`} className="grid gap-4">
+                    <div className="flex justify-end"><button type="button" onClick={() => { const updated = [...content.about.exhibitions]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, exhibitions: updated } }); }} className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]">Supprimer l’exposition</button></div>
+                    <TimelineLocalizedEditor title={`Exposition ${index + 1}`} item={item} onChange={(nextItem) => { const updated = [...content.about.exhibitions]; updated[index] = nextItem; setContent({ ...content, about: { ...content.about, exhibitions: updated } }); }} />
+                  </div>
                 ))}
 
                 <LocalizedField
@@ -979,21 +989,16 @@ export default function DashboardPage() {
                   }
                 />
 
-                {content.about.formations.map((item, index) => (
-                  <TimelineLocalizedEditor
-                    key={`formation-${index}`}
-                    title={`Formation ${index + 1}`}
-                    item={item}
-                    onChange={(nextItem) => {
-                      const updated = [...content.about.formations];
-                      updated[index] = nextItem;
+                <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[#ece3dc] bg-white p-5">
+                  <div><h3 className="text-lg font-medium text-[#201c19]">Formations</h3><p className="mt-2 text-sm text-[#8a7971]">Ajoutez, modifiez ou supprimez les formations.</p></div>
+                  <button type="button" onClick={() => setContent({ ...content, about: { ...content.about, formations: [...content.about.formations, { year: "2026", text: emptyLocalizedText() }] } })} className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px]">Ajouter une formation</button>
+                </div>
 
-                      setContent({
-                        ...content,
-                        about: { ...content.about, formations: updated },
-                      });
-                    }}
-                  />
+                {content.about.formations.map((item, index) => (
+                  <div key={`formation-${index}`} className="grid gap-4">
+                    <div className="flex justify-end"><button type="button" onClick={() => { const updated = [...content.about.formations]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, formations: updated } }); }} className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]">Supprimer la formation</button></div>
+                    <TimelineLocalizedEditor title={`Formation ${index + 1}`} item={item} onChange={(nextItem) => { const updated = [...content.about.formations]; updated[index] = nextItem; setContent({ ...content, about: { ...content.about, formations: updated } }); }} />
+                  </div>
                 ))}
 
                 <LocalizedField
@@ -1007,21 +1012,16 @@ export default function DashboardPage() {
                   }
                 />
 
-                {content.about.distinctions.map((item, index) => (
-                  <TimelineLocalizedEditor
-                    key={`distinction-${index}`}
-                    title={`Distinction ${index + 1}`}
-                    item={item}
-                    onChange={(nextItem) => {
-                      const updated = [...content.about.distinctions];
-                      updated[index] = nextItem;
+                <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[#ece3dc] bg-white p-5">
+                  <div><h3 className="text-lg font-medium text-[#201c19]">Distinctions</h3><p className="mt-2 text-sm text-[#8a7971]">Ajoutez, modifiez ou supprimez les distinctions.</p></div>
+                  <button type="button" onClick={() => setContent({ ...content, about: { ...content.about, distinctions: [...content.about.distinctions, { year: "2026", text: emptyLocalizedText() }] } })} className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px]">Ajouter une distinction</button>
+                </div>
 
-                      setContent({
-                        ...content,
-                        about: { ...content.about, distinctions: updated },
-                      });
-                    }}
-                  />
+                {content.about.distinctions.map((item, index) => (
+                  <div key={`distinction-${index}`} className="grid gap-4">
+                    <div className="flex justify-end"><button type="button" onClick={() => { const updated = [...content.about.distinctions]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, distinctions: updated } }); }} className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]">Supprimer la distinction</button></div>
+                    <TimelineLocalizedEditor title={`Distinction ${index + 1}`} item={item} onChange={(nextItem) => { const updated = [...content.about.distinctions]; updated[index] = nextItem; setContent({ ...content, about: { ...content.about, distinctions: updated } }); }} />
+                  </div>
                 ))}
               </EditorBlock>
             )}
