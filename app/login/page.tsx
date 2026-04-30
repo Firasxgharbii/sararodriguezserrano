@@ -9,7 +9,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("Firas.gharbi8485@gmail.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -129,12 +129,14 @@ export default function LoginPage() {
 
                   <div className="group flex h-[62px] items-center gap-3 rounded-[20px] border border-[#eadfd8] bg-[#faf8f6] px-5 transition-all duration-300 focus-within:-translate-y-[1px] focus-within:border-[#c9afa3] focus-within:bg-white focus-within:shadow-[0_0_0_5px_rgba(201,175,163,0.12)]">
                     <Mail className="h-5 w-5 text-[#b69c90] transition duration-300 group-focus-within:text-[#7e675d]" />
+
                     <input
                       id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="nom@exemple.com"
+                      autoComplete="email"
                       className="w-full bg-transparent text-[15px] text-[#1f1b19] outline-none placeholder:text-[#c3b4ad]"
                     />
                   </div>
@@ -166,6 +168,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••••••"
+                      autoComplete="current-password"
                       className="w-full bg-transparent text-[15px] text-[#1f1b19] outline-none placeholder:text-[#c3b4ad]"
                     />
 
@@ -194,6 +197,7 @@ export default function LoginPage() {
                     type="checkbox"
                     className="h-[18px] w-[18px] rounded border-[#d8cbc4] accent-black"
                   />
+
                   <label
                     htmlFor="remember"
                     className="text-[15px] text-[#8e7f79]"
@@ -214,13 +218,12 @@ export default function LoginPage() {
                   className="group relative mt-2 inline-flex h-[62px] w-full items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#171311_0%,#1d1715_50%,#2a211d_100%)] px-6 text-[15px] font-medium uppercase tracking-[0.28em] text-white shadow-[0_18px_40px_rgba(0,0,0,0.16)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_24px_55px_rgba(0,0,0,0.22)] active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <span className="absolute inset-0 -translate-x-full bg-[linear-gradient(120deg,transparent_20%,rgba(255,255,255,0.16)_50%,transparent_80%)] transition-transform duration-700 group-hover:translate-x-full" />
+
                   <span className="relative z-10">
                     {loading ? "Connexion..." : "Connexion"}
                   </span>
                 </button>
               </form>
-
-            
             </div>
           </div>
         </div>
