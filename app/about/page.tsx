@@ -19,7 +19,6 @@ import {
   LANG_STORAGE_KEY,
   type LocalizedText,
 } from "../lib/siteContent";
-import { getSiteContent } from "../lib/getSiteContent";
 import { t } from "../lib/i18n";
 
 const cvFiles: Record<Lang, string> = {
@@ -45,7 +44,7 @@ type CollectionItem = {
   text: LocalizedText;
 };
 
-function getProfileWrapperSize(size: "small" | "medium" | "large") {
+function getProfileWrapperSize(size?: "small" | "medium" | "large") {
   switch (size) {
     case "small":
       return "h-[280px] w-[280px] md:h-[340px] md:w-[340px] lg:h-[380px] lg:w-[380px]";
@@ -55,6 +54,82 @@ function getProfileWrapperSize(size: "small" | "medium" | "large") {
     default:
       return "h-[360px] w-[360px] md:h-[460px] md:w-[460px] lg:h-[520px] lg:w-[520px]";
   }
+}
+
+function getOptimizedImageUrl(url: string) {
+  if (!url) return "";
+
+  const clean = url.trim();
+
+  if (clean.includes("res.cloudinary.com") && clean.includes("/upload/")) {
+    return clean.replace("/upload/", "/upload/f_auto,q_auto,w_1400,c_limit/");
+  }
+
+  return clean;
+}
+
+function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
+  if (!parsed) return defaultSiteContent;
+
+  return {
+    ...defaultSiteContent,
+    ...parsed,
+
+    home: {
+      ...defaultSiteContent.home,
+      ...(parsed.home ?? {}),
+      heroImageStyle: {
+        ...defaultSiteContent.home.heroImageStyle,
+        ...(parsed.home?.heroImageStyle ?? {}),
+      },
+      gallery: {
+        ...defaultSiteContent.home.gallery,
+        ...(parsed.home?.gallery ?? {}),
+        works: (
+          parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works
+        ).map((item: any, index: number) => ({
+          ...(defaultSiteContent.home.gallery.works[index] ?? {}),
+          ...item,
+        })),
+      },
+    },
+
+    about: {
+      ...defaultSiteContent.about,
+      ...(parsed.about ?? {}),
+      profileImage: {
+        ...defaultSiteContent.about.profileImage,
+        ...(parsed.about?.profileImage ?? {}),
+      },
+      publications:
+        parsed.about?.publications ?? defaultSiteContent.about.publications,
+      collections:
+        parsed.about?.collections ?? defaultSiteContent.about.collections,
+      exhibitions:
+        parsed.about?.exhibitions ?? defaultSiteContent.about.exhibitions,
+      formations:
+        parsed.about?.formations ?? defaultSiteContent.about.formations,
+      distinctions:
+        parsed.about?.distinctions ?? defaultSiteContent.about.distinctions,
+    },
+
+    contact: {
+      ...defaultSiteContent.contact,
+      ...(parsed.contact ?? {}),
+      contactImage: {
+        ...defaultSiteContent.contact.contactImage,
+        ...(parsed.contact?.contactImage ?? {}),
+      },
+    },
+
+    oeuvres: {
+      ...defaultSiteContent.oeuvres,
+      ...(parsed.oeuvres ?? {}),
+      items: parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items,
+    },
+
+    portfolio: parsed.portfolio ?? defaultSiteContent.portfolio,
+  };
 }
 
 function CvLineList({
@@ -68,22 +143,18 @@ function CvLineList({
 }) {
   return (
     <div>
-      <h4
-        className="mb-2 text-[14px] font-semibold tracking-normal text-neutral-900"
-        style={{
-          fontFamily:
-            '"Times New Roman", Times, Georgia, serif',
-        }}
-      >
-        {title}
-      </h4>
+      {title && (
+        <h4
+          className="mb-2 text-[14px] font-semibold tracking-normal text-neutral-900"
+          style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
+        >
+          {title}
+        </h4>
+      )}
 
       <div
         className="space-y-[3px] text-[14px] leading-[1.45] text-neutral-900"
-        style={{
-          fontFamily:
-            '"Times New Roman", Times, Georgia, serif',
-        }}
+        style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
       >
         {items.map((item, index) => {
           const text = t(item.text, lang);
@@ -107,55 +178,55 @@ function CvLineList({
 }
 
 function CvBulletCollectionList({
-  title,
   items,
   lang,
 }: {
-  title: string;
   items: CollectionItem[];
   lang: Lang;
 }) {
   return (
-    <div>
-      <h4
-        className="mb-2 text-[14px] font-semibold tracking-normal text-neutral-900"
-        style={{
-          fontFamily:
-            '"Times New Roman", Times, Georgia, serif',
-        }}
-      >
-        {title}
-      </h4>
+    <ul
+      className="space-y-[3px] text-[14px] leading-[1.45] text-neutral-900"
+      style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
+    >
+      {items.map((item, index) => {
+        const text = t(item.text, lang);
+        if (!text) return null;
 
-      <ul
-        className="space-y-[3px] text-[14px] leading-[1.45] text-neutral-900"
-        style={{
-          fontFamily:
-            '"Times New Roman", Times, Georgia, serif',
-        }}
-      >
-        {items.map((item, index) => {
-          const text = t(item.text, lang);
-          if (!text) return null;
-
-          return (
-            <li key={`collection-${index}`} className="flex gap-2">
-              <span className="mt-[8px] h-[4px] w-[4px] flex-none rounded-full bg-neutral-900" />
-              <span>{text}</span>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+        return (
+          <li key={`collection-${index}`} className="flex gap-2">
+            <span className="mt-[8px] h-[4px] w-[4px] flex-none rounded-full bg-neutral-900" />
+            <span>{text}</span>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
 export default function AboutPage() {
   const [lang, setLang] = useState<Lang>("fr");
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const syncLang = () => {
+    const loadContent = async () => {
+      try {
+        const res = await fetch("/api/site-content", {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          setContent(defaultSiteContent);
+        } else {
+          const data = await res.json();
+          setContent(mergeSiteContent(data));
+        }
+      } catch (error) {
+        console.error("Erreur chargement About depuis Aiven:", error);
+        setContent(defaultSiteContent);
+      }
+
       const savedLang = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
 
       setLang(
@@ -163,27 +234,22 @@ export default function AboutPage() {
           ? savedLang
           : "fr"
       );
+
+      setReady(true);
     };
 
-    const loadContent = () => {
-      setContent(getSiteContent());
-    };
-
-    syncLang();
     loadContent();
 
-    window.addEventListener("focus", syncLang);
     window.addEventListener("focus", loadContent);
-    window.addEventListener("storage", syncLang);
     window.addEventListener("storage", loadContent);
 
     return () => {
-      window.removeEventListener("focus", syncLang);
       window.removeEventListener("focus", loadContent);
-      window.removeEventListener("storage", syncLang);
       window.removeEventListener("storage", loadContent);
     };
   }, []);
+
+  if (!ready) return null;
 
   const about = {
     ...defaultSiteContent.about,
@@ -222,7 +288,8 @@ export default function AboutPage() {
     document.body.removeChild(link);
   };
 
-  const imageSrc = about.profileImage?.src || about.image || "/sara1.jpg";
+  const imageSrc =
+    about.profileImage?.src || about.image || defaultSiteContent.about.image || "/sara1.jpg";
 
   return (
     <main className="min-h-screen bg-[#f8f7f4]">
@@ -231,9 +298,10 @@ export default function AboutPage() {
       <section className="relative overflow-hidden bg-[#f6f2ed]">
         <div className="absolute inset-0">
           <Image
-            src={about.image || "/sara1.jpg"}
+            src={getOptimizedImageUrl(about.image || "/sara1.jpg")}
             alt={t(about.title, lang)}
             fill
+            unoptimized
             priority
             sizes="100vw"
             className="object-cover opacity-20"
@@ -275,15 +343,16 @@ export default function AboutPage() {
 
               <div
                 className={`relative overflow-hidden border border-neutral-200 bg-white p-3 ${softShadow} ${getProfileWrapperSize(
-                  about.profileImage.size
+                  about.profileImage?.size
                 )}`}
               >
                 <div className="h-full w-full overflow-hidden">
                   <Image
-                    src={imageSrc}
+                    src={getOptimizedImageUrl(imageSrc)}
                     alt={t(about.title, lang)}
                     width={900}
                     height={900}
+                    unoptimized
                     className="h-full w-full object-cover transition-transform duration-700 ease-out hover:scale-[1.05]"
                   />
                 </div>
@@ -376,15 +445,13 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <CvLineList
-              title=""
-              items={about.publications}
-              lang={lang}
-            />
+            <CvLineList title="" items={about.publications} lang={lang} />
           </div>
         </div>
 
-        <div className={`mb-20 border border-neutral-200 bg-white p-7 ${softShadow}`}>
+        <div
+          className={`mb-20 border border-neutral-200 bg-white p-7 ${softShadow}`}
+        >
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center bg-neutral-100 text-neutral-700">
               <BookOpen size={18} />
@@ -404,11 +471,7 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <CvBulletCollectionList
-            title=""
-            items={about.collections}
-            lang={lang}
-          />
+          <CvBulletCollectionList items={about.collections} lang={lang} />
         </div>
 
         <div className="mb-20">
@@ -422,8 +485,7 @@ export default function AboutPage() {
           <p
             className="mb-3 text-[14px] font-semibold text-neutral-900"
             style={{
-              fontFamily:
-                '"Times New Roman", Times, Georgia, serif',
+              fontFamily: '"Times New Roman", Times, Georgia, serif',
             }}
           >
             CV ({lang.toUpperCase()})
@@ -432,8 +494,7 @@ export default function AboutPage() {
           <p
             className="mb-3 text-[14px] font-semibold text-neutral-900"
             style={{
-              fontFamily:
-                '"Times New Roman", Times, Georgia, serif',
+              fontFamily: '"Times New Roman", Times, Georgia, serif',
             }}
           >
             {t(about.parcoursTitle, lang)}
