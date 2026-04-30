@@ -75,25 +75,6 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
     ...defaultSiteContent,
     ...parsed,
 
-    home: {
-      ...defaultSiteContent.home,
-      ...(parsed.home ?? {}),
-      heroImageStyle: {
-        ...defaultSiteContent.home.heroImageStyle,
-        ...(parsed.home?.heroImageStyle ?? {}),
-      },
-      gallery: {
-        ...defaultSiteContent.home.gallery,
-        ...(parsed.home?.gallery ?? {}),
-        works: (
-          parsed.home?.gallery?.works ?? defaultSiteContent.home.gallery.works
-        ).map((item: any, index: number) => ({
-          ...(defaultSiteContent.home.gallery.works[index] ?? {}),
-          ...item,
-        })),
-      },
-    },
-
     about: {
       ...defaultSiteContent.about,
       ...(parsed.about ?? {}),
@@ -112,32 +93,15 @@ function mergeSiteContent(parsed: Partial<SiteContent> | null): SiteContent {
       distinctions:
         parsed.about?.distinctions ?? defaultSiteContent.about.distinctions,
     },
-
-    contact: {
-      ...defaultSiteContent.contact,
-      ...(parsed.contact ?? {}),
-      contactImage: {
-        ...defaultSiteContent.contact.contactImage,
-        ...(parsed.contact?.contactImage ?? {}),
-      },
-    },
-
-    oeuvres: {
-      ...defaultSiteContent.oeuvres,
-      ...(parsed.oeuvres ?? {}),
-      items: parsed.oeuvres?.items ?? defaultSiteContent.oeuvres.items,
-    },
-
-    portfolio: parsed.portfolio ?? defaultSiteContent.portfolio,
   };
 }
 
-function CvLineList({
+function CleanLineList({
   title,
   items,
   lang,
 }: {
-  title: string;
+  title?: string;
   items: TimelineItem[];
   lang: Lang;
 }) {
@@ -145,30 +109,27 @@ function CvLineList({
     <div>
       {title && (
         <h4
-          className="mb-2 text-[14px] font-semibold tracking-normal text-neutral-900"
-          style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
+          className="mb-4 text-[13px] uppercase tracking-[0.24em] text-[#aaa1a0]"
+          style={futuraLight}
         >
           {title}
         </h4>
       )}
 
-      <div
-        className="space-y-[3px] text-[14px] leading-[1.45] text-neutral-900"
-        style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
-      >
+      <div className="space-y-3 text-[15px] font-light leading-7 text-[#6f6866]">
         {items.map((item, index) => {
           const text = t(item.text, lang);
           if (!item.year && !text) return null;
 
           return (
-            <p key={`${title}-${index}`}>
+            <p key={`${title ?? "item"}-${index}`}>
               {item.year && (
-                <span className="font-semibold text-neutral-950">
+                <span className="font-light text-[#8a7d76]">
                   {item.year}
                 </span>
               )}
               {item.year && text ? " — " : ""}
-              {text}
+              <span>{text}</span>
             </p>
           );
         })}
@@ -177,7 +138,7 @@ function CvLineList({
   );
 }
 
-function CvBulletCollectionList({
+function CleanCollectionList({
   items,
   lang,
 }: {
@@ -185,22 +146,19 @@ function CvBulletCollectionList({
   lang: Lang;
 }) {
   return (
-    <ul
-      className="space-y-[3px] text-[14px] leading-[1.45] text-neutral-900"
-      style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
-    >
+    <div className="space-y-3 text-[15px] font-light leading-7 text-[#6f6866]">
       {items.map((item, index) => {
         const text = t(item.text, lang);
         if (!text) return null;
 
         return (
-          <li key={`collection-${index}`} className="flex gap-2">
-            <span className="mt-[8px] h-[4px] w-[4px] flex-none rounded-full bg-neutral-900" />
-            <span>{text}</span>
-          </li>
+          <p key={`collection-${index}`}>
+            <span className="mr-2 text-[#aaa1a0]">•</span>
+            {text}
+          </p>
         );
       })}
-    </ul>
+    </div>
   );
 }
 
@@ -289,7 +247,10 @@ export default function AboutPage() {
   };
 
   const imageSrc =
-    about.profileImage?.src || about.image || defaultSiteContent.about.image || "/sara1.jpg";
+    about.profileImage?.src ||
+    about.image ||
+    defaultSiteContent.about.image ||
+    "/sara1.jpg";
 
   return (
     <main className="min-h-screen bg-[#f8f7f4]">
@@ -328,7 +289,7 @@ export default function AboutPage() {
 
             <div className="mt-8 h-[1px] w-20 bg-neutral-300" />
 
-            <p className="mt-8 max-w-2xl text-[17px] leading-8 text-neutral-600">
+            <p className="mt-8 max-w-2xl text-[17px] font-light leading-8 text-neutral-600">
               {t(about.introText, lang)}
             </p>
           </div>
@@ -368,11 +329,11 @@ export default function AboutPage() {
               {t(about.bioTitle, lang)}
             </p>
 
-            <p className="text-[15px] leading-7 text-neutral-600">
+            <p className="text-[15px] font-light leading-7 text-neutral-600">
               {t(about.bioText1, lang)}
             </p>
 
-            <p className="mt-4 text-[15px] leading-7 text-neutral-600">
+            <p className="mt-4 text-[15px] font-light leading-7 text-neutral-600">
               {t(about.bioText2, lang)}
             </p>
 
@@ -420,7 +381,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <p className="text-[15px] leading-8 text-neutral-600">
+            <p className="text-[15px] font-light leading-8 text-neutral-600">
               {t(about.visionText, lang)}
             </p>
           </div>
@@ -445,7 +406,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <CvLineList title="" items={about.publications} lang={lang} />
+            <CleanLineList items={about.publications} lang={lang} />
           </div>
         </div>
 
@@ -471,7 +432,7 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <CvBulletCollectionList items={about.collections} lang={lang} />
+          <CleanCollectionList items={about.collections} lang={lang} />
         </div>
 
         <div className="mb-20">
@@ -483,37 +444,33 @@ export default function AboutPage() {
           className={`border border-neutral-200 bg-white p-7 ${softShadow}`}
         >
           <p
-            className="mb-3 text-[14px] font-semibold text-neutral-900"
-            style={{
-              fontFamily: '"Times New Roman", Times, Georgia, serif',
-            }}
+            className="mb-2 text-xs uppercase tracking-[0.28em] text-neutral-400"
+            style={futuraLight}
           >
             CV ({lang.toUpperCase()})
           </p>
 
-          <p
-            className="mb-3 text-[14px] font-semibold text-neutral-900"
-            style={{
-              fontFamily: '"Times New Roman", Times, Georgia, serif',
-            }}
+          <h3
+            className="mb-8 text-[34px] leading-tight text-[#8a8a8a]"
+            style={futuraLight}
           >
             {t(about.parcoursTitle, lang)}
-          </p>
+          </h3>
 
-          <div className="grid gap-5">
-            <CvLineList
+          <div className="grid gap-10 lg:grid-cols-3">
+            <CleanLineList
               title={t(about.exhibitionsTitle, lang)}
               items={about.exhibitions}
               lang={lang}
             />
 
-            <CvLineList
+            <CleanLineList
               title={t(about.formationTitle, lang)}
               items={about.formations}
               lang={lang}
             />
 
-            <CvLineList
+            <CleanLineList
               title={t(about.distinctionsTitle, lang)}
               items={about.distinctions}
               lang={lang}
