@@ -666,363 +666,60 @@ export default function DashboardPage() {
                 title="Page à propos"
                 subtitle="Modifier le contenu principal"
               >
-                <LocalizedField
-                  label="Badge hero"
-                  value={content.about.badge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, badge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre hero"
-                  value={content.about.title}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, title: value },
-                    })
-                  }
-                />
-
-                <LocalizedTextareaField
-                  label="Texte hero"
-                  value={content.about.introText}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, introText: value },
-                    })
-                  }
-                />
+                <LocalizedField label="Badge hero" value={content.about.badge} onChange={(value) => setContent({ ...content, about: { ...content.about, badge: value } })} />
+                <LocalizedField label="Titre hero" value={content.about.title} onChange={(value) => setContent({ ...content, about: { ...content.about, title: value } })} />
+                <LocalizedTextareaField label="Texte hero" value={content.about.introText} onChange={(value) => setContent({ ...content, about: { ...content.about, introText: value } })} />
 
                 <ImageUploadField
                   label="Image fond / image principale"
                   value={content.about.image}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: {
-                        ...content.about,
-                        image: value,
-                        profileImage: {
-                          ...content.about.profileImage,
-                          src: value,
-                        },
-                      },
-                    })
-                  }
+                  onChange={(value) => setContent({ ...content, about: { ...content.about, image: value, profileImage: { ...content.about.profileImage, src: value } } })}
                 />
 
-                <ImageStyleEditor
-                  title="Style de l’image profil"
-                  value={content.about.profileImage}
-                  onChange={(style) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, profileImage: style },
-                    })
-                  }
-                />
+                <ImageStyleEditor title="Style de l’image profil" value={content.about.profileImage} onChange={(style) => setContent({ ...content, about: { ...content.about, profileImage: style } })} />
 
-                <LocalizedField
-                  label="Titre biographie"
-                  value={content.about.bioTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, bioTitle: value },
-                    })
-                  }
-                />
+                <LocalizedField label="Titre biographie" value={content.about.bioTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, bioTitle: value } })} />
+                <LocalizedTextareaField label="Biographie texte 1" value={content.about.bioText1} onChange={(value) => setContent({ ...content, about: { ...content.about, bioText1: value } })} />
+                <LocalizedTextareaField label="Biographie texte 2" value={content.about.bioText2} onChange={(value) => setContent({ ...content, about: { ...content.about, bioText2: value } })} />
 
-                <LocalizedTextareaField
-                  label="Biographie texte 1"
-                  value={content.about.bioText1}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, bioText1: value },
-                    })
-                  }
-                />
-
-                <LocalizedTextareaField
-                  label="Biographie texte 2"
-                  value={content.about.bioText2}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, bioText2: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Texte bouton CV"
-                  value={content.about.cvButtonLabel}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, cvButtonLabel: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Texte bouton parcours"
-                  value={content.about.parcoursButtonLabel}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, parcoursButtonLabel: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Badge démarche"
-                  value={content.about.visionBadge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, visionBadge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre démarche"
-                  value={content.about.visionTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, visionTitle: value },
-                    })
-                  }
-                />
-
-                <LocalizedTextareaField
-                  label="Texte démarche"
-                  value={content.about.visionText}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, visionText: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Badge publications"
-                  value={content.about.publicationsBadge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, publicationsBadge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre publications"
-                  value={content.about.publicationsTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, publicationsTitle: value },
-                    })
-                  }
-                />
-
-                <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[#ece3dc] bg-white p-5">
-                  <div>
-                    <h3 className="text-lg font-medium text-[#201c19]">Publications</h3>
-                    <p className="mt-2 text-sm text-[#8a7971]">Ajoutez, modifiez ou supprimez les publications visibles sur la page À propos.</p>
-                  </div>
-                  <button type="button" onClick={() => setContent({ ...content, about: { ...content.about, publications: [...content.about.publications, { year: "2026", text: emptyLocalizedText() }] } })} className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px]">Ajouter une publication</button>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <LocalizedField label="Texte bouton CV" value={content.about.cvButtonLabel} onChange={(value) => setContent({ ...content, about: { ...content.about, cvButtonLabel: value } })} />
+                  <LocalizedField label="Texte bouton parcours" value={content.about.parcoursButtonLabel} onChange={(value) => setContent({ ...content, about: { ...content.about, parcoursButtonLabel: value } })} />
                 </div>
 
-                {content.about.publications.map((item, index) => (
-                  <div
-                    key={`publication-${index}`}
-                    className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5"
-                  >
-                    <div className="mb-5 flex items-center justify-between gap-3"><h3 className="text-lg font-medium text-[#201c19]">Publication {index + 1}</h3><button type="button" onClick={() => { const updated = [...content.about.publications]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, publications: updated } }); }} className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]">Supprimer</button></div>
-                    <Field
-                      label={`Publication ${index + 1} — année`}
-                      value={item.year}
-                      onChange={(value) => {
-                        const updated = [...content.about.publications];
-                        updated[index].year = value;
+                <div className="rounded-[28px] border border-[#e8ded7] bg-white p-5 sm:p-6">
+                  <h3 className="text-xl font-medium text-[#201c19]">Bloc démarche artistique</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#8a7971]">Ce bloc apparaît comme une carte simple sur la page À propos.</p>
+                  <div className="mt-6 grid gap-5">
+                    <LocalizedField label="Badge démarche" value={content.about.visionBadge} onChange={(value) => setContent({ ...content, about: { ...content.about, visionBadge: value } })} />
+                    <LocalizedField label="Titre démarche" value={content.about.visionTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, visionTitle: value } })} />
+                    <LocalizedTextareaField label="Texte démarche" value={content.about.visionText} onChange={(value) => setContent({ ...content, about: { ...content.about, visionText: value } })} />
+                  </div>
+                </div>
 
-                        setContent({
-                          ...content,
-                          about: { ...content.about, publications: updated },
-                        });
-                      }}
-                    />
-
-                    <div className="mt-5">
-                      <LocalizedTextareaField
-                        label={`Publication ${index + 1} — texte`}
-                        value={item.text}
-                        onChange={(value) => {
-                          const updated = [...content.about.publications];
-                          updated[index].text = value;
-
-                          setContent({
-                            ...content,
-                            about: { ...content.about, publications: updated },
-                          });
-                        }}
-                      />
+                <div className="rounded-[28px] border border-[#e8ded7] bg-white p-5 sm:p-6">
+                  <h3 className="text-xl font-medium text-[#201c19]">Titres des sections CV</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#8a7971]">Ces titres apparaissent dans les listes style CV sur la page À propos.</p>
+                  <div className="mt-6 grid gap-5">
+                    <LocalizedField label="Badge publications" value={content.about.publicationsBadge} onChange={(value) => setContent({ ...content, about: { ...content.about, publicationsBadge: value } })} />
+                    <LocalizedField label="Titre publications" value={content.about.publicationsTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, publicationsTitle: value } })} />
+                    <LocalizedField label="Badge collections" value={content.about.collectionsBadge} onChange={(value) => setContent({ ...content, about: { ...content.about, collectionsBadge: value } })} />
+                    <LocalizedField label="Titre collections" value={content.about.collectionsTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, collectionsTitle: value } })} />
+                    <LocalizedField label="Badge parcours" value={content.about.parcoursBadge} onChange={(value) => setContent({ ...content, about: { ...content.about, parcoursBadge: value } })} />
+                    <LocalizedField label="Titre parcours" value={content.about.parcoursTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, parcoursTitle: value } })} />
+                    <div className="grid gap-5 sm:grid-cols-3">
+                      <LocalizedField label="Titre expositions" value={content.about.exhibitionsTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, exhibitionsTitle: value } })} />
+                      <LocalizedField label="Titre formation" value={content.about.formationTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, formationTitle: value } })} />
+                      <LocalizedField label="Titre distinctions" value={content.about.distinctionsTitle} onChange={(value) => setContent({ ...content, about: { ...content.about, distinctionsTitle: value } })} />
                     </div>
                   </div>
-                ))}
-
-                <LocalizedField
-                  label="Badge collections"
-                  value={content.about.collectionsBadge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, collectionsBadge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre collections"
-                  value={content.about.collectionsTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, collectionsTitle: value },
-                    })
-                  }
-                />
-
-                <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[#ece3dc] bg-white p-5">
-                  <div><h3 className="text-lg font-medium text-[#201c19]">Collections</h3><p className="mt-2 text-sm text-[#8a7971]">Ajoutez, modifiez ou supprimez les collections privées.</p></div>
-                  <button type="button" onClick={() => setContent({ ...content, about: { ...content.about, collections: [...content.about.collections, { text: emptyLocalizedText() }] } })} className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px]">Ajouter une collection</button>
                 </div>
 
-                {content.about.collections.map((item, index) => (
-                  <div
-                    key={`collection-${index}`}
-                    className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5"
-                  >
-                    <div className="mb-5 flex items-center justify-between gap-3"><h3 className="text-lg font-medium text-[#201c19]">Collection {index + 1}</h3><button type="button" onClick={() => { const updated = [...content.about.collections]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, collections: updated } }); }} className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]">Supprimer</button></div>
-                    <LocalizedTextareaField
-                      label={`Collection ${index + 1}`}
-                      value={item.text}
-                      onChange={(value) => {
-                        const updated = [...content.about.collections];
-                        updated[index].text = value;
-
-                        setContent({
-                          ...content,
-                          about: { ...content.about, collections: updated },
-                        });
-                      }}
-                    />
-                  </div>
-                ))}
-
-                <LocalizedField
-                  label="Badge parcours"
-                  value={content.about.parcoursBadge}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, parcoursBadge: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre parcours"
-                  value={content.about.parcoursTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, parcoursTitle: value },
-                    })
-                  }
-                />
-
-                <LocalizedField
-                  label="Titre expositions"
-                  value={content.about.exhibitionsTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, exhibitionsTitle: value },
-                    })
-                  }
-                />
-
-                <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[#ece3dc] bg-white p-5">
-                  <div><h3 className="text-lg font-medium text-[#201c19]">Expositions</h3><p className="mt-2 text-sm text-[#8a7971]">Ajoutez, modifiez ou supprimez les expériences d’exposition.</p></div>
-                  <button type="button" onClick={() => setContent({ ...content, about: { ...content.about, exhibitions: [...content.about.exhibitions, { year: "2026", text: emptyLocalizedText() }] } })} className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px]">Ajouter une exposition</button>
-                </div>
-
-                {content.about.exhibitions.map((item, index) => (
-                  <div key={`exhibition-${index}`} className="grid gap-4">
-                    <div className="flex justify-end"><button type="button" onClick={() => { const updated = [...content.about.exhibitions]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, exhibitions: updated } }); }} className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]">Supprimer l’exposition</button></div>
-                    <TimelineLocalizedEditor title={`Exposition ${index + 1}`} item={item} onChange={(nextItem) => { const updated = [...content.about.exhibitions]; updated[index] = nextItem; setContent({ ...content, about: { ...content.about, exhibitions: updated } }); }} />
-                  </div>
-                ))}
-
-                <LocalizedField
-                  label="Titre formation"
-                  value={content.about.formationTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, formationTitle: value },
-                    })
-                  }
-                />
-
-                <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[#ece3dc] bg-white p-5">
-                  <div><h3 className="text-lg font-medium text-[#201c19]">Formations</h3><p className="mt-2 text-sm text-[#8a7971]">Ajoutez, modifiez ou supprimez les formations.</p></div>
-                  <button type="button" onClick={() => setContent({ ...content, about: { ...content.about, formations: [...content.about.formations, { year: "2026", text: emptyLocalizedText() }] } })} className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px]">Ajouter une formation</button>
-                </div>
-
-                {content.about.formations.map((item, index) => (
-                  <div key={`formation-${index}`} className="grid gap-4">
-                    <div className="flex justify-end"><button type="button" onClick={() => { const updated = [...content.about.formations]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, formations: updated } }); }} className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]">Supprimer la formation</button></div>
-                    <TimelineLocalizedEditor title={`Formation ${index + 1}`} item={item} onChange={(nextItem) => { const updated = [...content.about.formations]; updated[index] = nextItem; setContent({ ...content, about: { ...content.about, formations: updated } }); }} />
-                  </div>
-                ))}
-
-                <LocalizedField
-                  label="Titre distinctions"
-                  value={content.about.distinctionsTitle}
-                  onChange={(value) =>
-                    setContent({
-                      ...content,
-                      about: { ...content.about, distinctionsTitle: value },
-                    })
-                  }
-                />
-
-                <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[#ece3dc] bg-white p-5">
-                  <div><h3 className="text-lg font-medium text-[#201c19]">Distinctions</h3><p className="mt-2 text-sm text-[#8a7971]">Ajoutez, modifiez ou supprimez les distinctions.</p></div>
-                  <button type="button" onClick={() => setContent({ ...content, about: { ...content.about, distinctions: [...content.about.distinctions, { year: "2026", text: emptyLocalizedText() }] } })} className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px]">Ajouter une distinction</button>
-                </div>
-
-                {content.about.distinctions.map((item, index) => (
-                  <div key={`distinction-${index}`} className="grid gap-4">
-                    <div className="flex justify-end"><button type="button" onClick={() => { const updated = [...content.about.distinctions]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, distinctions: updated } }); }} className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]">Supprimer la distinction</button></div>
-                    <TimelineLocalizedEditor title={`Distinction ${index + 1}`} item={item} onChange={(nextItem) => { const updated = [...content.about.distinctions]; updated[index] = nextItem; setContent({ ...content, about: { ...content.about, distinctions: updated } }); }} />
-                  </div>
-                ))}
+                <AboutTimelineListEditor sectionTitle="Publications" description="Liste courte comme un CV : année + texte." addLabel="Ajouter une publication" itemLabel="Publication" items={content.about.publications} onAdd={() => setContent({ ...content, about: { ...content.about, publications: [...content.about.publications, { year: "2026", text: emptyLocalizedText() }] } })} onRemove={(index) => { const updated = [...content.about.publications]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, publications: updated } }); }} onChange={(index, nextItem) => { const updated = [...content.about.publications]; updated[index] = nextItem; setContent({ ...content, about: { ...content.about, publications: updated } }); }} />
+                <AboutCollectionListEditor sectionTitle="Collections" description="Liste simple sans année, comme une section CV." addLabel="Ajouter une collection" itemLabel="Collection" items={content.about.collections} onAdd={() => setContent({ ...content, about: { ...content.about, collections: [...content.about.collections, { text: emptyLocalizedText() }] } })} onRemove={(index) => { const updated = [...content.about.collections]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, collections: updated } }); }} onChange={(index, nextItem) => { const updated = [...content.about.collections]; updated[index] = nextItem; setContent({ ...content, about: { ...content.about, collections: updated } }); }} />
+                <AboutTimelineListEditor sectionTitle="Expositions" description="Ajoutez les expositions exactement comme dans un CV." addLabel="Ajouter une exposition" itemLabel="Exposition" items={content.about.exhibitions} onAdd={() => setContent({ ...content, about: { ...content.about, exhibitions: [...content.about.exhibitions, { year: "2026", text: emptyLocalizedText() }] } })} onRemove={(index) => { const updated = [...content.about.exhibitions]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, exhibitions: updated } }); }} onChange={(index, nextItem) => { const updated = [...content.about.exhibitions]; updated[index] = nextItem; setContent({ ...content, about: { ...content.about, exhibitions: updated } }); }} />
+                <AboutTimelineListEditor sectionTitle="Formation" description="Ajoutez toutes les formations futures." addLabel="Ajouter une formation" itemLabel="Formation" items={content.about.formations} onAdd={() => setContent({ ...content, about: { ...content.about, formations: [...content.about.formations, { year: "2026", text: emptyLocalizedText() }] } })} onRemove={(index) => { const updated = [...content.about.formations]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, formations: updated } }); }} onChange={(index, nextItem) => { const updated = [...content.about.formations]; updated[index] = nextItem; setContent({ ...content, about: { ...content.about, formations: updated } }); }} />
+                <AboutTimelineListEditor sectionTitle="Distinctions" description="Ajoutez toutes les distinctions et prix." addLabel="Ajouter une distinction" itemLabel="Distinction" items={content.about.distinctions} onAdd={() => setContent({ ...content, about: { ...content.about, distinctions: [...content.about.distinctions, { year: "2026", text: emptyLocalizedText() }] } })} onRemove={(index) => { const updated = [...content.about.distinctions]; updated.splice(index, 1); setContent({ ...content, about: { ...content.about, distinctions: updated } }); }} onChange={(index, nextItem) => { const updated = [...content.about.distinctions]; updated[index] = nextItem; setContent({ ...content, about: { ...content.about, distinctions: updated } }); }} />
               </EditorBlock>
             )}
 
@@ -2132,6 +1829,82 @@ function LocalizedTextareaField({
           value={value?.es ?? ""}
           onChange={(next) => onChange({ ...value, es: next })}
         />
+      </div>
+    </div>
+  );
+}
+
+type AboutTimelineItem = {
+  year: string;
+  text: LocalizedText;
+};
+
+type AboutCollectionItem = {
+  text: LocalizedText;
+};
+
+function AboutListHeader({ title, description, addLabel, onAdd }: { title: string; description: string; addLabel: string; onAdd: () => void }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[#ece3dc] bg-white p-5">
+      <div>
+        <h3 className="text-lg font-medium text-[#201c19]">{title}</h3>
+        <p className="mt-2 text-sm leading-6 text-[#8a7971]">{description}</p>
+      </div>
+      <button type="button" onClick={onAdd} className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#191614] px-5 text-[12px] font-medium uppercase tracking-[0.16em] text-white transition hover:-translate-y-[1px]">
+        {addLabel}
+      </button>
+    </div>
+  );
+}
+
+function AboutTimelineListEditor({ sectionTitle, description, addLabel, itemLabel, items, onAdd, onRemove, onChange }: { sectionTitle: string; description: string; addLabel: string; itemLabel: string; items: AboutTimelineItem[]; onAdd: () => void; onRemove: (index: number) => void; onChange: (index: number, value: AboutTimelineItem) => void }) {
+  return (
+    <div className="grid gap-5">
+      <AboutListHeader title={sectionTitle} description={description} addLabel={addLabel} onAdd={onAdd} />
+      <div className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6">
+        <div className="space-y-4">
+          {items.map((item, index) => (
+            <div key={`${sectionTitle}-${index}`} className="rounded-[20px] border border-[#eadfd8] bg-white p-4">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm font-medium text-[#201c19]">{itemLabel} {index + 1}</p>
+                <button type="button" onClick={() => onRemove(index)} className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]">Supprimer</button>
+              </div>
+              <div className="grid gap-4 lg:grid-cols-[150px_1fr]">
+                <Field label="Année" value={item.year} onChange={(year) => onChange(index, { ...item, year })} />
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Field label="Français" value={item.text?.fr ?? ""} onChange={(fr) => onChange(index, { ...item, text: { ...item.text, fr } })} />
+                  <Field label="English" value={item.text?.en ?? ""} onChange={(en) => onChange(index, { ...item, text: { ...item.text, en } })} />
+                  <Field label="Español" value={item.text?.es ?? ""} onChange={(es) => onChange(index, { ...item, text: { ...item.text, es } })} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AboutCollectionListEditor({ sectionTitle, description, addLabel, itemLabel, items, onAdd, onRemove, onChange }: { sectionTitle: string; description: string; addLabel: string; itemLabel: string; items: AboutCollectionItem[]; onAdd: () => void; onRemove: (index: number) => void; onChange: (index: number, value: AboutCollectionItem) => void }) {
+  return (
+    <div className="grid gap-5">
+      <AboutListHeader title={sectionTitle} description={description} addLabel={addLabel} onAdd={onAdd} />
+      <div className="rounded-[24px] border border-[#ece3dc] bg-[#fcfaf8] p-5 sm:p-6">
+        <div className="space-y-4">
+          {items.map((item, index) => (
+            <div key={`${sectionTitle}-${index}`} className="rounded-[20px] border border-[#eadfd8] bg-white p-4">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm font-medium text-[#201c19]">{itemLabel} {index + 1}</p>
+                <button type="button" onClick={() => onRemove(index)} className="rounded-full border border-[#e2d6cf] bg-white px-3 py-1.5 text-xs text-[#7c6760] transition hover:bg-[#faf7f4]">Supprimer</button>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Field label="Français" value={item.text?.fr ?? ""} onChange={(fr) => onChange(index, { text: { ...item.text, fr } })} />
+                <Field label="English" value={item.text?.en ?? ""} onChange={(en) => onChange(index, { text: { ...item.text, en } })} />
+                <Field label="Español" value={item.text?.es ?? ""} onChange={(es) => onChange(index, { text: { ...item.text, es } })} />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -17,6 +17,7 @@ import {
   type SiteContent,
   type Lang,
   LANG_STORAGE_KEY,
+  type LocalizedText,
 } from "../lib/siteContent";
 import { getSiteContent } from "../lib/getSiteContent";
 import { t } from "../lib/i18n";
@@ -35,6 +36,15 @@ const futuraLight = {
 
 const softShadow = "shadow-[0_18px_45px_rgba(120,120,120,0.10)]";
 
+type TimelineItem = {
+  year: string;
+  text: LocalizedText;
+};
+
+type CollectionItem = {
+  text: LocalizedText;
+};
+
 function getProfileWrapperSize(size: "small" | "medium" | "large") {
   switch (size) {
     case "small":
@@ -45,6 +55,70 @@ function getProfileWrapperSize(size: "small" | "medium" | "large") {
     default:
       return "h-[360px] w-[360px] md:h-[460px] md:w-[460px] lg:h-[520px] lg:w-[520px]";
   }
+}
+
+function CvTimelineList({
+  title,
+  items,
+  lang,
+}: {
+  title: string;
+  items: TimelineItem[];
+  lang: Lang;
+}) {
+  return (
+    <div>
+      <h4
+        className="mb-5 text-[13px] uppercase tracking-[0.28em] text-neutral-400"
+        style={futuraLight}
+      >
+        {title}
+      </h4>
+
+      <div className="space-y-3 text-[15px] leading-7 text-neutral-700">
+        {items.map((item, index) => {
+          const text = t(item.text, lang);
+          if (!item.year && !text) return null;
+
+          return (
+            <p key={`${title}-${index}`}>
+              {item.year && (
+                <span className="font-medium text-neutral-900">
+                  {item.year}
+                </span>
+              )}
+              {item.year && text ? " — " : ""}
+              {text}
+            </p>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CvCollectionList({
+  items,
+  lang,
+}: {
+  items: CollectionItem[];
+  lang: Lang;
+}) {
+  return (
+    <ul className="space-y-3 text-[15px] leading-7 text-neutral-700">
+      {items.map((item, index) => {
+        const text = t(item.text, lang);
+        if (!text) return null;
+
+        return (
+          <li key={`collection-${index}`} className="flex gap-3">
+            <span className="mt-[11px] h-[4px] w-[4px] flex-none rounded-full bg-neutral-400" />
+            <span>{text}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
 }
 
 export default function AboutPage() {
@@ -273,16 +347,11 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="space-y-4 text-[15px] leading-7 text-neutral-600">
-              {about.publications.map((item, index) => (
-                <p key={index}>
-                  <span className="font-medium text-neutral-800">
-                    {item.year}
-                  </span>{" "}
-                  — {t(item.text, lang)}
-                </p>
-              ))}
-            </div>
+            <CvTimelineList
+              title=""
+              items={about.publications}
+              lang={lang}
+            />
           </div>
         </div>
 
@@ -306,18 +375,7 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <ul className="grid gap-4 text-[15px] leading-7 text-neutral-600 sm:grid-cols-2">
-            {about.collections.map((item, index) => (
-              <li
-                key={index}
-                className={`bg-neutral-50 px-5 py-4 ${
-                  index === 2 ? "sm:col-span-2" : ""
-                }`}
-              >
-                {t(item.text, lang)}
-              </li>
-            ))}
-          </ul>
+          <CvCollectionList items={about.collections} lang={lang} />
         </div>
 
         <div className="mb-20">
@@ -336,72 +394,30 @@ export default function AboutPage() {
           </p>
 
           <h3
-            className="mb-8 text-4xl text-[#8a8a8a] sm:text-5xl"
+            className="mb-10 text-[34px] leading-tight text-[#8a8a8a]"
             style={futuraLight}
           >
             {t(about.parcoursTitle, lang)}
           </h3>
 
           <div className="grid gap-10 lg:grid-cols-3">
-            <div>
-              <h4
-                className="mb-4 text-sm uppercase tracking-[0.22em] text-neutral-500"
-                style={futuraLight}
-              >
-                {t(about.exhibitionsTitle, lang)}
-              </h4>
+            <CvTimelineList
+              title={t(about.exhibitionsTitle, lang)}
+              items={about.exhibitions}
+              lang={lang}
+            />
 
-              <div className="space-y-3 text-[15px] leading-7 text-neutral-600">
-                {about.exhibitions.map((item, index) => (
-                  <p key={index}>
-                    <span className="font-medium text-neutral-800">
-                      {item.year}
-                    </span>{" "}
-                    — {t(item.text, lang)}
-                  </p>
-                ))}
-              </div>
-            </div>
+            <CvTimelineList
+              title={t(about.formationTitle, lang)}
+              items={about.formations}
+              lang={lang}
+            />
 
-            <div>
-              <h4
-                className="mb-4 text-sm uppercase tracking-[0.22em] text-neutral-500"
-                style={futuraLight}
-              >
-                {t(about.formationTitle, lang)}
-              </h4>
-
-              <div className="space-y-3 text-[15px] leading-7 text-neutral-600">
-                {about.formations.map((item, index) => (
-                  <p key={index}>
-                    <span className="font-medium text-neutral-800">
-                      {item.year}
-                    </span>{" "}
-                    — {t(item.text, lang)}
-                  </p>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4
-                className="mb-4 text-sm uppercase tracking-[0.22em] text-neutral-500"
-                style={futuraLight}
-              >
-                {t(about.distinctionsTitle, lang)}
-              </h4>
-
-              <div className="space-y-3 text-[15px] leading-7 text-neutral-600">
-                {about.distinctions.map((item, index) => (
-                  <p key={index}>
-                    <span className="font-medium text-neutral-800">
-                      {item.year}
-                    </span>{" "}
-                    — {t(item.text, lang)}
-                  </p>
-                ))}
-              </div>
-            </div>
+            <CvTimelineList
+              title={t(about.distinctionsTitle, lang)}
+              items={about.distinctions}
+              lang={lang}
+            />
           </div>
         </div>
       </section>
